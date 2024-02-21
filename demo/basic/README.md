@@ -13,7 +13,7 @@ Follow these steps to integrate `flask-scheema` into your Flask application and 
 
 Ensure your models derive from a base class that provides a get_session method for database access. This setup is crucial for the API's ability to generate accurate schemas and perform database queries.
 
- - Extend DeclarativeBase and utilize `flask-SQLAlchemy` for seamless integration. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
+ - Extend DeclarativeBase and utilize `flask-SQLAlchemy` for seamless integration. [View Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
 
 For `flask-SQLAlchemy` users, the following implementation is recommended:
 
@@ -34,7 +34,7 @@ All models should inherit from `db.Model` as usual, with model_class handling th
 
 Introduce a few configuration values to Flask to enable `flask-scheema` functionalities.
 
- - Set necessary Flask configuration values.  View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L6-L8)
+ - Set necessary Flask configuration values.  [View Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L6-L8)
 
 Your application's Flask configuration must specify the following values:
 
@@ -50,8 +50,8 @@ With all extensions set up, instantiate `flask-scheema` using your app's `app_co
 
 Examples:
 
- - Initialize `flask-scheema` in your extensions' setup. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26)
- - Further initialization within your app's context. View [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
+ - Initialize `flask-scheema` in your extensions' setup. [View Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26)
+ - Further initialization within your app's context. [View Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
 
 
 ## Model Meta Class Attributes
@@ -64,6 +64,7 @@ class Meta:
     tag = "Specific Tag"
 ```
 
+-----------------------------
 
 With these steps completed, run your application and navigate to the `/docs` route to explore your API's documentation.
 
