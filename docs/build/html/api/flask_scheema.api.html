@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>flask_scheema.api package &#8212; flask-scheema</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/flask.css?v=b87c8d14" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flask_scheema.scheema package" href="flask_scheema.scheema.html" />
+    <link rel="prev" title="flask_scheema package" href="flask_scheema.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="flask_scheema.scheema.html" title="flask_scheema.scheema package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="flask_scheema.html" title="flask_scheema package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">flask-scheema</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="flask_scheema.html" accesskey="U">flask_scheema package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">flask_scheema.api package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="flask-scheema-api-package">
+<h1>flask_scheema.api package<a class="headerlink" href="#flask-scheema-api-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-flask_scheema.api.api">
+<span id="flask-scheema-api-api-module"></span><h2>flask_scheema.api.api module<a class="headerlink" href="#module-flask_scheema.api.api" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flask_scheema.api.api.</span></span><span class="sig-name descname"><span class="pre">RiceAPI</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">naan</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../index.html#Naan" title="Naan"><span class="pre">Naan</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="flask_scheema.html#flask_scheema.utilities.AttributeInitializerMixin" title="flask_scheema.utilities.AttributeInitializerMixin"><code class="xref py py-class docutils literal notranslate"><span class="pre">AttributeInitializerMixin</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.authenticate_routes">
+<span class="sig-name descname"><span class="pre">authenticate_routes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.authenticate_routes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.base_model">
+<span class="sig-name descname"><span class="pre">base_model</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.base_model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.base_schema">
+<span class="sig-name descname"><span class="pre">base_schema</span></span><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.base_schema" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><code class="xref py py-class docutils literal notranslate"><span class="pre">AutoScheema</span></code></a></p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.create_routes">
+<span class="sig-name descname"><span class="pre">create_routes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI.create_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.create_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Creates all the routes for the api.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.created_routes">
+<span class="sig-name descname"><span class="pre">created_routes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">dict</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{}</span></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.created_routes" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.db_service">
+<span class="sig-name descname"><span class="pre">db_service</span></span><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.db_service" title="Link to this definition">¶</a></dt>
+<dd><p>alias of <a class="reference internal" href="flask_scheema.services.html#flask_scheema.services.database.CrudService" title="flask_scheema.services.database.CrudService"><code class="xref py py-class docutils literal notranslate"><span class="pre">CrudService</span></code></a></p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.full_auto">
+<span class="sig-name descname"><span class="pre">full_auto</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.full_auto" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.generate_route">
+<span class="sig-name descname"><span class="pre">generate_route</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI.generate_route"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.generate_route" title="Link to this definition">¶</a></dt>
+<dd><p>Generated the route for this method/model. It pulls various information from the model’s Meta class, if it
+exists.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>**kwargs</strong> (<em>dict</em>) – dictionary of keyword args</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.make_all_model_routes">
+<span class="sig-name descname"><span class="pre">make_all_model_routes</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">session</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI.make_all_model_routes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.make_all_model_routes" title="Link to this definition">¶</a></dt>
+<dd><p>Creates all the routes for a given model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Callable</em>) – The model to create routes for.</p></li>
+<li><p><strong>session</strong> (<em>Any</em>) – The database session to use for the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.naan">
+<span class="sig-name descname"><span class="pre">naan</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../index.html#Naan" title="Naan"><span class="pre">Naan</span></a></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.naan" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.register_error_handler">
+<span class="sig-name descname"><span class="pre">register_error_handler</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI.register_error_handler"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.register_error_handler" title="Link to this definition">¶</a></dt>
+<dd><p>Register custom error handler for all http exceptions.
+:returns: None</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.session">
+<span class="sig-name descname"><span class="pre">session</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Session</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Session</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.session" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.api.api.RiceAPI.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/api.html#RiceAPI.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.api.RiceAPI.validate" title="Link to this definition">¶</a></dt>
+<dd><p>Validates the RiceAPI object.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.api.decorators">
+<span id="flask-scheema-api-decorators-module"></span><h2>flask_scheema.api.decorators module<a class="headerlink" href="#module-flask_scheema.api.decorators" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.auth_required">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">auth_required</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">roles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#auth_required"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.auth_required" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>A decorator to check if the user is authenticated and has the required roles.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>roles</strong> (<em>Union</em><em>[</em><em>bool</em><em>, </em><em>List</em><em>[</em><em>str</em><em>]</em><em>]</em>) – <ul class="simple">
+<li><p>False: No authentication required.</p></li>
+<li><p>True: Only authentication is checked.</p></li>
+<li><p>List of roles: Authentication and role-based access are checked.</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The decorated function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>HTTPException</strong> – If the user is not authenticated or does not have the required roles.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.check_roles">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">check_roles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">user</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">roles</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#check_roles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.check_roles" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Check if the user has the required roles.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>user</strong> (<em>User</em>) – The user object.</p></li>
+<li><p><strong>roles</strong> (<em>List</em><em>[</em><em>str</em><em>]</em>) – List of roles required to access the route.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>True if the user has the required roles, False otherwise.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.check_serialise_method_and_return">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">check_serialise_method_and_return</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><span class="pre">AutoScheema</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema_columns</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#check_serialise_method_and_return"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.check_serialise_method_and_return" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Checks to see if the columns that have been output match the columns in the model and schema, if not its likely a
+custom serialise method has been used, and we should return the result as is (list of dicts) rather than serialising
+in marshmallow.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>result</strong> (<em>Dict</em>) – The result dictionary</p></li>
+<li><p><strong>schema</strong> (<em>Schema</em>) – The schema to get the fields from</p></li>
+<li><p><strong>model_columns</strong> (<em>List</em>) – The model columns</p></li>
+<li><p><strong>schema_columns</strong> (<em>List</em>) – The schema columns</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of all the fields</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.fields">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><span class="pre">AutoScheema</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.fields" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>A decorator to specify which fields to return in the response.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_schema</strong> – Marshmallow schema for the model.</p></li>
+<li><p><strong>many</strong> – Indicate whether to return multiple objects or a single object.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Decorator function.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>/addresses?fields=id,account</p>
+<p>/addresses?fields=id,account,date_created</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.handle_error">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">handle_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#handle_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.handle_error" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Handle errors and return a standardised response.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>e</strong> (<em>Exception</em>) – The exception.</p></li>
+<li><p><strong>status_code</strong> (<em>int</em>) – The status code to return.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>an error response</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>response</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.handle_many">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">handle_many</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><span class="pre">AutoScheema</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#handle_many"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.handle_many" title="Link to this definition">¶</a></dt>
+<dd><p>A decorator to handle multiple records from a route.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>output_schema</strong> (<em>Schema</em>) – The Marshmallow schema to serialize the output.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The decorated function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.handle_one">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">handle_one</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><span class="pre">AutoScheema</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="flask_scheema.scheema.html#flask_scheema.scheema.bases.AutoScheema" title="flask_scheema.scheema.bases.AutoScheema"><span class="pre">AutoScheema</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#handle_one"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.handle_one" title="Link to this definition">¶</a></dt>
+<dd><p>Decorator to handle input and output using Marshmallow schemas for single record operations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_schema</strong> (<em>Schema</em><em>, </em><em>optional</em>) – The Marshmallow schema to serialize output.</p></li>
+<li><p><strong>input_schema</strong> (<em>Schema</em><em>, </em><em>optional</em>) – The Marshmallow schema to validate and deserialize input.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The decorated function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>&#64;app.route(‘/addresses/&lt;int:address_id&gt;’, methods=[‘GET’])
+&#64;authrequired([])
+&#64;handle_one(AddressSchema, AddressSchema)</p>
+<blockquote>
+<div><dl class="simple">
+<dt>def get_address(address_id: int, deserialized_data: Dict[str, Any]) -&gt; Dict[str, Any]:</dt><dd><p>return Address.query.get(address_id)</p>
+</dd>
+</dl>
+</div></blockquote>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.handle_result">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">handle_result</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#handle_result"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.handle_result" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.list_model_columns">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">list_model_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">CustomBase</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#list_model_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.list_model_columns" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Get all columns and hybrids from a sqlalchemy model</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>CustomBase</em>) – The model to get the columns from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of all the columns</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.list_schema_fields">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">list_schema_fields</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Schema</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#list_schema_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.list_schema_fields" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Get all the fields from a schema</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>schema</strong> (<em>Schema</em>) – The schema to get the fields from</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A dictionary of all the fields</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.decorators.standardize_response">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.decorators.</span></span><span class="sig-name descname"><span class="pre">standardize_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/decorators.html#standardize_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.decorators.standardize_response" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-flask_scheema.api.exception_handling">
+<span id="flask-scheema-api-exception-handling-module"></span><h2>flask_scheema.api.exception_handling module<a class="headerlink" href="#module-flask_scheema.api.exception_handling" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.exception_handling.handle_http_exception">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.exception_handling.</span></span><span class="sig-name descname"><span class="pre">handle_http_exception</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">e</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HTTPException</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/exception_handling.html#handle_http_exception"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.exception_handling.handle_http_exception" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Handles HTTP exceptions and returns a standardised response.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>e</strong> – The HTTP exception instance.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Standardised response.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.api.responses">
+<span id="flask-scheema-api-responses-module"></span><h2>flask_scheema.api.responses module<a class="headerlink" href="#module-flask_scheema.api.responses" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="flask_scheema.api.responses.CustomResponse">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flask_scheema.api.responses.</span></span><span class="sig-name descname"><span class="pre">CustomResponse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status_code</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/responses.html#CustomResponse"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.responses.CustomResponse" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Custom response class to be used for serializing output.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.responses.create_response">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.responses.</span></span><span class="sig-name descname"><span class="pre">create_response</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">200</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">error</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">next_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_url</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Response</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/responses.html#create_response"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.responses.create_response" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Create a standardised response.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<em>Optional</em>) – The value to be returned.</p></li>
+<li><p><strong>status</strong> (<em>Optional</em>) – HTTP status code.</p></li>
+<li><p><strong>error</strong> (<em>Optional</em>) – Error message.</p></li>
+<li><p><strong>count</strong> (<em>Optional</em>) – Number of objects returned.</p></li>
+<li><p><strong>next_url</strong> (<em>Optional</em>) – URL for the next page of results.</p></li>
+<li><p><strong>previous_url</strong> (<em>Optional</em>) – URL for the previous page of results.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A standardised response dictionary.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.responses.deserialize_data">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.responses.</span></span><span class="sig-name descname"><span class="pre">deserialize_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Schema</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/responses.html#deserialize_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.responses.deserialize_data" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Utility function to deserialize data using a given Marshmallow schema.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_schema</strong> (<em>Type</em><em>[</em><em>Schema</em><em>]</em>) – The Marshmallow schema to be used for deserialization.</p></li>
+<li><p><strong>data</strong> (<em>Any</em>) – The data to be deserialized.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The deserialized data if successful, or a tuple containing
+errors and a status code if there’s an error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[Dict[str, Any], Tuple[Dict[str, Any], int]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.responses.filter_keys">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.responses.</span></span><span class="sig-name descname"><span class="pre">filter_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Schema</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_dict_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/responses.html#filter_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.responses.filter_keys" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.responses.serialize_output">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.responses.</span></span><span class="sig-name descname"><span class="pre">serialize_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">output_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Type</span><span class="p"><span class="pre">[</span></span><span class="pre">Schema</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#flask_scheema.api.responses.CustomResponse" title="flask_scheema.api.responses.CustomResponse"><span class="pre">CustomResponse</span></a></span></span><a class="reference internal" href="../_modules/flask_scheema/api/responses.html#serialize_output"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.responses.serialize_output" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Utility function to serialize output using a given Marshmallow schema.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>output_schema</strong> (<em>Type</em><em>[</em><em>Schema</em><em>]</em>) – The Marshmallow schema to be used for serialization.</p></li>
+<li><p><strong>data</strong> (<em>Any</em>) – The data to be serialized.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The serialized data if successful, or a tuple containing errors and a status code if there’s an error.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[Dict[str, Any], tuple]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.api.utils">
+<span id="flask-scheema-api-utils-module"></span><h2>flask_scheema.api.utils module<a class="headerlink" href="#module-flask_scheema.api.utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.endpoint_namer">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">endpoint_namer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DeclarativeBase</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Schema</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_schema</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Schema</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#endpoint_namer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.endpoint_namer" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the endpoint name for the model, based on the model name.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>DeclarativeBase</em>) – The model to get the endpoint name for.</p></li>
+<li><p><strong>input_schema</strong> (<em>Schema</em>) – The input schema for the model.</p></li>
+<li><p><strong>output_schema</strong> (<em>Schema</em>) – The output schema for the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The endpoint name.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.get_description">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">get_description</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#get_description"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.get_description" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the description for the route, first checking the model’s Meta class for a description attribute,
+then if not found, returning a default description based on the method.</p>
+<dl class="simple">
+<dt>kwargs:</dt><dd><p>Keyword arguments that include the model and the method type (GET, POST, etc.)</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The description string for the route</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.get_models_relationships">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">get_models_relationships</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#get_models_relationships"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.get_models_relationships" title="Link to this definition">¶</a></dt>
+<dd><p>Checks the model for relations and returns a list of relations, if any.
+If the relation is a many to many, it will not log the association table as a relation but the other side of
+the relationship.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>Callable</em>) – The model to check for relations</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A list of relations</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.get_primary_keys">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">get_primary_keys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#get_primary_keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.get_primary_keys" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the primary key columns for the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>Callable</em>) – The model to get the primary key columns for.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The primary key column.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Column</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.get_tag_group">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">get_tag_group</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#get_tag_group"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.get_tag_group" title="Link to this definition">¶</a></dt>
+<dd><p>Gets the x-tagGroup for the route, first checking the model’s Meta class for a tag_group attribute,
+It is pulled from the group meta-attribute of the model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>kwargs</strong> – yword arguments that include the model and the method type (GET, POST, etc.)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The description string for the route</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.api.utils.setup_route_function">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.api.utils.</span></span><span class="sig-name descname"><span class="pre">setup_route_function</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">service</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multiple</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">many_to_many_model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">get_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/api/utils.html#setup_route_function"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.api.utils.setup_route_function" title="Link to this definition">¶</a></dt>
+<dd><p>Sets up the route function for the api, based on the method. Returns a function that can be used as a route.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>service</strong> (<a class="reference internal" href="flask_scheema.services.html#flask_scheema.services.database.CrudService" title="flask_scheema.services.database.CrudService"><em>CrudService</em></a>) – The crud service for the model.</p></li>
+<li><p><strong>method</strong> (<em>str</em>) – The http method.</p></li>
+<li><p><strong>multiple</strong> (<em>bool</em>) – Whether the route is for multiple records or not.</p></li>
+<li><p><strong>many_to_many_model</strong> (<em>Callable</em>) – The model to use in the join.</p></li>
+<li><p><strong>get_field</strong> (<em>str</em>) – The field to get the record by.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The route function.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.api">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flask_scheema.api" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+  <span id="sidebar-top"></span>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  
+    
+  
+
+  <h3>Contents</h3>
+  <ul>
+<li><a class="reference internal" href="#">flask_scheema.api package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-flask_scheema.api.api">flask_scheema.api.api module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI"><code class="docutils literal notranslate"><span class="pre">RiceAPI</span></code></a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.authenticate_routes"><code class="docutils literal notranslate"><span class="pre">RiceAPI.authenticate_routes</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.base_model"><code class="docutils literal notranslate"><span class="pre">RiceAPI.base_model</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.base_schema"><code class="docutils literal notranslate"><span class="pre">RiceAPI.base_schema</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.create_routes"><code class="docutils literal notranslate"><span class="pre">RiceAPI.create_routes()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.created_routes"><code class="docutils literal notranslate"><span class="pre">RiceAPI.created_routes</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.db_service"><code class="docutils literal notranslate"><span class="pre">RiceAPI.db_service</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.full_auto"><code class="docutils literal notranslate"><span class="pre">RiceAPI.full_auto</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.generate_route"><code class="docutils literal notranslate"><span class="pre">RiceAPI.generate_route()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.make_all_model_routes"><code class="docutils literal notranslate"><span class="pre">RiceAPI.make_all_model_routes()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.naan"><code class="docutils literal notranslate"><span class="pre">RiceAPI.naan</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.register_error_handler"><code class="docutils literal notranslate"><span class="pre">RiceAPI.register_error_handler()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.session"><code class="docutils literal notranslate"><span class="pre">RiceAPI.session</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.api.RiceAPI.validate"><code class="docutils literal notranslate"><span class="pre">RiceAPI.validate()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.api.decorators">flask_scheema.api.decorators module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.auth_required"><code class="docutils literal notranslate"><span class="pre">auth_required()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.check_roles"><code class="docutils literal notranslate"><span class="pre">check_roles()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.check_serialise_method_and_return"><code class="docutils literal notranslate"><span class="pre">check_serialise_method_and_return()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.fields"><code class="docutils literal notranslate"><span class="pre">fields()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.handle_error"><code class="docutils literal notranslate"><span class="pre">handle_error()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.handle_many"><code class="docutils literal notranslate"><span class="pre">handle_many()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.handle_one"><code class="docutils literal notranslate"><span class="pre">handle_one()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.handle_result"><code class="docutils literal notranslate"><span class="pre">handle_result()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.list_model_columns"><code class="docutils literal notranslate"><span class="pre">list_model_columns()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.list_schema_fields"><code class="docutils literal notranslate"><span class="pre">list_schema_fields()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.decorators.standardize_response"><code class="docutils literal notranslate"><span class="pre">standardize_response()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.api.exception_handling">flask_scheema.api.exception_handling module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.exception_handling.handle_http_exception"><code class="docutils literal notranslate"><span class="pre">handle_http_exception()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.api.responses">flask_scheema.api.responses module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.responses.CustomResponse"><code class="docutils literal notranslate"><span class="pre">CustomResponse</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.responses.create_response"><code class="docutils literal notranslate"><span class="pre">create_response()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.responses.deserialize_data"><code class="docutils literal notranslate"><span class="pre">deserialize_data()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.responses.filter_keys"><code class="docutils literal notranslate"><span class="pre">filter_keys()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.responses.serialize_output"><code class="docutils literal notranslate"><span class="pre">serialize_output()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.api.utils">flask_scheema.api.utils module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.api.utils.endpoint_namer"><code class="docutils literal notranslate"><span class="pre">endpoint_namer()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.utils.get_description"><code class="docutils literal notranslate"><span class="pre">get_description()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.utils.get_models_relationships"><code class="docutils literal notranslate"><span class="pre">get_models_relationships()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.utils.get_primary_keys"><code class="docutils literal notranslate"><span class="pre">get_primary_keys()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.utils.get_tag_group"><code class="docutils literal notranslate"><span class="pre">get_tag_group()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.api.utils.setup_route_function"><code class="docutils literal notranslate"><span class="pre">setup_route_function()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.api">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<ul>
+  <li><a href="../index.html">Overview</a>
+    <ul>
+      <li><a href="flask_scheema.html">flask_scheema package</a>
+        <ul>
+          <li>Previous: <a href="flask_scheema.html" title="previous chapter">flask_scheema package</a>
+          <li>Next: <a href="flask_scheema.scheema.html" title="next chapter">flask_scheema.scheema package</a></ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Lewis Morris.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  <script src="../_static/version_warning_offset.js"></script>
+
+  </body>
+</html>

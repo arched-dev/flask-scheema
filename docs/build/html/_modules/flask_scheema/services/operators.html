@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flask_scheema.services.operators &mdash; flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            flask-scheema
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.html">flask_scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.api.html">flask_scheema.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.scheema.html">flask_scheema.scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.services.html">flask_scheema.services package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.specification.html">flask_scheema.specification package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">flask_scheema</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence.html">MIT Licence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">flask-scheema</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flask_scheema.services.operators</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flask_scheema.services.operators</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">func</span><span class="p">,</span> <span class="n">inspect</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">or_</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Date</span><span class="p">,</span> <span class="n">Boolean</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.ext.hybrid</span> <span class="kn">import</span> <span class="n">hybrid_property</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">DeclarativeBase</span>
+
+<span class="kn">from</span> <span class="nn">flask_scheema.exceptions</span> <span class="kn">import</span> <span class="n">CustomHTTPException</span>
+
+<span class="n">OPERATORS</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;lt&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span> <span class="o">&lt;</span> <span class="n">a</span><span class="p">,</span>
+    <span class="s2">&quot;le&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span> <span class="o">&lt;=</span> <span class="n">a</span><span class="p">,</span>
+    <span class="s2">&quot;gt&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span> <span class="o">&gt;</span> <span class="n">a</span><span class="p">,</span>
+    <span class="s2">&quot;ge&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span> <span class="o">&gt;=</span> <span class="n">a</span><span class="p">,</span>
+    <span class="s2">&quot;ne&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span> <span class="o">!=</span> <span class="n">a</span><span class="p">,</span>
+    <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>
+    <span class="s2">&quot;nin&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="o">~</span><span class="n">f</span><span class="o">.</span><span class="n">in_</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>
+    <span class="s2">&quot;like&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">like</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>
+    <span class="s2">&quot;ilike&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">f</span><span class="p">,</span> <span class="n">a</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">ilike</span><span class="p">(</span><span class="n">a</span><span class="p">),</span>  <span class="c1"># case-insensitive LIKE operator</span>
+<span class="p">}</span>
+<span class="n">aggregate_funcs</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s2">&quot;sum&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="n">sum</span><span class="p">,</span>
+    <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">,</span>
+    <span class="s2">&quot;avg&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="n">avg</span><span class="p">,</span>
+    <span class="s2">&quot;min&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="n">min</span><span class="p">,</span>
+    <span class="s2">&quot;max&quot;</span><span class="p">:</span> <span class="n">func</span><span class="o">.</span><span class="n">max</span><span class="p">,</span>
+<span class="p">}</span>
+<span class="n">PAGINATION_DEFAULTS</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">}</span>
+<span class="n">PAGINATION_MAX</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="mi">100</span><span class="p">}</span>
+<span class="n">OTHER_FUNCTIONS</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;groupby&quot;</span><span class="p">,</span> <span class="s2">&quot;fields&quot;</span><span class="p">,</span> <span class="s2">&quot;join&quot;</span><span class="p">,</span> <span class="s2">&quot;orderby&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="get_pagination">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_pagination">[docs]</a>
+<span class="k">def</span> <span class="nf">get_pagination</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the pagination from the request arguments</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (Dict[str, str]): Dictionary of request arguments.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Tuple[int, int]: Tuple of page and limit</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Handle Pagination</span>
+    <span class="n">page</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;page&quot;</span><span class="p">,</span> <span class="n">PAGINATION_DEFAULTS</span><span class="p">[</span><span class="s2">&quot;page&quot;</span><span class="p">])</span>
+    <span class="n">limit</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;limit&quot;</span><span class="p">,</span> <span class="n">PAGINATION_DEFAULTS</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">page</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">PAGINATION_DEFAULTS</span><span class="p">[</span><span class="s2">&quot;page&quot;</span><span class="p">]</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="o">&gt;</span> <span class="n">PAGINATION_MAX</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]:</span>
+            <span class="n">limit</span> <span class="o">=</span> <span class="n">PAGINATION_MAX</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">PAGINATION_DEFAULTS</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">page</span><span class="p">,</span> <span class="n">limit</span></div>
+
+
+
+<div class="viewcode-block" id="get_all_columns_and_hybrids">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_all_columns_and_hybrids">[docs]</a>
+<span class="k">def</span> <span class="nf">get_all_columns_and_hybrids</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">join_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="n">all_columns</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="c1"># Get columns and hybrid properties for the primary model</span>
+    <span class="n">inspector</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">all_columns</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">column</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">inspector</span><span class="o">.</span><span class="n">columns</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">__mapper__</span><span class="o">.</span><span class="n">all_orm_descriptors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">extension_type</span> <span class="o">==</span> <span class="n">hybrid_property</span><span class="p">:</span>
+            <span class="n">all_columns</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="c1"># Get columns and hybrid properties for each join model</span>
+    <span class="k">for</span> <span class="n">join_model_name</span><span class="p">,</span> <span class="n">join_model</span> <span class="ow">in</span> <span class="n">join_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="n">inspector</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="n">join_model</span><span class="p">)</span>
+        <span class="n">all_columns</span><span class="p">[</span><span class="n">join_model_name</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">column</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">column</span> <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">inspector</span><span class="o">.</span><span class="n">columns</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">join_model</span><span class="o">.</span><span class="n">__mapper__</span><span class="o">.</span><span class="n">all_orm_descriptors</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">extension_type</span> <span class="o">==</span> <span class="n">hybrid_property</span><span class="p">:</span>
+                <span class="n">all_columns</span><span class="p">[</span><span class="n">join_model_name</span><span class="p">][</span><span class="n">attr</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">return</span> <span class="n">all_columns</span></div>
+
+
+
+<div class="viewcode-block" id="get_group_by_fields">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_group_by_fields">[docs]</a>
+<span class="k">def</span> <span class="nf">get_group_by_fields</span><span class="p">(</span><span class="n">args_dict</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">,</span> <span class="n">base_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the group by fields from the request arguments</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (Dict[str, str]): Dictionary of request arguments.</span>
+<span class="sd">        all_columns (Dict[str, Dict[str, Column]]): Nested dictionary of table names and their columns.</span>
+<span class="sd">        base_model (DeclarativeBase): The base SQLAlchemy model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Callable]: List of conditions to apply in the query.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">group_by_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s2">&quot;groupby&quot;</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="p">:</span>
+        <span class="n">_group_by_fields</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;groupby&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_group_by_fields</span><span class="p">:</span>
+            <span class="c1"># gets the table name and column name from the field</span>
+            <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="n">get_table_and_column</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">base_model</span><span class="p">)</span>
+            <span class="c1"># gets the column from the column dictionary which is the actual column for the model</span>
+            <span class="n">model_column</span> <span class="o">=</span> <span class="n">get_check_table_columns</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span>
+            <span class="n">group_by_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_column</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">group_by_fields</span></div>
+
+
+
+<div class="viewcode-block" id="get_join_models">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_join_models">[docs]</a>
+<span class="k">def</span> <span class="nf">get_join_models</span><span class="p">(</span>
+    <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">get_model_func</span><span class="p">:</span> <span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a list of SQLAlchemy models to join based on request arguments.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (dict): Dictionary of request arguments.</span>
+<span class="sd">        get_model_func (Callable): Function to get a model by name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of SQLAlchemy models to join.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If an invalid join model is supplied, a value error will be raised.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;join&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">join</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;join&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">get_model_func</span><span class="p">(</span><span class="n">join</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid join model: </span><span class="si">{</span><span class="n">join</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">models</span><span class="p">[</span><span class="n">join</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">return</span> <span class="n">models</span></div>
+
+
+
+<div class="viewcode-block" id="is_qualified_column">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.is_qualified_column">[docs]</a>
+<span class="k">def</span> <span class="nf">is_qualified_column</span><span class="p">(</span><span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">join_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if a column name is qualified with a table name.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        key (str): The column name.</span>
+<span class="sd">        join_models (Dict[str, Any]): Dictionary of join models.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the column name is qualified, False otherwise.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">table_name</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">table_name</span> <span class="ow">in</span> <span class="n">join_models</span></div>
+
+
+
+<div class="viewcode-block" id="get_table_column">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_table_column">[docs]</a>
+<span class="k">def</span> <span class="nf">get_table_column</span><span class="p">(</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the fully qualified column name (i.e., with table name).</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">         key (str): The column name.</span>
+<span class="sd">         all_columns (Dict[str, Dict[str, Any]]): Nested dictionary of table names and their columns.</span>
+
+<span class="sd">     Returns:</span>
+<span class="sd">         Tuple[str, str, str]: A tuple containing the table name, column name, and operator.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">keys_split</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+    <span class="n">column_name</span> <span class="o">=</span> <span class="n">keys_split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">operator</span> <span class="o">=</span> <span class="n">keys_split</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys_split</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+    <span class="n">table_name</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">columns</span> <span class="ow">in</span> <span class="n">all_columns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="c1"># Check if column name is qualified with a table name, if it is split it and get the table name</span>
+        <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">column_name</span><span class="p">:</span>
+            <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="n">column_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Check if the column name is in the columns&#39; dictionary</span>
+        <span class="k">if</span> <span class="n">column_name</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="k">break</span>
+
+    <span class="k">return</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">operator</span></div>
+
+
+
+<div class="viewcode-block" id="get_select_fields">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_select_fields">[docs]</a>
+<span class="k">def</span> <span class="nf">get_select_fields</span><span class="p">(</span>
+    <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">base_model</span><span class="p">:</span> <span class="n">DeclarativeBase</span><span class="p">,</span>
+    <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">]],</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the select fields from the request arguments</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (Dict[str, str]): Dictionary of request arguments.</span>
+<span class="sd">        base_model (DeclarativeBase): The base SQLAlchemy model.</span>
+<span class="sd">        all_columns (Dict[str, Dict[str, Column]]): Nested dictionary of table names and their columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Callable]: List of conditions to apply in the query.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">select_fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="s2">&quot;fields&quot;</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="p">:</span>
+        <span class="n">_select_fields</span> <span class="o">=</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fields&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">_select_fields</span><span class="p">:</span>
+            <span class="c1"># gets the table name and column name from the field</span>
+            <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="n">get_table_and_column</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">base_model</span><span class="p">)</span>
+            <span class="c1"># gets the column from the column dictionary which is the actual column for the model</span>
+            <span class="n">model_column</span> <span class="o">=</span> <span class="n">get_check_table_columns</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span>
+            <span class="n">select_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model_column</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">select_fields</span></div>
+
+
+
+<div class="viewcode-block" id="create_conditions_from_args">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.create_conditions_from_args">[docs]</a>
+<span class="k">def</span> <span class="nf">create_conditions_from_args</span><span class="p">(</span>
+    <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">base_model</span><span class="p">:</span> <span class="n">DeclarativeBase</span><span class="p">,</span>
+    <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">]],</span>
+    <span class="n">join_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">DeclarativeBase</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create filter conditions based on request arguments and model&#39;s columns.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (Dict[str, str]): Dictionary of request arguments.</span>
+<span class="sd">        base_model (DeclarativeBase): The base SQLAlchemy model.</span>
+<span class="sd">        all_columns (Dict[str, Dict[str, Any]]): Nested dictionary of table names and their columns.</span>
+<span class="sd">        join_models (Dict[str, Any]): Dictionary of join models.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List[Callable]: List of conditions to apply in the query.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If an invalid or ambiguous column name is provided.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        &#39;id__eq&#39;: 1 would return Addresses.id == 1</span>
+<span class="sd">        &#39;account__eq&#39;: &#39;12345&#39; would return Addresses.account == &#39;12345&#39;</span>
+<span class="sd">        &#39;account__in&#39;: &#39;12345,67890&#39; would return Addresses.account.in_([&#39;12345&#39;, &#39;67890&#39;])</span>
+<span class="sd">        &#39;account__like&#39;: &#39;12345&#39; would return Addresses.account.like(&#39;%12345%&#39;)</span>
+<span class="sd">        &#39;[account__eq,id__eq]&#39;: &#39;12345,1&#39; would return (Addresses.account == &#39;12345&#39;) | (Addresses.id == 1)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">conditions</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">or_conditions</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">OPERATORS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">PAGINATION_DEFAULTS</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span>
+            <span class="ow">and</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">OTHER_FUNCTIONS</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">key</span><span class="p">])</span> <span class="o">&lt;</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;[&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;]&quot;</span><span class="p">):</span>
+                <span class="n">or_keys</span> <span class="o">=</span> <span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">or_key</span> <span class="ow">in</span> <span class="n">or_keys</span><span class="p">:</span>
+                    <span class="p">(</span>
+                        <span class="n">table</span><span class="p">,</span>
+                        <span class="n">column</span><span class="p">,</span>
+                        <span class="n">operator</span><span class="p">,</span>
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">validate_and_get_tablename_column_name_and_operator</span><span class="p">(</span>
+                        <span class="n">or_key</span><span class="p">,</span> <span class="n">join_models</span><span class="p">,</span> <span class="n">all_columns</span>
+                    <span class="p">)</span>
+                    <span class="n">condition</span> <span class="o">=</span> <span class="n">create_condition</span><span class="p">(</span>
+                        <span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">,</span> <span class="n">base_model</span>
+                    <span class="p">)</span>
+                    <span class="n">or_conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="p">(</span>
+                <span class="n">table</span><span class="p">,</span>
+                <span class="n">column</span><span class="p">,</span>
+                <span class="n">operator</span><span class="p">,</span>
+            <span class="p">)</span> <span class="o">=</span> <span class="n">validate_and_get_tablename_column_name_and_operator</span><span class="p">(</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">join_models</span><span class="p">,</span> <span class="n">all_columns</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">column</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span>
+                    <span class="mi">400</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid table/column name: </span><span class="si">{</span><span class="n">table</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+            <span class="n">condition</span> <span class="o">=</span> <span class="n">create_condition</span><span class="p">(</span>
+                <span class="n">table</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">operator</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">,</span> <span class="n">base_model</span>
+            <span class="p">)</span>
+            <span class="n">conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">condition</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">or_conditions</span><span class="p">:</span>
+        <span class="n">conditions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">or_</span><span class="p">(</span><span class="o">*</span><span class="n">or_conditions</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">conditions</span></div>
+
+
+
+<div class="viewcode-block" id="get_key_and_label">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_key_and_label">[docs]</a>
+<span class="k">def</span> <span class="nf">get_key_and_label</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the key and label from the key</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        key (str): The key from request arguments, e.g. &quot;id__eq&quot;.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple of key and label</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">key_list</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;|&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_list</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="kc">None</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">key_list</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="c1"># was getting an error where the label and operator were combined, now we split them and recombine with the key</span>
+        <span class="n">key</span><span class="p">,</span> <span class="n">pre_label</span> <span class="o">=</span> <span class="n">key_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">key_list</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="s2">&quot;__&quot;</span> <span class="ow">in</span> <span class="n">pre_label</span><span class="p">:</span>
+            <span class="n">label</span><span class="p">,</span> <span class="n">operator</span> <span class="o">=</span> <span class="n">pre_label</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">__</span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">pre_label</span>
+
+        <span class="k">return</span> <span class="n">key</span><span class="p">,</span> <span class="n">label</span></div>
+
+
+
+<div class="viewcode-block" id="validate_and_get_tablename_column_name_and_operator">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.validate_and_get_tablename_column_name_and_operator">[docs]</a>
+<span class="k">def</span> <span class="nf">validate_and_get_tablename_column_name_and_operator</span><span class="p">(</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">join_models</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Validate and get the condition key.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        key (str): The column name.</span>
+<span class="sd">        join_models (Dict[str, Any]): Dictionary of join models.</span>
+<span class="sd">        all_columns (Dict[str, Dict[str, Any]]): Nested dictionary of table names and their columns.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: Validated condition key.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">get_table_column</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_models_for_join">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_models_for_join">[docs]</a>
+<span class="k">def</span> <span class="nf">get_models_for_join</span><span class="p">(</span>
+    <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">get_model_func</span><span class="p">:</span> <span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Builds a list of SQLAlchemy models to join based on request arguments.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (dict): Dictionary of request arguments.</span>
+<span class="sd">        get_model_func (Callable): Function to get a model by name.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A list of SQLAlchemy models to join.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If an invalid join model is supplied, a value error will be raised.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">if</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;join&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">join</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;join&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">):</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">get_model_func</span><span class="p">(</span><span class="n">join</span><span class="p">)</span>
+            <span class="n">models</span><span class="p">[</span><span class="n">join</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="k">return</span> <span class="n">models</span></div>
+
+
+
+<div class="viewcode-block" id="create_aggregate_conditions">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.create_aggregate_conditions">[docs]</a>
+<span class="k">def</span> <span class="nf">create_aggregate_conditions</span><span class="p">(</span>
+    <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates aggregate conditions based on request arguments and the model&#39;s columns.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict: Dictionary of request arguments.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A dictionary of aggregate conditions.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">aggregate_conditions</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">func_name</span> <span class="ow">in</span> <span class="n">aggregate_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;__</span><span class="si">{</span><span class="n">func_name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">key</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">get_key_and_label</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">aggregate_conditions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">label</span>
+
+    <span class="k">return</span> <span class="n">aggregate_conditions</span></div>
+
+
+
+<div class="viewcode-block" id="get_table_and_column">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_table_and_column">[docs]</a>
+<span class="k">def</span> <span class="nf">get_table_and_column</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">main_model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the table and column name from the value</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        value (str): The value from request arguments, e.g. &quot;id__eq&quot;.</span>
+<span class="sd">        main_model (Any): The base SQLAlchemy model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple of table name and column name</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="s2">&quot;.&quot;</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
+        <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">main_model</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">column_name</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">return</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span></div>
+
+
+
+<div class="viewcode-block" id="get_column_and_table_name_and_operator">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_column_and_table_name_and_operator">[docs]</a>
+<span class="k">def</span> <span class="nf">get_column_and_table_name_and_operator</span><span class="p">(</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">main_model</span><span class="p">:</span> <span class="n">DeclarativeBase</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the column and table name from the key</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        key (str): The key from request arguments, e.g. &quot;id__eq&quot;.</span>
+<span class="sd">        main_model (Any): The base SQLAlchemy model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A tuple of column name and table name</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Check if key is in the format of &lt;column_name&gt;__&lt;operator&gt; if its no we assume its &lt;column_name&gt;=&lt;value&gt;</span>
+
+    <span class="n">field</span><span class="p">,</span> <span class="n">operator_str</span> <span class="o">=</span> <span class="n">key</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;__&quot;</span><span class="p">)</span>
+    <span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span> <span class="o">=</span> <span class="n">get_table_and_column</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">main_model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">operator_str</span></div>
+
+
+
+<div class="viewcode-block" id="get_check_table_columns">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.get_check_table_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">get_check_table_columns</span><span class="p">(</span>
+    <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">]]</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the column from the column dictionary</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        table_name (str): the table name</span>
+<span class="sd">        column_name (str): the column name</span>
+<span class="sd">        all_columns (Dict[str, Dict[str, Column]]): Dictionary of columns in the base model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The column</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Get column from the column dictionary</span>
+    <span class="n">all_models_columns</span> <span class="o">=</span> <span class="n">all_columns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="p">{})</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">all_models_columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid table name: </span><span class="si">{</span><span class="n">table_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">model_column</span> <span class="o">=</span> <span class="n">all_models_columns</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">column_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model_column</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid column name: </span><span class="si">{</span><span class="n">column_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model_column</span></div>
+
+
+
+<div class="viewcode-block" id="create_condition">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.create_condition">[docs]</a>
+<span class="k">def</span> <span class="nf">create_condition</span><span class="p">(</span>
+    <span class="n">table_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">]],</span>
+    <span class="n">base_model</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts a key-value pair from request arguments to a condition.</span>
+
+<span class="sd">        This version of the function accounts for joined tables.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        table_name (str): The table name.</span>
+<span class="sd">        column_name (str): The column name.</span>
+<span class="sd">        operator (str): The operator.</span>
+<span class="sd">        value (str): The value associated with the key.</span>
+<span class="sd">        all_columns (Dict[str, Column]): Dictionary of columns in the base model.</span>
+<span class="sd">        base_model (Any): The base SQLAlchemy model.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Callable: A condition function.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        ValueError: If invalid operator or column is found in query params.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># # Determine if key contains joined table information</span>
+    <span class="c1"># column_name, table_name, operator = get_column_and_table_name_and_operator(</span>
+    <span class="c1">#     key, base_model</span>
+    <span class="c1"># )</span>
+
+    <span class="c1"># Get the column from the column dictionary</span>
+    <span class="n">model_column</span> <span class="o">=</span> <span class="n">get_check_table_columns</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span>
+
+    <span class="c1"># Check if it&#39;s a hybrid property</span>
+    <span class="n">is_hybrid</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_column</span><span class="p">,</span> <span class="s2">&quot;extension_type&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="n">model_column</span><span class="o">.</span><span class="n">extension_type</span> <span class="o">==</span> <span class="n">hybrid_property</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Attempt to convert value to the type of the column</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">convert_value_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">model_column</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">is_hybrid</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="c1"># Handle or propagate the error. For instance, you might add an error message to the response.</span>
+        <span class="k">pass</span>
+
+    <span class="c1"># Get operator function from the OPERATORS dictionary</span>
+    <span class="n">operator_func</span> <span class="o">=</span> <span class="n">OPERATORS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">operator</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">operator_func</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">if</span> <span class="s2">&quot;in&quot;</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">&quot;like&quot;</span> <span class="ow">in</span> <span class="n">operator</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;%</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">%&quot;</span>
+
+    <span class="k">return</span> <span class="n">operator_func</span><span class="p">(</span><span class="n">model_column</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="convert_value_to_type">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.operators.convert_value_to_type">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_value_to_type</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">column_type</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">is_hybrid</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert the given string value to its appropriate type based on the provided column_type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">is_hybrid</span><span class="p">:</span>
+        <span class="c1"># Do special handling here, e.g., return value without a conversion</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_type</span><span class="p">,</span> <span class="n">Integer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_type</span><span class="p">,</span> <span class="n">Float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_type</span><span class="p">,</span> <span class="n">Date</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">date</span><span class="p">()</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_type</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;True&quot;</span><span class="p">,</span> <span class="s2">&quot;TRUE&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;Yes&quot;</span><span class="p">,</span> <span class="s2">&quot;YES&quot;</span><span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="n">value</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s2">&quot;false&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;False&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;FALSE&quot;</span><span class="p">,</span>
+            <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;n&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;N&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;no&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;No&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;NO&quot;</span><span class="p">,</span>
+        <span class="p">]:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span><span class="mi">400</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Invalid boolean value: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="c1"># You can continue to add other types as needed.</span>
+    <span class="c1"># If a type is unrecognised, return the original string value</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lewis Morris.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

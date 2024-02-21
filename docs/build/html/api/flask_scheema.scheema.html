@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>flask_scheema.scheema package &#8212; flask-scheema</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=80d5e7a1" />
+    <link rel="stylesheet" type="text/css" href="../_static/flask.css?v=b87c8d14" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <script src="../_static/documentation_options.js?v=d45e8c67"></script>
+    <script src="../_static/doctools.js?v=888ff710"></script>
+    <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=f281be69"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="flask_scheema.services package" href="flask_scheema.services.html" />
+    <link rel="prev" title="flask_scheema.api package" href="flask_scheema.api.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="flask_scheema.services.html" title="flask_scheema.services package"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="flask_scheema.api.html" title="flask_scheema.api package"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../index.html">flask-scheema</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="flask_scheema.html" accesskey="U">flask_scheema package</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">flask_scheema.scheema package</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <section id="flask-scheema-scheema-package">
+<h1>flask_scheema.scheema package<a class="headerlink" href="#flask-scheema-scheema-package" title="Link to this heading">¶</a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading">¶</a></h2>
+</section>
+<section id="module-flask_scheema.scheema.bases">
+<span id="flask-scheema-scheema-bases-module"></span><h2>flask_scheema.scheema.bases module<a class="headerlink" href="#module-flask_scheema.scheema.bases" title="Link to this heading">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.bases.</span></span><span class="sig-name descname"><span class="pre">AutoScheema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">render_nested</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></p>
+<dl class="py class">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Meta</span></span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.Meta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.API_DUMP_HYBRID_PROPERTIES">
+<span class="sig-name descname"><span class="pre">API_DUMP_HYBRID_PROPERTIES</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.API_DUMP_HYBRID_PROPERTIES" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.API_SERIALIZATION_DEPTH">
+<span class="sig-name descname"><span class="pre">API_SERIALIZATION_DEPTH</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.API_SERIALIZATION_DEPTH" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_many">
+<span class="sig-name descname"><span class="pre">always_serialise_one_to_many</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_many" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_one">
+<span class="sig-name descname"><span class="pre">always_serialise_one_to_one</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_one" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.include_children">
+<span class="sig-name descname"><span class="pre">include_children</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">True</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.include_children" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.model">
+<span class="sig-name descname"><span class="pre">model</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.model" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.Meta.serialise_only">
+<span class="sig-name descname"><span class="pre">serialise_only</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.Meta.serialise_only" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.add_column_field">
+<span class="sig-name descname"><span class="pre">add_column_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_type</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.add_column_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.add_column_field" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Automatically add a field for a given column in the SQLAlchemy model, using the column type to determine the
+Marshmallow field type. The function will ignore any attributes that start with an underscore.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute</strong> (<em>str</em>) – The name of the attribute to add to the schema.</p></li>
+<li><p><strong>column_type</strong> – SQLAlchemy column type.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>None</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.add_relationship_field">
+<span class="sig-name descname"><span class="pre">add_relationship_field</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">attribute</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">relationship_property</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.add_relationship_field"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.add_relationship_field" title="Link to this definition">¶</a></dt>
+<dd><p>Automatically adds a field for each relationship in the SQLAlchemy model,
+using the relationship type to determine the Marshmallow field type.
+Ignores any relationships that start with an underscore.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>attribute</strong> (<em>str</em>) – The attribute name for the relationship field.</p></li>
+<li><p><strong>relationship_property</strong> (<em>obj</em>) – SQLAlchemy relationship property object.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.dump">
+<span class="sig-name descname"><span class="pre">dump</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">obj</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.dump"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.dump" title="Link to this definition">¶</a></dt>
+<dd><p>Custom serialization for SQLAlchemy model instances.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.generate_fields">
+<span class="sig-name descname"><span class="pre">generate_fields</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.generate_fields"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.generate_fields" title="Link to this definition">¶</a></dt>
+<dd><p>Automatically add fields for each column and relationship in the SQLAlchemy model.
+Also adds fields for hybrid properties.
+:returns: None</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.load">
+<span class="sig-name descname"><span class="pre">load</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.load"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.load" title="Link to this definition">¶</a></dt>
+<dd><p>Custom deserialization for SQLAlchemy model instances.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.make_enum_dumper">
+<span class="sig-name descname"><span class="pre">make_enum_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.make_enum_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.make_enum_dumper" title="Link to this definition">¶</a></dt>
+<dd><p>Creates a getter method for a hybrid property</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field_name</strong> (<em>str</em>) – The name of the hybrid property</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The getter method</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.make_enum_status_dumper">
+<span class="sig-name descname"><span class="pre">make_enum_status_dumper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/bases.html#AutoScheema.make_enum_status_dumper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.make_enum_status_dumper" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Creates a getter method for a hybrid property</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field_name</strong> (<em>str</em>) – The name of the hybrid property</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The getter method</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>function</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="flask_scheema.scheema.bases.AutoScheema.opts">
+<span class="sig-name descname"><span class="pre">opts</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">SchemaOpts</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;marshmallow.schema.SchemaOpts</span> <span class="pre">object&gt;</span></em><a class="headerlink" href="#flask_scheema.scheema.bases.AutoScheema.opts" title="Link to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.scheema.utils">
+<span id="flask-scheema-scheema-utils-module"></span><h2>flask_scheema.scheema.utils module<a class="headerlink" href="#module-flask_scheema.scheema.utils" title="Link to this heading">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.scheema.utils.convert_to_openapi_type">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.utils.</span></span><span class="sig-name descname"><span class="pre">convert_to_openapi_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/utils.html#convert_to_openapi_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.utils.convert_to_openapi_type" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Convert a marshmallow field to an OpenAPI type</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>field_obj</strong> – The field of to be converted</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The open api type</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.scheema.utils.create_dynamic_schema">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.utils.</span></span><span class="sig-name descname"><span class="pre">create_dynamic_schema</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">base_class</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_class</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/utils.html#create_dynamic_schema"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.utils.create_dynamic_schema" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Creates a dynamic schema class that inherits from the base_class and has the model_class as its model.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_class</strong> – </p></li>
+<li><p><strong>model_class</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.scheema.utils.get_description_and_example_add">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.utils.</span></span><span class="sig-name descname"><span class="pre">get_description_and_example_add</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">openapi_type_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_obj</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/utils.html#get_description_and_example_add"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.utils.get_description_and_example_add" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Get the description from the model field and add it to the openapi_type_info dict</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>openapi_type_info</strong> – </p></li>
+<li><p><strong>field_obj</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>Returns:</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.scheema.utils.get_input_output_from_model_or_make">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.utils.</span></span><span class="sig-name descname"><span class="pre">get_input_output_from_model_or_make</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/utils.html#get_input_output_from_model_or_make"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.utils.get_input_output_from_model_or_make" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Gets the input and output schemas from the model, or creates them if they do not exist.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>model</strong> (<em>Callable</em>) – The model to get the schemas from.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The input and output schemas.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>tuple</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="flask_scheema.scheema.utils.get_scheema_subclass">
+<span class="sig-prename descclassname"><span class="pre">flask_scheema.scheema.utils.</span></span><span class="sig-name descname"><span class="pre">get_scheema_subclass</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/flask_scheema/scheema/utils.html#get_scheema_subclass"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#flask_scheema.scheema.utils.get_scheema_subclass" title="Link to this definition">¶</a></dt>
+<dd><blockquote>
+<div><p>Searches through all subclasses of AutoScheema to find the one that matches the model and dump parameters.</p>
+</div></blockquote>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>callable</em>) – The model to search for.</p></li>
+<li><p><strong>dump</strong> (<em>bool</em>) – Whether to search for a dump or load schema.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The subclass of AutoScheema that matches the model and dump parameters.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+<section id="module-flask_scheema.scheema">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flask_scheema.scheema" title="Link to this heading">¶</a></h2>
+</section>
+</section>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+  <span id="sidebar-top"></span>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  
+    
+  
+
+  <h3>Contents</h3>
+  <ul>
+<li><a class="reference internal" href="#">flask_scheema.scheema package</a><ul>
+<li><a class="reference internal" href="#submodules">Submodules</a></li>
+<li><a class="reference internal" href="#module-flask_scheema.scheema.bases">flask_scheema.scheema.bases module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema"><code class="docutils literal notranslate"><span class="pre">AutoScheema</span></code></a><ul>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta</span></code></a><ul>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.API_DUMP_HYBRID_PROPERTIES"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.API_DUMP_HYBRID_PROPERTIES</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.API_SERIALIZATION_DEPTH"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.API_SERIALIZATION_DEPTH</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_many"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.always_serialise_one_to_many</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.always_serialise_one_to_one"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.always_serialise_one_to_one</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.include_children"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.include_children</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.model"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.model</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.Meta.serialise_only"><code class="docutils literal notranslate"><span class="pre">AutoScheema.Meta.serialise_only</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.add_column_field"><code class="docutils literal notranslate"><span class="pre">AutoScheema.add_column_field()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.add_relationship_field"><code class="docutils literal notranslate"><span class="pre">AutoScheema.add_relationship_field()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.dump"><code class="docutils literal notranslate"><span class="pre">AutoScheema.dump()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.generate_fields"><code class="docutils literal notranslate"><span class="pre">AutoScheema.generate_fields()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.load"><code class="docutils literal notranslate"><span class="pre">AutoScheema.load()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.make_enum_dumper"><code class="docutils literal notranslate"><span class="pre">AutoScheema.make_enum_dumper()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.make_enum_status_dumper"><code class="docutils literal notranslate"><span class="pre">AutoScheema.make_enum_status_dumper()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.bases.AutoScheema.opts"><code class="docutils literal notranslate"><span class="pre">AutoScheema.opts</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.scheema.utils">flask_scheema.scheema.utils module</a><ul>
+<li><a class="reference internal" href="#flask_scheema.scheema.utils.convert_to_openapi_type"><code class="docutils literal notranslate"><span class="pre">convert_to_openapi_type()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.utils.create_dynamic_schema"><code class="docutils literal notranslate"><span class="pre">create_dynamic_schema()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.utils.get_description_and_example_add"><code class="docutils literal notranslate"><span class="pre">get_description_and_example_add()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.utils.get_input_output_from_model_or_make"><code class="docutils literal notranslate"><span class="pre">get_input_output_from_model_or_make()</span></code></a></li>
+<li><a class="reference internal" href="#flask_scheema.scheema.utils.get_scheema_subclass"><code class="docutils literal notranslate"><span class="pre">get_scheema_subclass()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#module-flask_scheema.scheema">Module contents</a></li>
+</ul>
+</li>
+</ul>
+<h3>Navigation</h3>
+<ul>
+  <li><a href="../index.html">Overview</a>
+    <ul>
+      <li><a href="flask_scheema.html">flask_scheema package</a>
+        <ul>
+          <li>Previous: <a href="flask_scheema.api.html" title="previous chapter">flask_scheema.api package</a>
+          <li>Next: <a href="flask_scheema.services.html" title="next chapter">flask_scheema.services package</a></ul>
+      </li>
+    </ul>
+  </li>
+</ul>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+  
+    <div class="footer" role="contentinfo">
+    &#169; Copyright 2024, Lewis Morris.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    </div>
+  <script src="../_static/version_warning_offset.js"></script>
+
+  </body>
+</html>

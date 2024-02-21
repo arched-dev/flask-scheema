@@ -1,0 +1,34 @@
+## Fields (Returning Specific Keys)
+
+You can customize the API response by specifying which fields you want to be included. This can be useful to minimize the payload or to fetch only the information you need.
+
+To specify fields, include them as a comma-separated list in the query parameter `fields`.
+
+- **Basic Usage**: `fields=id,account,document_number`
+- **Advanced Usage with Table Names**: When you perform joins between tables, you can specify which table's field you are referring to by adding the table name followed by a dot. For example: `fields=table1.id,table2.account`
+
+### Syntax
+
+- For fields in the default table: `fields=field1,field2,field3`
+- For fields in specific tables: `fields=table1.field1,table2.field2`
+
+**Note**: Table names are not required for plain API calls. However, if you want to perform joins between tables, specifying the table names is mandatory.
+
+### Options
+
+You can select from the following list of fields:
+
+{% for field in fields|sort %}
+- `{{ field[0] }}` {% if field[1] %}: {{ field[1] }}{% endif %}
+{% endfor %}
+
+These options allow you to create flexible and optimized API queries to suit your specific needs.
+
+>
+> ### Example
+> `http://somesite.com{{api_prefix}}/{{schema_name}}?{{ example_fields[0] }}`.
+>
+> `http://somesite.com{{api_prefix}}/{{schema_name}}?{{ example_fields[1] }}`.
+>
+> `http://somesite.com{{api_prefix}}/{{schema_name}}?join=OtherTable&{{ example_fields[2] }}`.
+>

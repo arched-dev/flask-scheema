@@ -1,0 +1,31 @@
+## Filtering API Calls
+
+Filters can be applied to most `GET` requests as query parameters. To apply a filter, use the following format:
+
+— For columns in the default table: `{column}__{operator}={value}`
+— For columns in a specific table: `{table}.{column}__{operator}={value1}`
+
+**Note**: Fields are mandatory, table names are conditionally required.
+
+### Operators
+
+All filters require an operator, which should follow the column name, separated by a double underscore `__`. For example: `{column}__{operator}`.
+
+Here is a list of supported operators:
+
+- `__eq`: Equal To (`=`)
+- `__ne`: Not Equal To (`!=`)
+- `__lt`: Less Than (`<`)
+- `__le`: Less Than or Equal To (`<=`)
+- `__gt`: Greater Than (`>`)
+- `__ge`: Greater Than or Equal To (`>=`)
+- `__in`: In `in`
+- `__nin`: Not In `not in`
+- `__like`: Like `like`
+- `__ilike`: Case Insensitive Like `(case insensitive like)`
+
+>
+> ### Example
+> `?{{ examples[0] }}`.
+>
+> `?{{ examples[1] }}`.

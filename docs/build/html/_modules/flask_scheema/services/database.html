@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flask_scheema.services.database &mdash; flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            flask-scheema
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.html">flask_scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.api.html">flask_scheema.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.scheema.html">flask_scheema.scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.services.html">flask_scheema.services package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.specification.html">flask_scheema.specification package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">flask_scheema</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence.html">MIT Licence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">flask-scheema</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flask_scheema.services.database</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flask_scheema.services.database</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Any</span>
+<span class="kn">from</span> <span class="nn">urllib.parse</span> <span class="kn">import</span> <span class="n">urlparse</span><span class="p">,</span> <span class="n">parse_qs</span><span class="p">,</span> <span class="n">urlencode</span><span class="p">,</span> <span class="n">urlunparse</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="kn">import</span> <span class="n">desc</span><span class="p">,</span> <span class="n">inspect</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">and_</span><span class="p">,</span> <span class="n">func</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">Query</span><span class="p">,</span> <span class="n">Session</span><span class="p">,</span> <span class="n">DeclarativeBase</span>
+
+<span class="kn">from</span> <span class="nn">flask_scheema.exceptions</span> <span class="kn">import</span> <span class="n">CustomHTTPException</span>
+<span class="kn">from</span> <span class="nn">flask_scheema.services.operators</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">aggregate_funcs</span><span class="p">,</span>
+    <span class="n">get_pagination</span><span class="p">,</span>
+    <span class="n">get_all_columns_and_hybrids</span><span class="p">,</span>
+    <span class="n">get_group_by_fields</span><span class="p">,</span>
+    <span class="n">get_select_fields</span><span class="p">,</span>
+    <span class="n">create_conditions_from_args</span><span class="p">,</span>
+    <span class="n">get_models_for_join</span><span class="p">,</span>
+    <span class="n">create_aggregate_conditions</span><span class="p">,</span>
+    <span class="n">get_table_and_column</span><span class="p">,</span>
+    <span class="n">get_column_and_table_name_and_operator</span><span class="p">,</span>
+    <span class="n">get_check_table_columns</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="add_dict_to_query">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.add_dict_to_query">[docs]</a>
+<span class="k">def</span> <span class="nf">add_dict_to_query</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds a dictionary to the query result, this is for they result is an SQLAlchemy result object and not an ORM model,</span>
+<span class="sd">    used when there are custom queries, etc.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Dictionary containing a query result and count.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">decorated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;dictionary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="o">.</span><span class="n">_asdict</span><span class="p">()</span> <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;query&quot;</span><span class="p">]]</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">return</span> <span class="n">decorated_function</span></div>
+
+
+
+<div class="viewcode-block" id="add_page_totals_and_urls">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.add_page_totals_and_urls">[docs]</a>
+<span class="k">def</span> <span class="nf">add_page_totals_and_urls</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Adds page totals and urls to the query result.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">            f (Callable): The function to decorate.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable: The decorated function.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">decorated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Gets the output of the function and append the page totals and urls to the output.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            **kwargs:</span>
+<span class="sd">        Returns:</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span>
+        <span class="n">page</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;page&quot;</span><span class="p">]</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">output</span><span class="p">[</span><span class="s2">&quot;count&quot;</span><span class="p">]</span>
+
+        <span class="n">parsed_url</span> <span class="o">=</span> <span class="n">urlparse</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">url</span><span class="p">)</span>
+        <span class="n">query_params</span> <span class="o">=</span> <span class="n">parse_qs</span><span class="p">(</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+
+        <span class="c1"># Calculate total_pages and current_page</span>
+        <span class="n">total_pages</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="o">-</span><span class="n">count</span> <span class="o">//</span> <span class="n">limit</span><span class="p">)</span>  <span class="c1"># Equivalent to math.ceil(count / limit)</span>
+        <span class="n">current_page</span> <span class="o">=</span> <span class="n">page</span>
+
+        <span class="c1"># Update the &#39;page&#39; query parameter for the next and previous URLs</span>
+        <span class="n">query_params</span><span class="p">[</span><span class="s2">&quot;limit&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">)]</span>
+        <span class="n">query_params</span><span class="p">[</span><span class="s2">&quot;page&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">page</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">next_query_string</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">doseq</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">query_params</span><span class="p">[</span><span class="s2">&quot;page&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">page</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)]</span>
+        <span class="n">prev_query_string</span> <span class="o">=</span> <span class="n">urlencode</span><span class="p">(</span><span class="n">query_params</span><span class="p">,</span> <span class="n">doseq</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># Determine if there are next and previous pages</span>
+        <span class="n">next_page</span> <span class="o">=</span> <span class="n">page</span> <span class="o">+</span> <span class="mi">1</span> <span class="k">if</span> <span class="p">(</span><span class="n">page</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">limit</span> <span class="o">&lt;</span> <span class="n">count</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="n">prev_page</span> <span class="o">=</span> <span class="n">page</span> <span class="o">-</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">page</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
+
+        <span class="c1"># Construct next and previous URLs</span>
+        <span class="n">next_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">urlunparse</span><span class="p">(</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">next_query_string</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">next_page</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="n">previous_url</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">urlunparse</span><span class="p">(</span><span class="n">parsed_url</span><span class="o">.</span><span class="n">_replace</span><span class="p">(</span><span class="n">query</span><span class="o">=</span><span class="n">prev_query_string</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">prev_page</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;next_url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">next_url</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;previous_url&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">previous_url</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;current_page&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">current_page</span>
+                <span class="n">output</span><span class="p">[</span><span class="s2">&quot;total_pages&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">total_pages</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+        <span class="k">return</span> <span class="n">output</span>
+
+    <span class="k">return</span> <span class="n">decorated_function</span></div>
+
+
+
+<div class="viewcode-block" id="apply_pagination">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.apply_pagination">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_pagination</span><span class="p">(</span><span class="n">query</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Query</span><span class="p">],</span> <span class="n">page</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Paginates a given query.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            query (Query): Original SQLAlchemy query.</span>
+<span class="sd">            page (int): Page number for pagination.</span>
+<span class="sd">            limit (int): Number of items per page.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Query: Paginated query results.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">query</span><span class="o">.</span><span class="n">paginate</span><span class="p">(</span><span class="n">page</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">error_out</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="apply_order_by">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.apply_order_by">[docs]</a>
+<span class="k">def</span> <span class="nf">apply_order_by</span><span class="p">(</span><span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Query</span><span class="p">,</span> <span class="n">base_model</span><span class="p">:</span> <span class="nb">callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Applies order_by conditions to a query.</span>
+<span class="sd">        Use &quot;-&quot; prefix for descending order.</span>
+<span class="sd">        Example: &quot;-id,name&quot;</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        args_dict (dict): Dictionary containing filtering and pagination conditions.</span>
+<span class="sd">        query (Query): The query to sort.</span>
+<span class="sd">        base_model (Base): The base model for the query.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Query: The sorted query.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="s2">&quot;order_by&quot;</span> <span class="ow">in</span> <span class="n">args_dict</span><span class="p">:</span>
+        <span class="n">order_by</span> <span class="o">=</span> <span class="n">args_dict</span><span class="p">[</span><span class="s2">&quot;order_by&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">order_by</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">order_by</span> <span class="o">=</span> <span class="n">order_by</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">order_key</span> <span class="ow">in</span> <span class="n">order_by</span><span class="p">:</span>
+            <span class="n">descending</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">order_key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;-&quot;</span><span class="p">):</span>
+                <span class="n">descending</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">order_key</span> <span class="o">=</span> <span class="n">order_key</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+
+            <span class="n">column</span> <span class="o">=</span> <span class="n">get_table_and_column</span><span class="p">(</span><span class="n">order_key</span><span class="p">,</span> <span class="n">base_model</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">column</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">descending</span><span class="p">:</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">desc</span><span class="p">(</span><span class="n">order_key</span><span class="p">[</span><span class="mi">1</span><span class="p">:]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">order_by</span><span class="p">(</span><span class="n">order_key</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">query</span></div>
+
+
+
+<div class="viewcode-block" id="CrudService">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService">[docs]</a>
+<span class="k">class</span> <span class="nc">CrudService</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">session</span><span class="p">:</span> <span class="n">Session</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Initializes the CrudService instance.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            model (Callable): SQLAlchemy model class for CRUD operations.</span>
+<span class="sd">            session (Session): SQLAlchemy session.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span> <span class="o">=</span> <span class="n">session</span>
+
+<div class="viewcode-block" id="CrudService.get_model_by_name">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_model_by_name">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_model_by_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Gets a model by name.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            field_name (str): The name of the model to get.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The model class.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            Exception: If the model does not have a relationship with the current model.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Check for relationships between the fetched model and self.model</span>
+        <span class="n">relationships</span> <span class="o">=</span> <span class="n">inspect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">relationships</span>
+        <span class="n">related_model</span> <span class="o">=</span> <span class="n">relationships</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">related_model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">CustomHTTPException</span><span class="p">(</span>
+                <span class="mi">401</span><span class="p">,</span>
+                <span class="sa">f</span><span class="s2">&quot;Field </span><span class="si">{</span><span class="n">field_name</span><span class="si">}</span><span class="s2"> does not represent a relationship in model </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">related_model</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">class_</span></div>
+
+
+<div class="viewcode-block" id="CrudService.get_query_from_args">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_query_from_args">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_query_from_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Query</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Filters a query based on request arguments. Handles filtering, sorting, pagination and aggregation.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            args_dict (dict): Dictionary containing filtering and pagination conditions.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Query: The filtered query.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># columns in the model</span>
+
+        <span class="c1"># get the models to join</span>
+        <span class="n">join_models</span><span class="p">:</span> <span class="n">Dict</span> <span class="o">=</span> <span class="n">get_models_for_join</span><span class="p">(</span><span class="n">args_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_by_name</span><span class="p">)</span>
+
+        <span class="c1"># get all columns in the model</span>
+        <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">:</span><span class="n">Column</span><span class="p">]]</span> <span class="o">=</span> <span class="n">get_all_columns_and_hybrids</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">join_models</span>
+        <span class="p">)</span>  <span class="c1"># table name, column name, column</span>
+
+        <span class="c1"># get the select fields</span>
+        <span class="n">select_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_select_fields</span><span class="p">(</span>
+            <span class="n">args_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">all_columns</span>
+        <span class="p">)</span>
+
+        <span class="c1"># create the conditions</span>
+        <span class="n">conditions</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">x</span>
+            <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">create_conditions_from_args</span><span class="p">(</span>
+                <span class="n">args_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">,</span> <span class="n">join_models</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">]</span>
+
+        <span class="c1"># create the aggregates</span>
+        <span class="n">aggregates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">create_aggregate_conditions</span><span class="p">(</span>
+            <span class="n">args_dict</span>
+        <span class="p">)</span>
+
+        <span class="c1"># apply the aggregates</span>
+        <span class="k">if</span> <span class="n">aggregates</span><span class="p">:</span>
+            <span class="n">aggregate_columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">calculate_aggregates</span><span class="p">(</span><span class="n">aggregates</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span>
+            <span class="c1"># combine the select fields with the aggregate columns</span>
+            <span class="n">select_fields</span> <span class="o">=</span> <span class="n">select_fields</span> <span class="o">+</span> <span class="n">aggregate_columns</span>
+
+        <span class="c1"># create the query</span>
+        <span class="k">if</span> <span class="n">select_fields</span><span class="p">:</span>
+            <span class="n">query</span><span class="p">:</span> <span class="n">Query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="o">*</span><span class="n">select_fields</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">query</span><span class="p">:</span> <span class="n">Query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="c1"># join the models</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">join_models</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+
+        <span class="n">groupby_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_group_by_fields</span><span class="p">(</span>
+            <span class="n">args_dict</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="p">)</span>
+        <span class="c1"># apply the groupby</span>
+        <span class="k">if</span> <span class="n">groupby_columns</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="o">*</span><span class="n">groupby_columns</span><span class="p">)</span>
+
+        <span class="c1"># apply the conditions</span>
+        <span class="k">if</span> <span class="n">conditions</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">and_</span><span class="p">(</span><span class="o">*</span><span class="n">conditions</span><span class="p">))</span>
+
+        <span class="c1"># Handle Sorting</span>
+
+        <span class="n">query</span> <span class="o">=</span> <span class="n">apply_order_by</span><span class="p">(</span><span class="n">args_dict</span><span class="p">,</span> <span class="n">query</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">query</span></div>
+
+
+<div class="viewcode-block" id="CrudService.calculate_aggregates">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.calculate_aggregates">[docs]</a>
+    <span class="k">def</span> <span class="nf">calculate_aggregates</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">aggregate_conditions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Column</span><span class="p">]]</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Applies aggregate conditions to a query and returns the aggregated query.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            aggregate_conditions (Dict): List of aggregate conditions.</span>
+<span class="sd">            all_columns (dict): Dictionary of all columns in the model.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List: List of aggregated columns.</span>
+
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Separate groupby from other aggregate functions</span>
+        <span class="n">aggregate_columns</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">aggregate_conditions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">column_name</span><span class="p">,</span> <span class="n">table_name</span><span class="p">,</span> <span class="n">agg_func</span> <span class="o">=</span> <span class="n">get_column_and_table_name_and_operator</span><span class="p">(</span>
+                <span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+            <span class="p">)</span>
+            <span class="n">column</span> <span class="o">=</span> <span class="n">get_check_table_columns</span><span class="p">(</span><span class="n">table_name</span><span class="p">,</span> <span class="n">column_name</span><span class="p">,</span> <span class="n">all_columns</span><span class="p">)</span>
+
+            <span class="n">aggregate_func</span> <span class="o">=</span> <span class="n">aggregate_funcs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">agg_func</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">aggregate_func</span><span class="p">:</span>
+                <span class="c1"># added this so we can have the label if we want it</span>
+                <span class="n">column</span> <span class="o">=</span> <span class="n">aggregate_func</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                    <span class="n">column</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">label</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="n">aggregate_columns</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">column</span><span class="p">)</span>
+
+        <span class="c1"># Apply other aggregate functions</span>
+        <span class="c1"># if aggregate_columns:</span>
+        <span class="c1">#     query = query.with_entities(*aggregate_columns)</span>
+        <span class="c1">#</span>
+        <span class="c1"># # Apply groupby first, if exists</span>
+        <span class="c1"># if groupby_columns:</span>
+        <span class="c1">#     query = query.group_by(*groupby_columns)</span>
+
+        <span class="k">return</span> <span class="n">aggregate_columns</span></div>
+
+
+<div class="viewcode-block" id="CrudService.get_many">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_many">[docs]</a>
+    <span class="nd">@add_page_totals_and_urls</span>
+    <span class="nd">@add_dict_to_query</span>
+    <span class="k">def</span> <span class="nf">get_many</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args_dict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Retrieves a list of objects from the database, optionally paginated.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            args_dict (dict): Dictionary containing filtering and pagination conditions.</span>
+<span class="sd">            Extracts &#39;order_by&#39; from args_dict for sorting. Use &quot;-&quot; prefix for descending order.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing a query result and count.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_query_from_args</span><span class="p">(</span><span class="n">args_dict</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">func</span><span class="o">.</span><span class="n">count</span><span class="p">())</span><span class="o">.</span><span class="n">select_from</span><span class="p">(</span><span class="n">query</span><span class="p">)</span><span class="o">.</span><span class="n">scalar</span><span class="p">()</span>
+
+        <span class="n">page</span><span class="p">,</span> <span class="n">limit</span> <span class="o">=</span> <span class="n">get_pagination</span><span class="p">(</span><span class="n">args_dict</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">page</span> <span class="ow">or</span> <span class="n">limit</span><span class="p">:</span>
+            <span class="n">query</span> <span class="o">=</span> <span class="n">apply_pagination</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">page</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+
+        <span class="n">results</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="n">results</span><span class="p">,</span> <span class="s2">&quot;count&quot;</span><span class="p">:</span> <span class="n">count</span><span class="p">,</span> <span class="s2">&quot;page&quot;</span><span class="p">:</span> <span class="n">page</span><span class="p">,</span> <span class="s2">&quot;limit&quot;</span><span class="p">:</span> <span class="n">limit</span><span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="CrudService.get_one">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_one">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lookup_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">alt_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Returns a single object from the database, based on the provided id.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lookup_val (int): The id of the object to return.</span>
+<span class="sd">            alt_field (str): An alternative field to search by.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: A single object from the database.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">alt_field</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">alt_field</span><span class="p">:</span> <span class="n">lookup_val</span><span class="p">})</span>
+                <span class="o">.</span><span class="n">first</span><span class="p">()</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="nb">id</span><span class="o">=</span><span class="n">lookup_val</span><span class="p">)</span><span class="o">.</span><span class="n">first</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="CrudService.get_by_field">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_by_field">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_by_field</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">lookup_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">alt_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Returns a single object from the database, based on the provided id.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lookup_val (int): The id of the object to return.</span>
+<span class="sd">            alt_field (str): An alternative field to search by.</span>
+<span class="sd">            many (bool): Whether to return many objects or not.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: A single object from the database.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">q</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">filter_by</span><span class="p">(</span><span class="o">**</span><span class="p">{</span><span class="n">alt_field</span><span class="p">:</span> <span class="n">lookup_val</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="CrudService.get_by_field_many">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.get_by_field_many">[docs]</a>
+    <span class="k">def</span> <span class="nf">get_by_field_many</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">lookup_val</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span> <span class="n">alt_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">other_model</span><span class="o">=</span><span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Returns a single object from the database, based on the provided id.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            lookup_val (int): The id of the object to return.</span>
+<span class="sd">            alt_field (str): An alternative field to search by.</span>
+<span class="sd">            many (bool): Whether to return many objects or not.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: A single object from the database.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">other_model</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="n">other_model</span><span class="o">.</span><span class="vm">__class__</span><span class="p">,</span> <span class="n">alt_field</span><span class="p">)</span> <span class="o">==</span> <span class="n">lookup_val</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">q</span></div>
+
+
+<div class="viewcode-block" id="CrudService.create">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.create">[docs]</a>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a new object in the database, based on the provided data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            data (dict): A dictionary of data to create the object with.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The newly created SQLAlchemy object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="p">(</span><span class="o">**</span><span class="n">data</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="CrudService.update">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.update">[docs]</a>
+    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">DeclarativeBase</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">object</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Updates an object in the database, based on the provided id and data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            obj (object): The SQLAlchemy object to update.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            object: The updated SQLAlchemy object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s2">&quot;merge&quot;</span><span class="p">):</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">merge</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+
+<div class="viewcode-block" id="CrudService.delete">
+<a class="viewcode-back" href="../../../api/flask_scheema.services.html#flask_scheema.services.database.CrudService.delete">[docs]</a>
+    <span class="k">def</span> <span class="nf">delete</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">id_</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                Deletes an object from the database, based on the provided id.</span>
+
+
+<span class="sd">        Args:</span>
+<span class="sd">            id_ (int): The id of the object to delete.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            bool: True if the object was successfully deleted, False otherwise.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_one</span><span class="p">(</span><span class="n">id_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">obj</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">commit</span><span class="p">()</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lewis Morris.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

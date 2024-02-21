@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flask_scheema.api.decorators &mdash; flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            flask-scheema
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.html">flask_scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.api.html">flask_scheema.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.scheema.html">flask_scheema.scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.services.html">flask_scheema.services package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.specification.html">flask_scheema.specification package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">flask_scheema</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence.html">MIT Licence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">flask-scheema</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flask_scheema.api.decorators</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flask_scheema.api.decorators</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">request</span><span class="p">,</span> <span class="n">abort</span>
+<span class="kn">from</span> <span class="nn">flask_jwt_extended</span> <span class="kn">import</span> <span class="n">get_jwt_identity</span><span class="p">,</span> <span class="n">get_jwt</span><span class="p">,</span> <span class="n">jwt_required</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.exc</span> <span class="kn">import</span> <span class="n">ProgrammingError</span>
+<span class="kn">from</span> <span class="nn">werkzeug.exceptions</span> <span class="kn">import</span> <span class="n">HTTPException</span>
+
+<span class="kn">from</span> <span class="nn">flask_scheema.api.responses</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">deserialize_data</span><span class="p">,</span>
+    <span class="n">serialize_output</span><span class="p">,</span>
+    <span class="n">create_response</span><span class="p">,</span>
+    <span class="n">CustomResponse</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">flask_scheema.exceptions</span> <span class="kn">import</span> <span class="n">CustomHTTPException</span>
+<span class="kn">from</span> <span class="nn">flask_scheema.scheema.bases</span> <span class="kn">import</span> <span class="n">AutoScheema</span>
+<span class="kn">from</span> <span class="nn">flask_scheema.services.operators</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">get_all_columns_and_hybrids</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="n">get_config_or_model_meta</span>
+
+<span class="n">HTTP_OK</span> <span class="o">=</span> <span class="mi">200</span>
+<span class="n">HTTP_BAD_REQUEST</span> <span class="o">=</span> <span class="mi">400</span>
+<span class="n">HTTP_INTERNAL_SERVER_ERROR</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">HTTP_UNAUTHORIZED</span> <span class="o">=</span> <span class="mi">401</span>
+<span class="n">HTTP_FORBIDDEN</span> <span class="o">=</span> <span class="mi">403</span>
+
+
+<div class="viewcode-block" id="handle_many">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.handle_many">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_many</span><span class="p">(</span><span class="n">output_schema</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    A decorator to handle multiple records from a route.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output_schema (Schema): The Marshmallow schema to serialize the output.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Callable: The decorated function.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decorator to handle input and output using Marshmallow schemas for multiple record operations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (Callable): The function to be decorated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable: The decorated function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="nd">@standardize_response</span>
+        <span class="nd">@fields</span><span class="p">(</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">many</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Inner wrapper function that gets executed when decorated function is called.&quot;&quot;&quot;</span>
+
+            <span class="c1"># Getting the output schema from the decorator</span>
+            <span class="n">new_output_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">]]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="c1"># Getting the query from kwargs</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="c1"># Serializing the output</span>
+            <span class="k">if</span> <span class="n">new_output_schema</span><span class="p">:</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">new_output_schema</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span>
+
+                <span class="n">model_columns</span> <span class="o">=</span> <span class="n">list_model_columns</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+                <span class="n">schema_columns</span> <span class="o">=</span> <span class="n">list_schema_fields</span><span class="p">(</span><span class="n">new_output_schema</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">check_serialise_method_and_return</span><span class="p">(</span>
+                    <span class="n">result</span><span class="p">,</span>
+                    <span class="n">model_columns</span><span class="o">=</span><span class="n">model_columns</span><span class="p">,</span>
+                    <span class="n">schema_columns</span><span class="o">=</span><span class="n">schema_columns</span><span class="p">,</span>
+                    <span class="n">schema</span><span class="o">=</span><span class="n">new_output_schema</span><span class="p">,</span>
+                <span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<div class="viewcode-block" id="handle_one">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.handle_one">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_one</span><span class="p">(</span>
+    <span class="n">output_schema</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">],</span> <span class="n">input_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Decorator to handle input and output using Marshmallow schemas for single record operations.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        output_schema (Schema, optional): The Marshmallow schema to serialize output.</span>
+<span class="sd">        input_schema (Schema, optional): The Marshmallow schema to validate and deserialize input.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Callable: The decorated function.</span>
+
+<span class="sd">    Examples:</span>
+<span class="sd">        @app.route(&#39;/addresses/&lt;int:address_id&gt;&#39;, methods=[&#39;GET&#39;])</span>
+<span class="sd">        @authrequired([])</span>
+<span class="sd">        @handle_one(AddressSchema, AddressSchema)</span>
+<span class="sd">            def get_address(address_id: int, deserialized_data: Dict[str, Any]) -&gt; Dict[str, Any]:</span>
+<span class="sd">                return Address.query.get(address_id)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># set the input schema to the output schema if not provided</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Decorator to handle input and output using Marshmallow schemas for single record operations.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            func (Callable): The function to be decorated.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Callable: The decorated function.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="nd">@standardize_response</span>
+        <span class="nd">@fields</span><span class="p">(</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">many</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">]:</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;Inner wrapper function that gets executed when decorated function is called.&quot;&quot;&quot;</span>
+
+            <span class="c1"># Deserializing and validating input if input_schema is provided</span>
+
+            <span class="c1"># Deserializing and validating input if input_schema is provided</span>
+            <span class="k">if</span> <span class="n">input_schema</span><span class="p">:</span>
+                <span class="n">data_or_error</span> <span class="o">=</span> <span class="n">deserialize_data</span><span class="p">(</span><span class="n">input_schema</span><span class="p">,</span> <span class="n">request</span><span class="o">.</span><span class="n">json</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data_or_error</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>  <span class="c1"># This means there was an error</span>
+                    <span class="k">return</span> <span class="n">data_or_error</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;deserialized_data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data_or_error</span>
+
+            <span class="n">new_output_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">]]</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;schema&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+            <span class="n">result</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">new_output_schema</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">serialize_output</span><span class="p">(</span><span class="n">new_output_schema</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="n">result</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<div class="viewcode-block" id="handle_error">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.handle_error">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_error</span><span class="p">(</span><span class="n">e</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">status_code</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Handle errors and return a standardised response.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        e (Exception): The exception.</span>
+<span class="sd">        status_code (int): The status code to return.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        response: an error response</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span><span class="n">error</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">status</span><span class="o">=</span><span class="n">status_code</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="check_roles">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.check_roles">[docs]</a>
+<span class="k">def</span> <span class="nf">check_roles</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">roles</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Check if the user has the required roles.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        user (User): The user object.</span>
+<span class="sd">        roles (List[str]): List of roles required to access the route.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool: True if the user has the required roles, False otherwise.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">&quot;superuser&quot;</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">role_names</span> <span class="ow">or</span> <span class="nb">any</span><span class="p">(</span>
+        <span class="n">role</span> <span class="ow">in</span> <span class="n">roles</span> <span class="k">for</span> <span class="n">role</span> <span class="ow">in</span> <span class="n">user</span><span class="o">.</span><span class="n">role_names</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="auth_required">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.auth_required">[docs]</a>
+<span class="k">def</span> <span class="nf">auth_required</span><span class="p">(</span><span class="n">roles</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A decorator to check if the user is authenticated and has the required roles.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        roles (Union[bool, List[str]]):</span>
+<span class="sd">            - False: No authentication required.</span>
+<span class="sd">            - True: Only authentication is checked.</span>
+<span class="sd">            - List of roles: Authentication and role-based access are checked.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Callable: The decorated function.</span>
+
+<span class="sd">    Raises:</span>
+<span class="sd">        HTTPException: If the user is not authenticated or does not have the required roles.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapped</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">roles</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">roles</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="c1"># Only authentication is checked</span>
+                <span class="nd">@jwt_required</span><span class="p">()</span>
+                <span class="k">def</span> <span class="nf">protected</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+                <span class="k">return</span> <span class="n">protected</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+            <span class="c1"># Authentication and role-based access are checked</span>
+            <span class="nd">@jwt_required</span><span class="p">()</span>
+            <span class="k">def</span> <span class="nf">protected</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+                <span class="n">user_identity</span> <span class="o">=</span> <span class="n">get_jwt_identity</span><span class="p">()</span>
+                <span class="n">user_claims</span> <span class="o">=</span> <span class="n">get_jwt</span><span class="p">()</span>
+
+                <span class="c1"># Assuming roles are stored in JWT claims</span>
+                <span class="n">user_roles</span> <span class="o">=</span> <span class="n">user_claims</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;roles&quot;</span><span class="p">,</span> <span class="p">[])</span>
+
+                <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">roles</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">user_roles</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">abort</span><span class="p">(</span><span class="mi">403</span><span class="p">)</span>  <span class="c1"># Forbidden</span>
+
+            <span class="k">return</span> <span class="n">protected</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapped</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<div class="viewcode-block" id="handle_result">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.handle_result">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_result</span><span class="p">(</span><span class="n">result</span><span class="p">):</span>
+    <span class="n">status_code</span> <span class="o">=</span> <span class="n">HTTP_OK</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">result</span>
+    <span class="n">next_url</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">previous_url</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">status_code</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="n">HTTP_OK</span>
+        <span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;query&quot;</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;count&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">next_url</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;next_url&quot;</span><span class="p">)</span>
+        <span class="n">previous_url</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;previous_url&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="n">CustomResponse</span><span class="p">):</span>
+        <span class="n">next_url</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">next_url</span>
+        <span class="n">previous_url</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">previous_url</span>
+
+    <span class="k">return</span> <span class="n">status_code</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">next_url</span><span class="p">,</span> <span class="n">previous_url</span></div>
+
+
+
+<div class="viewcode-block" id="standardize_response">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.standardize_response">[docs]</a>
+<span class="k">def</span> <span class="nf">standardize_response</span><span class="p">(</span><span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+    <span class="nd">@wraps</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">decorated_function</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="n">status_code</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">count</span><span class="p">,</span> <span class="n">next_url</span><span class="p">,</span> <span class="n">previous_url</span> <span class="o">=</span> <span class="n">handle_result</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">error</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">status_code</span> <span class="o">&lt;</span> <span class="n">HTTP_BAD_REQUEST</span> <span class="k">else</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span>
+                <span class="n">value</span><span class="o">=</span><span class="n">value</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">error</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                <span class="n">error</span><span class="o">=</span><span class="n">error</span><span class="p">,</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">status_code</span><span class="p">,</span>
+                <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>
+                <span class="n">next_url</span><span class="o">=</span><span class="n">next_url</span><span class="p">,</span>
+                <span class="n">previous_url</span><span class="o">=</span><span class="n">previous_url</span><span class="p">,</span>
+            <span class="p">)</span>
+
+        <span class="k">except</span> <span class="n">HTTPException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">code</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">description</span><span class="p">}</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">ProgrammingError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">text</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;)&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">capitalize</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">HTTP_BAD_REQUEST</span><span class="p">,</span>
+                <span class="n">error</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;SQL Format Error&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="n">text</span><span class="p">},</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="n">CustomHTTPException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">e</span><span class="o">.</span><span class="n">status_code</span><span class="p">,</span> <span class="n">error</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">error</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">reason</span><span class="p">)}</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">create_response</span><span class="p">(</span>
+                <span class="n">status</span><span class="o">=</span><span class="n">HTTP_INTERNAL_SERVER_ERROR</span><span class="p">,</span>
+                <span class="n">error</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;Internal Server Error&quot;</span><span class="p">,</span> <span class="s2">&quot;reason&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)},</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">decorated_function</span></div>
+
+
+
+<div class="viewcode-block" id="fields">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.fields">[docs]</a>
+<span class="k">def</span> <span class="nf">fields</span><span class="p">(</span><span class="n">model_schema</span><span class="p">:</span> <span class="n">Type</span><span class="p">[</span><span class="n">AutoScheema</span><span class="p">],</span> <span class="n">many</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        A decorator to specify which fields to return in the response.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        model_schema: Marshmallow schema for the model.</span>
+<span class="sd">        many: Indicate whether to return multiple objects or a single object.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Decorator function.</span>
+
+
+<span class="sd">    Examples:</span>
+<span class="sd">        /addresses?fields=id,account</span>
+
+<span class="sd">        /addresses?fields=id,account,date_created</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">decorator</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+        <span class="nd">@wraps</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">wrapper</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">            </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">                        This is the wrapper function, it will be called and preforms the following:</span>
+<span class="sd">                        1. Gets the fields from the request args</span>
+<span class="sd">                        2. If fields are specified, it will return only those fields</span>
+<span class="sd">                        3. If no fields are specified, it will return all fields</span>
+
+
+
+<span class="sd">            Args:</span>
+<span class="sd">                 **kwargs: key word args</span>
+
+<span class="sd">            Returns:</span>
+<span class="sd">                The function that was passed in, with the schema specified in the decorator</span>
+
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="n">select_fields</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;fields&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">select_fields</span><span class="p">:</span>
+                <span class="n">select_fields</span> <span class="o">=</span> <span class="n">select_fields</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_schema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="n">many</span><span class="p">,</span> <span class="n">only</span><span class="o">=</span><span class="n">select_fields</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">model_schema</span><span class="p">(</span><span class="n">many</span><span class="o">=</span><span class="n">many</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">wrapper</span>
+
+    <span class="k">return</span> <span class="n">decorator</span></div>
+
+
+
+<div class="viewcode-block" id="list_model_columns">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.list_model_columns">[docs]</a>
+<span class="k">def</span> <span class="nf">list_model_columns</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="s2">&quot;CustomBase&quot;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all columns and hybrids from a sqlalchemy model</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (CustomBase): The model to get the columns from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        List: A list of all the columns</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">all_model_columns</span> <span class="o">=</span> <span class="n">get_all_columns_and_hybrids</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">all_model_columns</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="list_schema_fields">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.list_schema_fields">[docs]</a>
+<span class="k">def</span> <span class="nf">list_schema_fields</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get all the fields from a schema</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema (Schema): The schema to get the fields from</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: A dictionary of all the fields</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
+
+
+<div class="viewcode-block" id="check_serialise_method_and_return">
+<a class="viewcode-back" href="../../../api/flask_scheema.api.html#flask_scheema.api.decorators.check_serialise_method_and_return">[docs]</a>
+<span class="k">def</span> <span class="nf">check_serialise_method_and_return</span><span class="p">(</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="n">AutoScheema</span><span class="p">,</span> <span class="n">model_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">,</span> <span class="n">schema_columns</span><span class="p">:</span> <span class="n">List</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Checks to see if the columns that have been output match the columns in the model and schema, if not its likely a</span>
+<span class="sd">        custom serialise method has been used, and we should return the result as is (list of dicts) rather than serialising</span>
+<span class="sd">        in marshmallow.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        result (Dict): The result dictionary</span>
+<span class="sd">        schema (Schema): The schema to get the fields from</span>
+<span class="sd">        model_columns (List): The model columns</span>
+<span class="sd">        schema_columns (List): The schema columns</span>
+
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Dict: A dictionary of all the fields</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">output_list</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;dictionary&quot;</span><span class="p">,</span> <span class="nb">list</span><span class="p">())</span>
+    <span class="n">mallow_serialise</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_list</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">output_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">output_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">missing_model_columns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_keys</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model_columns</span><span class="p">])</span>
+        <span class="n">missing_schema_columns</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">output_keys</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">schema_columns</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">missing_model_columns</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">missing_schema_columns</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">mallow_serialise</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="k">return</span> <span class="n">serialize_output</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">result</span><span class="p">)</span> <span class="k">if</span> <span class="n">mallow_serialise</span> <span class="k">else</span> <span class="n">output_list</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lewis Morris.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

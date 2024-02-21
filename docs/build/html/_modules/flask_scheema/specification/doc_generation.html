@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flask_scheema.specification.doc_generation &mdash; flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            flask-scheema
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.html">flask_scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.api.html">flask_scheema.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.scheema.html">flask_scheema.scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.services.html">flask_scheema.services package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.specification.html">flask_scheema.specification package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">flask_scheema</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence.html">MIT Licence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">flask-scheema</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flask_scheema.specification.doc_generation</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flask_scheema.specification.doc_generation</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">import</span> <span class="nn">pytz</span>
+<span class="kn">from</span> <span class="nn">apispec</span> <span class="kn">import</span> <span class="n">APISpec</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">current_app</span>
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span> <span class="nn">marshmallow_sqlalchemy.fields</span> <span class="kn">import</span> <span class="n">RelatedList</span><span class="p">,</span> <span class="n">Related</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.orm</span> <span class="kn">import</span> <span class="n">DeclarativeBase</span>
+<span class="kn">from</span> <span class="nn">werkzeug.routing</span> <span class="kn">import</span> <span class="n">IntegerConverter</span><span class="p">,</span> <span class="n">UnicodeConverter</span>
+
+<span class="kn">from</span> <span class="nn">flask_scheema.services.operators</span> <span class="kn">import</span> <span class="n">aggregate_funcs</span>
+
+
+<span class="n">DATE_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2">&quot;</span>
+<span class="n">DATETIME_FORMAT</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+<span class="n">html_path</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="make_endpoint_description">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.make_endpoint_description">[docs]</a>
+<span class="k">def</span> <span class="nf">make_endpoint_description</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">http_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates endpoint description from a schema for the API docs.</span>
+
+<span class="sd">        Only applicable in FULL_AUTO mode or if AUTO_NAME_ENDPOINTS = True</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            schema (Callable): Schema to generate endpoint description from.</span>
+<span class="sd">            http_method (str): HTTP method.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Endpoint description.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">many</span> <span class="o">=</span> <span class="n">schema</span><span class="p">()</span><span class="o">.</span><span class="n">many</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span> <span class="k">else</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__name__</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;Schema&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+    <span class="n">parent</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;parent_model&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span> <span class="ow">and</span> <span class="n">many</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Returns a list of `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` objects.&quot;</span>
+    <span class="k">elif</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">many</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Returns a `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` object.&quot;</span>
+    <span class="k">elif</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Creates a new `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` object.&quot;</span>
+    <span class="k">elif</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;PUT&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Updates a `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` object.&quot;</span>
+    <span class="k">elif</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Updates a `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` object.&quot;</span>
+    <span class="k">elif</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;DELETE&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Deletes a `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` object.&quot;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;Endpoint description not available&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="generate_fields_description">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.generate_fields_description">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_fields_description</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s2">&quot;AutoScheema&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates fields description from a schema for the API docs.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">            schema (AutoScheema): Schema to generate fields description from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Fields description.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">manual_render_absolute_template</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">schema</span><span class="p">()</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">v</span>
+        <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">dump_only</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">]</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">RelatedList</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Related</span><span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s2">&quot;Meta&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">):</span>
+        <span class="n">table_name</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">example_table</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;OtherTable.name,OtherTable.age,OtherTable.id,OtherTable.email&quot;</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">get_table_name</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">temp_fields</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">])</span>
+            <span class="n">random</span><span class="o">.</span><span class="n">shuffle</span><span class="p">(</span><span class="n">temp_fields</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">current_fields</span> <span class="o">=</span> <span class="n">temp_fields</span><span class="p">[:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="k">elif</span> <span class="n">x</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">current_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">table_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">temp_fields</span><span class="p">[:</span><span class="mi">3</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_fields</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">5</span><span class="p">):</span>
+                    <span class="n">table_choices</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">([</span><span class="n">table_name</span><span class="p">,</span> <span class="s2">&quot;OtherTable&quot;</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">table_choices</span> <span class="o">==</span> <span class="n">table_name</span><span class="p">:</span>
+                        <span class="n">current_table_and_field</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">table_name</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">temp_fields</span><span class="p">)</span>
+                        <span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current_table_and_field</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">example_table</span><span class="p">)</span>
+                    <span class="n">current_fields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current_table_and_field</span><span class="p">)</span>
+
+            <span class="k">return</span> <span class="s2">&quot;fields=&quot;</span> <span class="o">+</span> <span class="s2">&quot;,&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">current_fields</span><span class="p">)</span>
+
+        <span class="n">example_fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_table_name</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)]</span>
+
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">html_path</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/fields.html&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">manual_render_absolute_template</span><span class="p">(</span>
+            <span class="n">full_path</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span> <span class="n">example_fields</span><span class="o">=</span><span class="n">example_fields</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;None&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="generate_x_description">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.generate_x_description">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_x_description</span><span class="p">(</span><span class="n">template_data</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates filter examples from a model, e.g.:</span>
+<span class="sd">        Filters to apply on the data. E.g. id=1, name=John, age&gt;20. Supported operators: =, &gt;, &lt;, like, in.#</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            template_data (dict): Template data to generate filter examples from.</span>
+<span class="sd">            path (str): Path to the template.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Filter examples.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">manual_render_absolute_template</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">template_data</span><span class="p">:</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">html_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">manual_render_absolute_template</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span> <span class="o">**</span><span class="n">template_data</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">&quot;This endpoint does not have a database table (or is computed etc) and should not be filtered</span><span class="se">\n</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="generate_filter_examples">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.generate_filter_examples">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_filter_examples</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">Callable</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates filter examples from a model, e.g.:</span>
+<span class="sd">        Filters to apply on the data. E.g. id=1, name=John, age&gt;20. Supported operators: =, &gt;, &lt;, like, in.#</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            schema (AutoScheema): Schema to generate filter examples from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Filter examples.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+        <span class="n">manual_render_absolute_template</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">now</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+    <span class="n">yesterday</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">pytz</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">day_before_yesterday</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="n">yesterday</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="n">examples</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">operators</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Integer&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;__eq&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__lt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__le&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__gt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ge&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ne&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__in&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__nin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__like&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ilike&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;Float&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;__eq&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__lt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__le&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__gt&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ge&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ne&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__in&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__nin&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__like&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;__ilike&quot;</span><span class="p">,</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;String&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;__eq&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne&quot;</span><span class="p">,</span> <span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">,</span> <span class="s2">&quot;__like&quot;</span><span class="p">,</span> <span class="s2">&quot;__ilike&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Bool&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;__eq&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne&quot;</span><span class="p">,</span> <span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;__eq&quot;</span><span class="p">,</span> <span class="s2">&quot;__lt&quot;</span><span class="p">,</span> <span class="s2">&quot;__le&quot;</span><span class="p">,</span> <span class="s2">&quot;__gt&quot;</span><span class="p">,</span> <span class="s2">&quot;__ge&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne&quot;</span><span class="p">,</span> <span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;DateTime&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;__eq&quot;</span><span class="p">,</span> <span class="s2">&quot;__lt&quot;</span><span class="p">,</span> <span class="s2">&quot;__le&quot;</span><span class="p">,</span> <span class="s2">&quot;__gt&quot;</span><span class="p">,</span> <span class="s2">&quot;__ge&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne&quot;</span><span class="p">,</span> <span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;__eq&quot;</span><span class="p">,</span> <span class="s2">&quot;__lt&quot;</span><span class="p">,</span> <span class="s2">&quot;__le&quot;</span><span class="p">,</span> <span class="s2">&quot;__gt&quot;</span><span class="p">,</span> <span class="s2">&quot;__ge&quot;</span><span class="p">,</span> <span class="s2">&quot;__ne&quot;</span><span class="p">,</span> <span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="n">example_values</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Integer&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;10&quot;</span><span class="p">,</span> <span class="s2">&quot;100&quot;</span><span class="p">,</span> <span class="s2">&quot;500&quot;</span><span class="p">,</span> <span class="s2">&quot;1000&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Float&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;1.25&quot;</span><span class="p">,</span> <span class="s2">&quot;2.50&quot;</span><span class="p">,</span> <span class="s2">&quot;3.75&quot;</span><span class="p">,</span> <span class="s2">&quot;5.00&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;String&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;John&quot;</span><span class="p">,</span> <span class="s2">&quot;Doe&quot;</span><span class="p">,</span> <span class="s2">&quot;Jane&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Boolean&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;true&quot;</span><span class="p">,</span> <span class="s2">&quot;false&quot;</span><span class="p">],</span>
+        <span class="s2">&quot;Date&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">now</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT</span><span class="p">),</span>
+            <span class="n">yesterday</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT</span><span class="p">),</span>
+            <span class="n">day_before_yesterday</span><span class="o">.</span><span class="n">date</span><span class="p">()</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATE_FORMAT</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;DateTime&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">DATETIME_FORMAT</span><span class="p">),</span>
+            <span class="n">yesterday</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+            <span class="n">day_before_yesterday</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;Time&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;12:00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;13:00:00&quot;</span><span class="p">,</span> <span class="s2">&quot;14:00:00&quot;</span><span class="p">],</span>
+    <span class="p">}</span>
+
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">schema</span><span class="p">()</span><span class="o">.</span><span class="n">fields</span>
+    <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">dump_only</span> <span class="ow">in</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">False</span><span class="p">]]</span>
+
+    <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
+        <span class="n">col_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="n">column</span><span class="p">])</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">if</span> <span class="n">col_type</span> <span class="ow">in</span> <span class="n">operators</span><span class="p">:</span>
+            <span class="n">chosen_operator</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">operators</span><span class="p">[</span><span class="n">col_type</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">chosen_operator</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;__in&quot;</span><span class="p">,</span> <span class="s2">&quot;__nin&quot;</span><span class="p">]:</span>
+                <span class="n">chosen_values</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="p">[</span>
+                        <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">example_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col_type</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]))</span>
+                        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+                    <span class="p">]</span>
+                <span class="p">)</span>
+                <span class="n">chosen_value</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">chosen_values</span><span class="si">}</span><span class="s2">)&quot;</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}{</span><span class="n">chosen_operator</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">chosen_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">chosen_value</span> <span class="o">=</span> <span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="n">example_values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">col_type</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]))</span>
+                <span class="n">examples</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">column</span><span class="si">}{</span><span class="n">chosen_operator</span><span class="si">}</span><span class="s2">=</span><span class="si">{</span><span class="n">chosen_value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">split_examples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">examples</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3</span><span class="p">)</span>
+    <span class="n">example_one</span> <span class="o">=</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples</span><span class="p">[:</span><span class="n">split_examples</span><span class="p">])</span>
+    <span class="n">example_two</span> <span class="o">=</span> <span class="s2">&quot;&amp;&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">examples</span><span class="p">[</span><span class="o">-</span><span class="n">split_examples</span><span class="p">:])</span>
+
+    <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">html_path</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/filters.html&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">manual_render_absolute_template</span><span class="p">(</span>
+        <span class="n">full_path</span><span class="p">,</span> <span class="n">examples</span><span class="o">=</span><span class="p">[</span><span class="n">example_one</span><span class="p">,</span> <span class="n">example_two</span><span class="p">]</span>
+    <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="get_template_data_for_model">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.get_template_data_for_model">[docs]</a>
+<span class="k">def</span> <span class="nf">get_template_data_for_model</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates model data for jinja template and redoc.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">            schema (AutoScheema): Schema to generate model data for.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Model data.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="n">extract_sqlalchemy_columns</span>
+    <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="n">extract_relationships</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="s2">&quot;Meta&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">):</span>
+        <span class="n">base_model</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span>
+        <span class="n">base_table</span> <span class="o">=</span> <span class="n">base_model</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">base_columns</span> <span class="o">=</span> <span class="n">extract_sqlalchemy_columns</span><span class="p">(</span><span class="n">base_model</span><span class="p">)</span>
+
+        <span class="n">model_relationships</span> <span class="o">=</span> <span class="n">extract_relationships</span><span class="p">(</span><span class="n">base_model</span><span class="p">)</span>
+        <span class="n">model_relationship_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="vm">__name__</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">model_relationships</span><span class="p">]</span>
+
+        <span class="n">relationship_columns</span> <span class="o">=</span> <span class="n">extract_sqlalchemy_columns</span><span class="p">(</span><span class="n">model_relationships</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">relationship_table</span> <span class="o">=</span> <span class="n">model_relationships</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="vm">__name__</span>
+
+        <span class="n">aggs</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">x</span><span class="si">}</span><span class="s2">`&quot;</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">aggregate_funcs</span><span class="o">.</span><span class="n">keys</span><span class="p">())])</span>
+
+        <span class="n">template_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;relationship_table&quot;</span><span class="p">:</span> <span class="n">relationship_table</span><span class="p">,</span>
+            <span class="s2">&quot;relationship_columns&quot;</span><span class="p">:</span> <span class="n">relationship_columns</span><span class="p">,</span>
+            <span class="s2">&quot;base_table&quot;</span><span class="p">:</span> <span class="n">base_table</span><span class="p">,</span>
+            <span class="s2">&quot;base_columns&quot;</span><span class="p">:</span> <span class="n">base_columns</span><span class="p">,</span>
+            <span class="s2">&quot;aggs&quot;</span><span class="p">:</span> <span class="n">aggs</span><span class="p">,</span>
+            <span class="s2">&quot;model_relationship_names&quot;</span><span class="p">:</span> <span class="n">model_relationship_names</span><span class="p">,</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">template_data</span></div>
+
+
+
+<div class="viewcode-block" id="generate_path_params_from_rule">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.generate_path_params_from_rule">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_path_params_from_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates path parameters from a rule.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            rule (Rule): Rule to generate path parameters from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[dict]: List of path parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path_params</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">argument</span> <span class="ow">in</span> <span class="n">rule</span><span class="o">.</span><span class="n">arguments</span><span class="p">:</span>
+        <span class="n">param_info</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">argument</span><span class="p">,</span> <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">_converters</span><span class="p">[</span><span class="n">argument</span><span class="p">],</span> <span class="n">IntegerConverter</span><span class="p">):</span>
+            <span class="n">param_info</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rule</span><span class="o">.</span><span class="n">_converters</span><span class="p">[</span><span class="n">argument</span><span class="p">],</span> <span class="n">UnicodeConverter</span><span class="p">):</span>
+            <span class="n">param_info</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param_info</span><span class="p">[</span><span class="s2">&quot;schema&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">}</span>
+        <span class="n">path_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_info</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">path_params</span></div>
+
+
+
+<div class="viewcode-block" id="register_routes_with_spec">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.register_routes_with_spec">[docs]</a>
+<span class="k">def</span> <span class="nf">register_routes_with_spec</span><span class="p">(</span><span class="n">naan</span><span class="p">:</span> <span class="s2">&quot;Naan&quot;</span><span class="p">,</span> <span class="n">route_spec</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers all flask_scheemaa with the apispec object.</span>
+<span class="sd">        Which flask_scheemaa should be registered is determined by the decorators and builds the openapi spec, which is</span>
+<span class="sd">        served with Redoc.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            naan (Naan): The naan object.</span>
+<span class="sd">            route_spec (List): List of routes/schemas to register with the apispec.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.scheema.bases</span> <span class="kn">import</span> <span class="n">AutoScheema</span>
+
+    <span class="k">for</span> <span class="n">route_info</span> <span class="ow">in</span> <span class="n">route_spec</span><span class="p">:</span>
+        <span class="k">with</span> <span class="n">naan</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">test_request_context</span><span class="p">():</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">&quot;function&quot;</span><span class="p">]</span>
+
+            <span class="c1"># Get the correct endpoint and path using the function.</span>
+            <span class="k">for</span> <span class="n">rule</span> <span class="ow">in</span> <span class="n">naan</span><span class="o">.</span><span class="n">app</span><span class="o">.</span><span class="n">url_map</span><span class="o">.</span><span class="n">iter_rules</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">rule</span><span class="o">.</span><span class="n">endpoint</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">f</span><span class="o">.</span><span class="vm">__name__</span><span class="p">:</span>
+                    <span class="n">path</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">rule</span>
+                    <span class="n">methods</span> <span class="o">=</span> <span class="n">rule</span><span class="o">.</span><span class="n">methods</span> <span class="o">-</span> <span class="p">{</span><span class="s2">&quot;OPTIONS&quot;</span><span class="p">,</span> <span class="s2">&quot;HEAD&quot;</span><span class="p">}</span>
+                    <span class="n">path_params</span> <span class="o">=</span> <span class="n">generate_path_params_from_rule</span><span class="p">(</span><span class="n">rule</span><span class="p">)</span>
+                    <span class="k">break</span>
+
+            <span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="p">(</span>
+                <span class="n">scrape_extra_info_from_spec_data</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">http_method</span> <span class="ow">in</span> <span class="n">methods</span><span class="p">:</span>
+                <span class="n">route_info</span> <span class="o">=</span> <span class="n">scrape_extra_info_from_spec_data</span><span class="p">(</span>
+                    <span class="n">route_info</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">http_method</span>
+                <span class="p">)</span>
+
+                <span class="n">output_schema</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;output_schema&quot;</span><span class="p">)</span>
+                <span class="n">input_schema</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input_schema&quot;</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;model&quot;</span><span class="p">)</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+                <span class="n">summary</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;summary&quot;</span><span class="p">)</span>
+                <span class="n">tag</span> <span class="o">=</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;tag&quot;</span><span class="p">)</span>
+
+                <span class="c1"># We do not accept input schemas on GET or DELETE requests. They are handled with query parameters,</span>
+                <span class="c1"># and not request bodies.</span>
+                <span class="k">if</span> <span class="n">input_schema</span> <span class="ow">and</span> <span class="n">http_method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">]:</span>
+                    <span class="n">input_schema</span> <span class="o">=</span> <span class="kc">None</span>
+
+                <span class="n">endpoint_spec</span> <span class="o">=</span> <span class="n">generate_swagger_spec</span><span class="p">(</span>
+                    <span class="n">http_method</span><span class="p">,</span>
+                    <span class="n">f</span><span class="p">,</span>
+                    <span class="n">output_schema</span><span class="o">=</span><span class="n">output_schema</span><span class="p">,</span>
+                    <span class="n">input_schema</span><span class="o">=</span><span class="n">input_schema</span><span class="p">,</span>
+                    <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+                    <span class="n">path_params</span><span class="o">=</span><span class="n">path_params</span><span class="p">,</span>
+                <span class="p">)</span>
+
+                <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">tag</span><span class="p">]</span>
+
+                <span class="c1"># Add or update the tag group in the spec</span>
+                <span class="k">if</span> <span class="n">route_info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;group_tag&quot;</span><span class="p">):</span>
+                    <span class="n">naan</span><span class="o">.</span><span class="n">api_spec</span><span class="o">.</span><span class="n">set_xtags_group</span><span class="p">(</span><span class="n">tag</span><span class="p">,</span> <span class="n">route_info</span><span class="p">[</span><span class="s2">&quot;group_tag&quot;</span><span class="p">])</span>
+
+                <span class="c1"># Split function docstring by &#39;---&#39; and set summary and description</span>
+                <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
+                    <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;summary&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">summary</span>
+                <span class="k">if</span> <span class="n">description</span><span class="p">:</span>
+                    <span class="n">endpoint_spec</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">description</span>
+
+                <span class="n">naan</span><span class="o">.</span><span class="n">api_spec</span><span class="o">.</span><span class="n">path</span><span class="p">(</span>
+                    <span class="n">path</span><span class="o">=</span><span class="n">convert_path_to_openapi</span><span class="p">(</span><span class="n">path</span><span class="p">),</span>
+                    <span class="n">operations</span><span class="o">=</span><span class="p">{</span><span class="n">http_method</span><span class="o">.</span><span class="n">lower</span><span class="p">():</span> <span class="n">endpoint_spec</span><span class="p">},</span>
+                <span class="p">)</span>
+
+    <span class="n">register_schemas</span><span class="p">(</span><span class="n">naan</span><span class="o">.</span><span class="n">api_spec</span><span class="p">,</span> <span class="n">AutoScheema</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="convert_path_to_openapi">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.convert_path_to_openapi">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_path_to_openapi</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Converts a flask path to an openapi path.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            path (str): Flask path to convert.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            str: Openapi path.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;{&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&gt;&quot;</span><span class="p">,</span> <span class="s2">&quot;}&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&lt;int:&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="register_schemas">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.register_schemas">[docs]</a>
+<span class="k">def</span> <span class="nf">register_schemas</span><span class="p">(</span>
+    <span class="n">spec</span><span class="p">:</span> <span class="n">APISpec</span><span class="p">,</span>
+    <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
+    <span class="n">output_schema</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Schema</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Registers schemas with the apispec object.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            spec (APISpec): APISpec object to register schemas with.</span>
+<span class="sd">            input_schema (Schema): Input schema to register.</span>
+<span class="sd">            output_schema (Schema): Output schema to register.</span>
+<span class="sd">            force_update (bool): If True, will update the schema even if it already exists.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">schema</span> <span class="ow">in</span> <span class="p">[</span><span class="n">input_schema</span><span class="p">,</span> <span class="n">output_schema</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">schema</span><span class="p">:</span>
+            <span class="n">schema_name</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">existing_schema</span> <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">schemas</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">schema_name</span><span class="p">)</span>
+
+            <span class="c1"># Check if schema already exists</span>
+            <span class="k">if</span> <span class="n">existing_schema</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">force_update</span><span class="p">:</span>
+                    <span class="c1"># Update the existing schema</span>
+                    <span class="n">spec</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">schemas</span><span class="p">[</span><span class="n">schema_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">schema</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     print(f&quot;Schema {schema_name} already exists. Skipping.&quot;)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Add the new schema</span>
+                <span class="n">spec</span><span class="o">.</span><span class="n">components</span><span class="o">.</span><span class="n">schema</span><span class="p">(</span><span class="n">schema_name</span><span class="p">,</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="initialize_spec_template">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.initialize_spec_template">[docs]</a>
+<span class="k">def</span> <span class="nf">initialize_spec_template</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes the spec template.</span>
+<span class="sd">    Returns:</span>
+<span class="sd">        dict: Spec template.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="p">{</span>
+        <span class="s2">&quot;responses&quot;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;200&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful operation&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;401&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Unauthorized&quot;</span><span class="p">},</span>
+            <span class="s2">&quot;403&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Forbidden&quot;</span><span class="p">},</span>
+        <span class="p">},</span>
+        <span class="s2">&quot;parameters&quot;</span><span class="p">:</span> <span class="p">[],</span>
+    <span class="p">}</span></div>
+
+
+
+<div class="viewcode-block" id="append_parameters">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.append_parameters">[docs]</a>
+<span class="k">def</span> <span class="nf">append_parameters</span><span class="p">(</span>
+    <span class="n">spec_template</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">path_params</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">http_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
+    <span class="n">output_schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">DeclarativeBase</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">        Appends parameters to the spec template based on the input.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            spec_template (dict): Spec template to append parameters to.</span>
+<span class="sd">            path_params (list): Path parameters to append.</span>
+<span class="sd">            http_method (str): HTTP method to append parameters for.</span>
+<span class="sd">            input_schema (Schema): Input schema to append.</span>
+<span class="sd">            output_schema (Schema): Output schema to append.</span>
+<span class="sd">            model (DeclarativeBase): Database model to append.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">html_path</span>
+    <span class="n">html_path</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="s2">&quot;flask_scheemaa&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_templates_path</span><span class="p">()</span>
+
+    <span class="c1"># Add 200 response based on the output_schema</span>
+    <span class="k">if</span> <span class="n">output_schema</span><span class="p">:</span>
+        <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="s2">&quot;200&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;Successful operation&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">output_schema</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">path_params</span><span class="p">:</span>
+        <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">path_params</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">http_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;POST&quot;</span><span class="p">,</span> <span class="s2">&quot;PUT&quot;</span><span class="p">,</span> <span class="s2">&quot;PATCH&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">input_schema</span><span class="p">:</span>
+        <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;requestBody&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">input_schema</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> payload&quot;</span>
+            <span class="o">+</span> <span class="p">(</span>
+                <span class="s2">&quot; (all fields are optional when updating records, but with out the id the model cannot be queries and &quot;</span>
+                <span class="s2">&quot;will therefor fail)&quot;</span>
+                <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;PATCH&quot;</span>
+                <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span> <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;POST&quot;</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+            <span class="s2">&quot;content&quot;</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;application/json&quot;</span><span class="p">:</span> <span class="p">{</span>
+                    <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">input_schema</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">}</span>
+                <span class="p">}</span>
+            <span class="p">},</span>
+        <span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">http_method</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="s2">&quot;GET&quot;</span><span class="p">]</span> <span class="ow">and</span> <span class="n">model</span><span class="p">:</span>
+        <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="p">{</span>
+                    <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;filters&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_filter_examples</span><span class="p">(</span><span class="n">output_schema</span><span class="p">),</span>  <span class="c1">#</span>
+                <span class="p">},</span>
+            <span class="p">]</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">http_method</span> <span class="o">==</span> <span class="s2">&quot;GET&quot;</span><span class="p">:</span>
+            <span class="c1"># Add fields&#39; parameter based on the output_schema</span>
+            <span class="n">template_data</span> <span class="o">=</span> <span class="n">get_template_data_for_model</span><span class="p">(</span><span class="n">output_schema</span><span class="p">)</span>
+            <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span>
+                <span class="n">make_endpoint_params_description</span><span class="p">(</span><span class="n">output_schema</span><span class="p">,</span> <span class="n">template_data</span><span class="p">)</span>
+            <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="make_endpoint_params_description">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.make_endpoint_params_description">[docs]</a>
+<span class="k">def</span> <span class="nf">make_endpoint_params_description</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generates endpoint parameters description from a schema for the API docs.</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">            schema (Schema): Schema to generate endpoint parameters description from.</span>
+<span class="sd">            data (dict): Data to generate endpoint parameters description from.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[dict]: Endpoint parameters description.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">naan</span><span class="p">:</span> <span class="s2">&quot;Naan&quot;</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="s2">&quot;flask_scheemaa&quot;</span><span class="p">]</span>
+
+    <span class="n">output</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="n">naan</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="s2">&quot;API_FIELDS&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;fields&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_fields_description</span><span class="p">(</span><span class="n">schema</span><span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">naan</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="s2">&quot;API_ORDERBY&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;order by&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_x_description</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/order.html&quot;</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">naan</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="s2">&quot;API_JOIN&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;joins&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_x_description</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/joins.html&quot;</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">naan</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="s2">&quot;API_GROUPBY&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;group by&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_x_description</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/group.html&quot;</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">naan</span><span class="o">.</span><span class="n">get_config</span><span class="p">(</span><span class="s2">&quot;API_AGGREGATION&quot;</span><span class="p">,</span> <span class="kc">True</span><span class="p">):</span>
+        <span class="n">output</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;aggregation&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;query&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="n">generate_x_description</span><span class="p">(</span>
+                    <span class="n">data</span><span class="p">,</span> <span class="s2">&quot;redoc_templates/aggregate.html&quot;</span>
+                <span class="p">),</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+    <span class="k">return</span> <span class="n">output</span></div>
+
+
+
+<div class="viewcode-block" id="handle_authorization">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.handle_authorization">[docs]</a>
+<span class="k">def</span> <span class="nf">handle_authorization</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">spec_template</span><span class="p">):</span>
+    <span class="n">roles_required</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="s2">&quot;_decorators&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">decorator</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">_decorators</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">decorator</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">==</span> <span class="s2">&quot;auth_required&quot;</span><span class="p">:</span>
+                <span class="n">roles_required</span> <span class="o">=</span> <span class="n">decorator</span><span class="o">.</span><span class="n">_args</span>
+                <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;parameters&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="p">{</span>
+                        <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Authorization&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;in&quot;</span><span class="p">:</span> <span class="s2">&quot;header&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;JWT token required&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;required&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+                        <span class="s2">&quot;schema&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">},</span>
+                        <span class="s2">&quot;format&quot;</span><span class="p">:</span> <span class="s2">&quot;jwt&quot;</span><span class="p">,</span>
+                    <span class="p">}</span>
+                <span class="p">)</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">roles_required</span><span class="p">:</span>
+        <span class="n">roles_desc</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">roles_required</span><span class="p">)</span>
+        <span class="n">spec_template</span><span class="p">[</span><span class="s2">&quot;responses&quot;</span><span class="p">][</span><span class="s2">&quot;401&quot;</span><span class="p">][</span>
+            <span class="s2">&quot;description&quot;</span>
+        <span class="p">]</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot; Roles required: </span><span class="si">{</span><span class="n">roles_desc</span><span class="si">}</span><span class="s2">.&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="generate_swagger_spec">
+<a class="viewcode-back" href="../../../api/flask_scheema.specification.html#flask_scheema.specification.doc_generation.generate_swagger_spec">[docs]</a>
+<span class="k">def</span> <span class="nf">generate_swagger_spec</span><span class="p">(</span>
+    <span class="n">http_method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+    <span class="n">input_schema</span><span class="p">:</span> <span class="n">Schema</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">output_schema</span><span class="p">:</span> <span class="n">Schema</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">DeclarativeBase</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">path_params</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">current_app</span><span class="o">.</span><span class="n">extensions</span><span class="p">[</span><span class="s2">&quot;flask_scheemaa&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">api_spec</span>
+
+    <span class="c1"># Register Schemas</span>
+    <span class="n">register_schemas</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">,</span> <span class="n">output_schema</span><span class="p">)</span>
+
+    <span class="c1"># Initialize spec template</span>
+    <span class="n">spec_template</span> <span class="o">=</span> <span class="n">initialize_spec_template</span><span class="p">()</span>
+
+    <span class="c1"># Append parameters to spec_template</span>
+    <span class="n">append_parameters</span><span class="p">(</span>
+        <span class="n">spec_template</span><span class="p">,</span> <span class="n">path_params</span><span class="p">,</span> <span class="n">http_method</span><span class="p">,</span> <span class="n">input_schema</span><span class="p">,</span> <span class="n">output_schema</span><span class="p">,</span> <span class="n">model</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Handle Authorization</span>
+    <span class="n">handle_authorization</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">spec_template</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">spec_template</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lewis Morris.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

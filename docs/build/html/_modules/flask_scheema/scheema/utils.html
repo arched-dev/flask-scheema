@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>flask_scheema.scheema.utils &mdash; flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=80d5e7a1" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=19f00094" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=d45e8c67"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+        <script src="../../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            flask-scheema
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Quick Start</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.html">flask_scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.api.html">flask_scheema.api package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.scheema.html">flask_scheema.scheema package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.services.html">flask_scheema.services package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/flask_scheema.specification.html">flask_scheema.specification package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/modules.html">flask_scheema</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../licence.html">MIT Licence</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changes.html">Changes</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">flask-scheema</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">flask_scheema.scheema.utils</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for flask_scheema.scheema.utils</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">new_class</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Callable</span>
+
+<span class="kn">from</span> <span class="nn">marshmallow</span> <span class="kn">import</span> <span class="n">fields</span>
+<span class="kn">from</span> <span class="nn">marshmallow_sqlalchemy.fields</span> <span class="kn">import</span> <span class="n">Nested</span><span class="p">,</span> <span class="n">Related</span><span class="p">,</span> <span class="n">RelatedList</span>
+
+<span class="kn">from</span> <span class="nn">flask_scheema.utilities</span> <span class="kn">import</span> <span class="n">get_config_or_model_meta</span>
+
+
+<div class="viewcode-block" id="get_scheema_subclass">
+<a class="viewcode-back" href="../../../api/flask_scheema.scheema.html#flask_scheema.scheema.utils.get_scheema_subclass">[docs]</a>
+<span class="k">def</span> <span class="nf">get_scheema_subclass</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">callable</span><span class="p">,</span> <span class="n">dump</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Searches through all subclasses of AutoScheema to find the one that matches the model and dump parameters.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (callable): The model to search for.</span>
+<span class="sd">        dump (bool): Whether to search for a dump or load schema.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The subclass of AutoScheema that matches the model and dump parameters.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.scheema.bases</span> <span class="kn">import</span> <span class="n">AutoScheema</span>
+
+    <span class="n">schema_base</span> <span class="o">=</span> <span class="n">get_config_or_model_meta</span><span class="p">(</span>
+        <span class="s2">&quot;API_SCHEMA_BASE&quot;</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">AutoScheema</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">subclass</span> <span class="ow">in</span> <span class="n">schema_base</span><span class="o">.</span><span class="n">__subclasses__</span><span class="p">():</span>
+        <span class="n">schema_model</span> <span class="o">=</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">subclass</span><span class="p">,</span> <span class="s2">&quot;Meta&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span>
+            <span class="n">subclass</span><span class="o">.</span><span class="n">Meta</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">,</span> <span class="kc">None</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">schema_model</span> <span class="o">==</span> <span class="n">model</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="nb">getattr</span><span class="p">(</span><span class="n">subclass</span><span class="p">,</span> <span class="s2">&quot;dump&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span> <span class="ow">is</span> <span class="n">dump</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">subclass</span><span class="p">,</span> <span class="s2">&quot;dump&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">return</span> <span class="n">subclass</span></div>
+
+            <span class="c1"># subclass is not type(self)</span>
+
+
+<div class="viewcode-block" id="create_dynamic_schema">
+<a class="viewcode-back" href="../../../api/flask_scheema.scheema.html#flask_scheema.scheema.utils.create_dynamic_schema">[docs]</a>
+<span class="k">def</span> <span class="nf">create_dynamic_schema</span><span class="p">(</span><span class="n">base_class</span><span class="p">,</span> <span class="n">model_class</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a dynamic schema class that inherits from the base_class and has the model_class as its model.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        base_class:</span>
+<span class="sd">        model_class:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_class</span>
+
+    <span class="n">dynamic_class</span> <span class="o">=</span> <span class="n">new_class</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">model_class</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">Schema&quot;</span><span class="p">,</span>
+        <span class="p">(</span><span class="n">base_class</span><span class="p">,),</span>
+        <span class="n">exec_body</span><span class="o">=</span><span class="k">lambda</span> <span class="n">ns</span><span class="p">:</span> <span class="n">ns</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">Meta</span><span class="o">=</span><span class="n">Meta</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">dynamic_class</span></div>
+
+
+
+<div class="viewcode-block" id="get_input_output_from_model_or_make">
+<a class="viewcode-back" href="../../../api/flask_scheema.scheema.html#flask_scheema.scheema.utils.get_input_output_from_model_or_make">[docs]</a>
+<span class="k">def</span> <span class="nf">get_input_output_from_model_or_make</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Callable</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Gets the input and output schemas from the model, or creates them if they do not exist.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        model (Callable): The model to get the schemas from.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        tuple: The input and output schemas.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="kn">from</span> <span class="nn">flask_scheema.scheema.bases</span> <span class="kn">import</span> <span class="n">AutoScheema</span>
+
+    <span class="c1"># Generate input and output schema classes dynamically if they do not exist</span>
+    <span class="n">input_schema_class</span> <span class="o">=</span> <span class="n">get_scheema_subclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">output_schema_class</span> <span class="o">=</span> <span class="n">get_scheema_subclass</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dump</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">input_schema_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">input_schema_class</span> <span class="o">=</span> <span class="n">create_dynamic_schema</span><span class="p">(</span><span class="n">AutoScheema</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">output_schema_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">output_schema_class</span> <span class="o">=</span> <span class="n">create_dynamic_schema</span><span class="p">(</span><span class="n">AutoScheema</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">input_schema_class</span><span class="p">,</span> <span class="n">output_schema_class</span></div>
+
+
+
+<span class="n">type_mapping</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">String</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Integer</span><span class="p">:</span> <span class="s2">&quot;integer&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Float</span><span class="p">:</span> <span class="s2">&quot;number&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Boolean</span><span class="p">:</span> <span class="s2">&quot;boolean&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">DateTime</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Date</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Time</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">UUID</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">URL</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Email</span><span class="p">:</span> <span class="s2">&quot;string&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">Dict</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="n">fields</span><span class="o">.</span><span class="n">List</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+    <span class="n">Related</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span>
+    <span class="n">RelatedList</span><span class="p">:</span> <span class="s2">&quot;array&quot;</span><span class="p">,</span>
+<span class="p">}</span>
+
+
+<div class="viewcode-block" id="convert_to_openapi_type">
+<a class="viewcode-back" href="../../../api/flask_scheema.scheema.html#flask_scheema.scheema.utils.convert_to_openapi_type">[docs]</a>
+<span class="k">def</span> <span class="nf">convert_to_openapi_type</span><span class="p">(</span><span class="n">field_obj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Convert a marshmallow field to an OpenAPI type</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        field_obj: The field of to be converted</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        str: The open api type</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">openapi_type_info</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">field_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_obj</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="nb">hasattr</span><span class="p">(</span><span class="n">field_obj</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field_obj</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="s2">&quot;Meta&quot;</span><span class="p">)</span>
+        <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field_obj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">Meta</span><span class="p">,</span> <span class="s2">&quot;model&quot;</span><span class="p">)</span>
+    <span class="p">):</span>
+        <span class="n">openapi_type_info</span> <span class="o">=</span> <span class="n">get_description_and_example_add</span><span class="p">(</span><span class="n">openapi_type_info</span><span class="p">,</span> <span class="n">field_obj</span><span class="p">)</span>
+
+    <span class="c1"># Handle basic types</span>
+    <span class="n">openapi_type</span> <span class="o">=</span> <span class="n">type_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+        <span class="n">field_type</span><span class="p">,</span> <span class="s2">&quot;string&quot;</span>
+    <span class="p">)</span>  <span class="c1"># Default to &#39;string&#39; if type not found</span>
+    <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">openapi_type</span>
+
+    <span class="c1"># Handle DateTime, Date and Time formats</span>
+    <span class="k">if</span> <span class="n">field_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fields</span><span class="o">.</span><span class="n">DateTime</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">Date</span><span class="p">,</span> <span class="n">fields</span><span class="o">.</span><span class="n">Time</span><span class="p">]:</span>
+        <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;format&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s2">&quot;date-time&quot;</span>
+            <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="n">fields</span><span class="o">.</span><span class="n">DateTime</span>
+            <span class="k">else</span> <span class="n">field_type</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Handle list types</span>
+    <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="n">fields</span><span class="o">.</span><span class="n">List</span><span class="p">:</span>
+        <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">convert_to_openapi_type</span><span class="p">(</span><span class="n">field_obj</span><span class="o">.</span><span class="n">inner</span><span class="p">)</span>
+
+    <span class="c1"># Handle nested fields (relationships)</span>
+    <span class="k">if</span> <span class="n">field_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Nested</span><span class="p">,</span> <span class="n">Related</span><span class="p">,</span> <span class="n">RelatedList</span><span class="p">]:</span>
+        <span class="n">related_schema_name</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="n">Nested</span><span class="p">:</span>
+            <span class="n">related_schema_name</span> <span class="o">=</span> <span class="n">field_obj</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="k">elif</span> <span class="n">field_type</span> <span class="ow">in</span> <span class="p">[</span><span class="n">Related</span><span class="p">,</span> <span class="n">RelatedList</span><span class="p">]:</span>
+            <span class="n">parent_model</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">field_obj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span>
+            <span class="p">)</span>  <span class="c1"># SQLAlchemy model from the parent schema</span>
+            <span class="n">related_model</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span>
+                <span class="n">parent_model</span><span class="p">,</span> <span class="n">field_obj</span><span class="o">.</span><span class="n">name</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">property</span><span class="o">.</span><span class="n">mapper</span><span class="o">.</span><span class="n">class_</span>  <span class="c1"># Related SQLAlchemy model</span>
+            <span class="n">related_schema_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">related_model</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">Schema&quot;</span>  <span class="c1"># Assuming schema names follow this convention</span>
+
+        <span class="k">if</span> <span class="n">related_schema_name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">hasattr</span><span class="p">(</span><span class="n">field_obj</span><span class="p">,</span> <span class="s2">&quot;many&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field_obj</span><span class="o">.</span><span class="n">many</span>
+            <span class="p">)</span> <span class="ow">or</span> <span class="n">field_type</span> <span class="o">==</span> <span class="n">RelatedList</span><span class="p">:</span>
+                <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;array&quot;</span>
+                <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;items&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;$ref&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">related_schema_name</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">openapi_type_info</span><span class="p">[</span>
+                    <span class="s2">&quot;$ref&quot;</span>
+                <span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;#/components/schemas/</span><span class="si">{</span><span class="n">related_schema_name</span><span class="si">}</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">openapi_type_info</span></div>
+
+
+
+<div class="viewcode-block" id="get_description_and_example_add">
+<a class="viewcode-back" href="../../../api/flask_scheema.scheema.html#flask_scheema.scheema.utils.get_description_and_example_add">[docs]</a>
+<span class="k">def</span> <span class="nf">get_description_and_example_add</span><span class="p">(</span><span class="n">openapi_type_info</span><span class="p">,</span> <span class="n">field_obj</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get the description from the model field and add it to the openapi_type_info dict</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        openapi_type_info:</span>
+<span class="sd">        field_obj:</span>
+
+<span class="sd">    Returns:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">field_obj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">field_obj</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+        <span class="n">model_field</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">field_obj</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">Meta</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">field_obj</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_field</span><span class="p">,</span> <span class="s2">&quot;info&quot;</span><span class="p">):</span>
+            <span class="n">model_field_metadata</span> <span class="o">=</span> <span class="n">model_field</span><span class="o">.</span><span class="n">info</span>
+
+            <span class="k">if</span> <span class="n">model_field_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">):</span>
+                <span class="n">desc</span> <span class="o">=</span> <span class="n">model_field_metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">desc</span><span class="p">:</span>
+                    <span class="n">openapi_type_info</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">desc</span>
+
+    <span class="k">return</span> <span class="n">openapi_type_info</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2024, Lewis Morris.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

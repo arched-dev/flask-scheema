@@ -1,0 +1,31 @@
+## Joining Tables in API Queries
+{% if model_relationship_names|length == 0 %}
+This model does not have any relationships with other models.
+{% else %}
+You can join multiple model endpoints together to perform more complex queries. This is especially useful when you
+want to retrieve related data from different tables in a single API call.
+
+### Syntax
+
+To join tables, use the `join` query parameter with a comma-separated list of the table names you wish to join.
+
+- **Example**: `join={{ model_relationship_names[0] }}`
+
+### Table Name Requirement
+
+Once you include the `join` query parameter, it becomes mandatory to specify table names for all your other query
+parameters. This is done to eliminate any ambiguity in the queries.
+
+- **Example with Join and Fields**: `?join={{ relationship_table }}&fields={{ relationship_table }}.{{ relationship_columns[0] }},{{ base_table }}.{{ base_columns[0] }}`
+
+### Tables That Can Be Joined
+
+The following tables can be joined to this endpoint:
+
+{% for model_relationship_name in model_relationship_names %}
+- `{{ model_relationship_name }}`
+{% endfor %}
+
+By utilising table joins, you have the ability to make your API queries more expressive, enabling you to fetch
+precisely the data you need in an efficient manner.
+{% endif %}
