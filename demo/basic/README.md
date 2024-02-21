@@ -2,43 +2,18 @@
 
 ## Introduction
 
-Jumpstart your API development with `flask-schema` by integrating it into your Flask application. This guide walks you through setting up a robust API complete with an automatically generated OpenAPI documentation page, all with minimal changes to your existing Flask setup.
+Jumpstart your API development with `flask-scheema` by integrating it into your Flask application. This guide walks you through setting up a robust API complete with an automatically generated OpenAPI documentation page, all with minimal changes to your existing Flask setup.
 
 ## Getting Started
 
-Follow these steps to integrate `flask-schema` into your Flask application and enjoy a fully functional API alongside comprehensive OpenAPI Redoc documentation.
-
-### 1. Subclass DeclarativeBase for Flask-SQLAlchemy Integration
-
-Your models should inherit from a base class equipped with a get_session method to facilitate database interactions for schema generation and queries.
-
- - Extend DeclarativeBase and utilize `flask-SQLAlchemy` for seamless integration. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
-
-### 2. Configure Flask
-
-Introduce a few configuration values to Flask to enable `flask-schema` functionalities.
-
- - Set necessary Flask configuration values.  View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L8-L8)
-
-### 3. Initialize Flask-Scheema
-
-With all extensions set up, instantiate `flask-scheema` using your app's `app_context`. This step should follow the initialization of other extensions.
-
-Examples:
-
- - Initialize `flask-scheema` in your extensions' setup. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26)
- - Further initialization within your app's context. View [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
-
-### 4. Organize Documentation with Meta Class
-
-Enhance your `SQLAlchemy` models by adding a Meta class to organize documentation tags effectively.
-
-Implement Meta class in your models for documentation structuring. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/models.py#L32-L36)
+Follow these steps to integrate `flask-scheema` into your Flask application and enjoy a fully functional API alongside comprehensive OpenAPI Redoc documentation.
 
 
-## Implementing DeclarativeBase
+## Implementing DeclarativeBase for Flask-SQLAlchemy Integration
 
 Ensure your models derive from a base class that provides a get_session method for database access. This setup is crucial for the API's ability to generate accurate schemas and perform database queries.
+
+ - Extend DeclarativeBase and utilize `flask-SQLAlchemy` for seamless integration. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
 
 For `flask-SQLAlchemy` users, the following implementation is recommended:
 
@@ -57,6 +32,10 @@ All models should inherit from `db.Model` as usual, with model_class handling th
 
 ## Flask Configuration Requirements
 
+Introduce a few configuration values to Flask to enable `flask-scheema` functionalities.
+
+ - Set necessary Flask configuration values.  View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L6-L8)
+
 Your application's Flask configuration must specify the following values:
 
 ```python
@@ -65,9 +44,19 @@ API_TITLE = "Your API Title"
 API_VERSION = "Your API Version"
 ```
 
+## Initialize Flask-Scheema
+
+With all extensions set up, instantiate `flask-scheema` using your app's `app_context`. This step should follow the initialization of other extensions.
+
+Examples:
+
+ - Initialize `flask-scheema` in your extensions' setup. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26)
+ - Further initialization within your app's context. View [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
+
+
 ## Model Meta Class Attributes
 
-For organized documentation, include a Meta class in your SQLAlchemy models specifying tag_group and tag:
+Enhance your `SQLAlchemy` models by adding a Meta class to organize documentation tags effectively specifying `tag_group` and `tag`:
 
 ```python
 class Meta:
@@ -75,6 +64,7 @@ class Meta:
     tag = "Specific Tag"
 ```
 
+
 With these steps completed, run your application and navigate to the `/docs` route to explore your API's documentation.
 
-This refined approach clarifies the setup process, emphasizing essential steps and configurations for integrating `flask-schema` into your Flask application.
+This refined approach clarifies the setup process, emphasizing essential steps and configurations for integrating `flask-scheema` into your Flask application.
