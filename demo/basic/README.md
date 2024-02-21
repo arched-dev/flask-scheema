@@ -1,51 +1,80 @@
-# Demo - Flask-Scheema
+# Quick Start Guide for Flask-Schema
 
-## Basic
+## Introduction
 
-To spin up your first API using flask-scheema, you need to change your flask app very little to get a fully functioning 
-API along with an OpenAPI redoc documentation page.
+Jumpstart your API development with Flask-Schema by integrating it into your Flask application. This guide walks you through setting up a robust API complete with an automatically generated OpenAPI documentation page, all with minimal changes to your existing Flask setup.
 
-1) Subclass `DeclarativeBase` and pass to Flask-Sqlalchemy [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
-2) Appy a few flask config values   [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L12-L14)
-3) Initialise the `FlaskScheema` class with your apps `app_context` after all other extensions have been created and initialised [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26) [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
-4) Optionally add a `Meta` class to your sqlalchemy models with a `tag` & `tag_group` to organise the documentation.   [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/models.py#L32-L36)
+## Getting Started
+
+Follow these steps to integrate Flask-Schema into your Flask application and enjoy a fully functional API alongside comprehensive OpenAPI Redoc documentation.
+
+### 1. Subclass DeclarativeBase for Flask-SQLAlchemy Integration
+
+Your models should inherit from a base class equipped with a get_session method to facilitate database interactions for schema generation and queries.
+
+ - Extend DeclarativeBase and utilize Flask-SQLAlchemy for seamless integration. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L10-L25)
+
+### 2. Configure Flask
+
+Introduce a few configuration values to Flask to enable Flask-Schema functionalities.
+
+ - Set necessary Flask configuration values.  View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/config.py#L12-L14)
+
+### 3. Initialize Flask-Scheema
+
+With all extensions set up, instantiate `flask-scheema` using your app's `app_context`. This step should follow the initialization of other extensions.
+
+Examples:
+
+ - Initialize `flask-scheema` in your extensions' setup. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/extensions.py#L26)
+ - Further initialization within your app's context. View [Example1](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/__init__.py#L28)
+
+### 4. Organize Documentation with Meta Class
+
+Enhance your SQLAlchemy models by adding a Meta class to organize documentation tags effectively.
+
+Implement Meta class in your models for documentation structuring. View [Example](https://github.com/arched-dev/flask-scheema/blob/master/demo/basic/basic/models.py#L32-L36)
 
 
-### Subclass `DeclarativeBase`
+## Implementing DeclarativeBase
 
-Your models must inherit from a base class that has a method called `get_session` that returns a sqlalchemy session. 
-This is so the API can access the database to create the correct schemas and to query the database.
+Ensure your models derive from a base class that provides a get_session method for database access. This setup is crucial for the API's ability to generate accurate schemas and perform database queries.
 
-If you are using flask-sqlalchemy, the below works perfectly.
+For Flask-SQLAlchemy users, the following implementation is recommended:
 
 ```python
 from sqlalchemy.orm import DeclarativeBase
 
 class BaseModel(DeclarativeBase):
-
     def get_session(*args):
-        # you must add a method to your base model called get session that returns a sqlalchemy session for the
-        # auto api creator to work.
+        # Your base model must include a 'get_session' method returning a SQLAlchemy session.
         return db.session
     
 db = SQLAlchemy(model_class=BaseModel)
 ```
-Make sure all of your models inherit from `db.Model` like normal as the above `model_class` is already handling everything 
-for you.
 
-### Required flask Config values are:
-```
-API_BASE_MODEL = db.Model  # This can be any base model as above, but if using flask-sqlalchemy, pass db.Model 
-API_TITLE = "Book Shop API"
-API_VERSION = "0.1.0"
+All models should inherit from db.Model as usual, with model_class handling the necessary integration.
+
+## Flask Configuration Requirements
+
+Your application's Flask configuration must specify the following values:
+
+```python
+API_BASE_MODEL = db.Model  # Use your base model here. Flask-SQLAlchemy users should specify db.Model.
+API_TITLE = "Your API Title"
+API_VERSION = "Your API Version"
 ```
 
-### Sqlalchemy models must have a `Meta` class with the following attributes:
+## Model Meta Class Attributes
+
+For organized documentation, include a Meta class in your SQLAlchemy models specifying tag_group and tag:
 
 ```python
 class Meta:
-    tag_group = "People/Companies"
-    tag = "Author"
+    tag_group = "Descriptive Group Name"
+    tag = "Specific Tag"
 ```
 
-After this you can run your app and visit the `/docs` route to see your API documentation.
+With these steps completed, run your application and navigate to the `/docs` route to explore your API's documentation.
+
+This refined approach clarifies the setup process, emphasizing essential steps and configurations for integrating `flask-schema` into your Flask application.
