@@ -9,7 +9,7 @@ from marshmallow import Schema
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_scheema.api.api import RiceAPI
-from flask_scheema.extensions import logger
+from flask_scheema.logging import logger
 from flask_scheema.specification.specification import (
     CurrySpec,
 )
@@ -17,7 +17,7 @@ from flask_scheema.utilities import (
     AttributeInitializerMixin,
 )
 
-FLASK_APP_NAME = "flask_scheemaa"
+FLASK_APP_NAME = "flask_scheema"
 
 
 class Naan(AttributeInitializerMixin):

@@ -8,7 +8,7 @@ from flask import Response, current_app, jsonify, g
 from marshmallow import Schema, ValidationError
 from sqlalchemy.orm import DeclarativeBase
 
-from flask_scheema.scheema.utils import convert_camel
+from flask_scheema.scheema.utils import convert_snake_to_camel
 from flask_scheema.utilities import get_config_or_model_meta
 
 
@@ -120,11 +120,15 @@ def serialize_output_with_mallow(
     Returns:
         Union[Dict[str, Any], tuple]: The serialized data if successful, or a tuple containing errors and a status code if there's an error.
     """
+    from flask_scheema.api.decorators import get_count
+
     try:
         is_list = isinstance(data, list) or ("value" in data and isinstance(data["value"], list)) or ("query" in data and isinstance(data["query"], list))
         dump_data = data["query"] if "query" in data else data
         value = dump_schema_if_exists(output_schema, dump_data, is_list)
-        count = data.get("count", 1)
+        # Check if value is a list, a single item, or None, and adjust count accordingly
+        count = get_count(data, value)
+
         next_url = data.get("next_url", 1)
         previous_url = data.get("previous_url", 1)
         many = is_list
@@ -207,7 +211,7 @@ def create_response(
             "status_code": str(status),
             "error": error,
             "response_ms": response_ms,
-            "count": count,  # Include the count key here
+            "total_count": count,  # Include the count key here
         }
     )
 
@@ -220,6 +224,9 @@ def create_response(
         )
 
     data = remove_values(data)
+
+    if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
+        data = {convert_snake_to_camel(k): v for k, v in data.items()}
 
     response = jsonify(data)
     response.status_code = str(status)
@@ -242,10 +249,10 @@ def remove_values(data: dict) -> dict:
         data.pop("api_version")
     if "status_code" in data and not get_config_or_model_meta("API_DUMP_STATUS_CODE", default=True):
         data.pop("status_code")
-    if "count" in data and not get_config_or_model_meta("API_DUMP_RESPONSE_MS", default=True):
+    if "response_ms" in data and not get_config_or_model_meta("API_DUMP_RESPONSE_MS", default=True):
         data.pop("response_ms")
-    if "count" in data and not get_config_or_model_meta("API_DUMP_COUNT", default=True):
-        data.pop("count")
+    if "total_count" in data and not get_config_or_model_meta("API_DUMP_TOTAL_COUNT", default=True):
+        data.pop("total_count")
     if "next_url" in data and not get_config_or_model_meta("API_DUMP_NULL_NEXT_URL", default=True) and not data.get(
             "next_url"):
         data.pop("next_url")

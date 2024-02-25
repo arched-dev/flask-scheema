@@ -76,9 +76,9 @@ def generate_fields_description(schema: "AutoScheema") -> str:
         (k, v.metadata.get("description", ""))
         for k, v in schema().fields.items()
         if v
-        and v.dump_only in [None, False]
-        and not isinstance(v, RelatedList)
-        and not isinstance(v, Related)
+           and v.dump_only in [None, False]
+           and not isinstance(v, RelatedList)
+           and not isinstance(v, Related)
     ]
 
     if hasattr(schema, "Meta") and hasattr(schema.Meta, "model"):
@@ -100,7 +100,7 @@ def generate_fields_description(schema: "AutoScheema") -> str:
                     table_choices = random.choice([table_name, "OtherTable"])
                     if table_choices == table_name:
                         current_table_and_field = (
-                            table_name + "." + random.choice(temp_fields)
+                                table_name + "." + random.choice(temp_fields)
                         )
                     else:
                         current_table_and_field = random.choice(example_table)
@@ -114,11 +114,12 @@ def generate_fields_description(schema: "AutoScheema") -> str:
 
         from flask_scheema.utilities import get_config_or_model_meta
         from flask_scheema.api.utils import endpoint_namer
-        schema_name = get_config_or_model_meta("API_ENDPOINT_NAMER", schema.Meta.model, default=endpoint_namer)(schema.Meta.model)
+        schema_name = get_config_or_model_meta("API_ENDPOINT_NAMER", schema.Meta.model, default=endpoint_namer)(
+            schema.Meta.model)
         api_prefix = get_config_or_model_meta("API_PREFIX", default="/api")
 
         return manual_render_absolute_template(
-            full_path, schema_name=schema_name,api_prefix=api_prefix, fields=fields, example_fields=example_fields
+            full_path, schema_name=schema_name, api_prefix=api_prefix, fields=fields, example_fields=example_fields
         )
 
     return "None"
@@ -276,8 +277,12 @@ def get_template_data_for_model(schema) -> Optional[dict]:
         model_relationships = extract_relationships(base_model)
         model_relationship_names = [x.__name__ for x in model_relationships]
 
-        relationship_columns = extract_sqlalchemy_columns(model_relationships[0])
-        relationship_table = model_relationships[0].__name__
+        if isinstance(model_relationships, list) and len(model_relationships) > 0:
+            relationship_columns = extract_sqlalchemy_columns(model_relationships[0])
+            relationship_table = model_relationships[0].__name__
+        else:
+            relationship_columns = []
+            relationship_table = None
 
         aggs = ", ".join([f"`{x}`" for x in list(aggregate_funcs.keys())])
 
@@ -318,8 +323,8 @@ def generate_path_params_from_rule(rule) -> List[dict]:
 
 def register_routes_with_spec(naan: "Naan", route_spec: List):
     """
-        Registers all flask_scheemaa with the apispec object.
-        Which flask_scheemaa should be registered is determined by the decorators and builds the openapi spec, which is
+        Registers all flask_scheema with the apispec object.
+        Which flask_scheema should be registered is determined by the decorators and builds the openapi spec, which is
         served with Redoc.
 
 
@@ -410,10 +415,10 @@ def convert_path_to_openapi(path: str) -> str:
 
 
 def register_schemas(
-    spec: APISpec,
-    input_schema: Schema,
-    output_schema: Optional[Schema] = None,
-    force_update=False,
+        spec: APISpec,
+        input_schema: Schema,
+        output_schema: Optional[Schema] = None,
+        force_update=False,
 ):
     """
         Registers schemas with the apispec object.
@@ -461,12 +466,12 @@ def initialize_spec_template():
 
 
 def append_parameters(
-    spec_template: dict,
-    path_params: list,
-    http_method: str,
-    input_schema: Schema,
-    output_schema: Schema,
-    model: DeclarativeBase,
+        spec_template: dict,
+        path_params: list,
+        http_method: str,
+        input_schema: Schema,
+        output_schema: Schema,
+        model: DeclarativeBase,
 ):
     """
 
@@ -486,7 +491,7 @@ def append_parameters(
 
     """
     global html_path
-    html_path = current_app.extensions["flask_scheemaa"].get_templates_path()
+    html_path = current_app.extensions["flask_scheema"].get_templates_path()
 
     # Add 200 response based on the output_schema
     if output_schema:
@@ -505,12 +510,12 @@ def append_parameters(
     if http_method in ["POST", "PUT", "PATCH"] and input_schema:
         spec_template["requestBody"] = {
             "description": f"{input_schema.__name__} payload"
-            + (
-                " (all fields are optional when updating records, but with out the id the model cannot be queries and "
-                "will therefor fail)"
-                if http_method == "PATCH"
-                else ""
-            ),
+                           + (
+                               " (all fields are optional when updating records, but with out the id the model cannot be queries and "
+                               "will therefor fail)"
+                               if http_method == "PATCH"
+                               else ""
+                           ),
             "required": True if http_method == "POST" else False,
             "content": {
                 "application/json": {
@@ -555,7 +560,7 @@ def make_endpoint_params_description(schema: Schema, data: dict):
 
     output = []
 
-    if get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", getattr(schema.Meta, "model"), True):
+    if get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", getattr(schema.Meta, "model", None), default=True):
         output.append(
             {
                 "name": "fields",
@@ -565,7 +570,7 @@ def make_endpoint_params_description(schema: Schema, data: dict):
             }
         )
 
-    if get_config_or_model_meta("API_ALLOW_ORDERBY", getattr(schema.Meta,"model"), default=True):
+    if get_config_or_model_meta("API_ALLOW_ORDERBY", getattr(schema.Meta, "model", None), default=True):
         output.append(
             {
                 "name": "order by",
@@ -576,7 +581,7 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_JOIN", getattr(schema.Meta,"model"), default=True):
+    if get_config_or_model_meta("API_ALLOW_JOIN", getattr(schema.Meta, "model", None), default=True):
         output.append(
             {
                 "name": "joins",
@@ -587,7 +592,7 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_GROUPBY", getattr(schema.Meta,"model"), default=True):
+    if get_config_or_model_meta("API_ALLOW_GROUPBY", getattr(schema.Meta, "model", None), default=True):
         output.append(
             {
                 "name": "group by",
@@ -598,7 +603,7 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_AGGREGATION", getattr(schema.Meta,"model"), default=True):
+    if get_config_or_model_meta("API_ALLOW_AGGREGATION", getattr(schema.Meta, "model", None), default=True):
         output.append(
             {
                 "name": "aggregation",
@@ -638,14 +643,14 @@ def handle_authorization(f, spec_template):
 
 
 def generate_swagger_spec(
-    http_method: str,
-    f: Callable,
-    input_schema: Schema = None,
-    output_schema: Schema = None,
-    model: DeclarativeBase = None,
-    path_params: list = None,
+        http_method: str,
+        f: Callable,
+        input_schema: Schema = None,
+        output_schema: Schema = None,
+        model: DeclarativeBase = None,
+        path_params: list = None,
 ) -> dict:
-    spec = current_app.extensions["flask_scheemaa"].api_spec
+    spec = current_app.extensions["flask_scheema"].api_spec
 
     # Register Schemas
     register_schemas(spec, input_schema, output_schema)

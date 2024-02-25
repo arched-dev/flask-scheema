@@ -2,9 +2,11 @@ from functools import wraps
 from typing import Callable, Union, Dict, List, Optional, Any
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
+import sqlalchemy
 from flask import request, abort
 from sqlalchemy import desc, inspect, Column, and_, func
-from sqlalchemy.orm import Query, Session, DeclarativeBase
+from sqlalchemy.exc import IntegrityError, DataError
+from sqlalchemy.orm import Query, Session, DeclarativeBase, class_mapper
 
 from flask_scheema.api.utils import get_primary_keys
 from flask_scheema.exceptions import CustomHTTPException
@@ -75,7 +77,7 @@ def add_page_totals_and_urls(f: Callable) -> Callable:
         output = f(*args, **kwargs)
         limit = output.get("limit")
         page = output.get("page")
-        count = output.get("count")
+        total_count = output.get("total_count")
 
         parsed_url = urlparse(request.url)
         query_params = parse_qs(parsed_url.query)
@@ -86,8 +88,8 @@ def add_page_totals_and_urls(f: Callable) -> Callable:
         total_pages = None
 
         # Calculate total_pages and current_page
-        if count and limit:
-            total_pages = -(-count // limit)  # Equivalent to math.ceil(count / limit)
+        if total_count and limit:
+            total_pages = -(-total_count // limit)  # Equivalent to math.ceil(count / limit)
             current_page = page
 
             # Update the 'page' query parameter for the next and previous URLs
@@ -99,7 +101,7 @@ def add_page_totals_and_urls(f: Callable) -> Callable:
             prev_query_string = urlencode(query_params, doseq=True)
 
             # Determine if there are next and previous pages
-            next_page = page + 1 if (page + 1) * limit < count else None
+            next_page = page + 1 if (page + 1) * limit < total_count else None
             prev_page = page - 1 if page > 0 else None
 
             # Construct next and previous URLs
@@ -361,17 +363,19 @@ class CrudService:
             dict: Dictionary containing a query result and count.
 
         """
-
+        pk = get_primary_keys(self.model)
         query = self.get_query_from_args(args_dict)
 
-        if lookup_val and not multiple:
+        if lookup_val: # and not multiple:
 
             if alt_field:
                 query = query.filter_by(**{alt_field: lookup_val})
             else:
-                query = query.filter_by(id=lookup_val)
+                query = query.filter(pk == lookup_val)
 
             results = query.first()
+            if not results:
+                raise CustomHTTPException(404, f"{self.model.__name__} not found with {pk.key} {lookup_val}")
             return {"query": results}
 
         else:
@@ -390,7 +394,7 @@ class CrudService:
             else:
                 results = query.items
 
-            return {"query": results, "count": count, "page": page, "limit": limit}
+            return {"query": results, "total_count": count, "page": page, "limit": limit}
 
     def create(self, **kwargs) -> object:
         """
@@ -404,47 +408,115 @@ class CrudService:
 
         """
         body = kwargs.get("deserialized_data")
-        new_model = self.model(**body)
-        self.session.add(new_model)
-        self.session.commit()
-        return {"query": new_model}
+        if not body:
+            raise CustomHTTPException(400, "No data provided for creation.")
 
-    def update(self, **kwargs) -> object:
+        try:
+            new_model = self.model(**body)
+            self.session.add(new_model)
+            self.session.commit()
+            return {"query": new_model}
+        except IntegrityError as e:
+            self.session.rollback()
+            # Log the error as well if logging is setup
+            # logging.error(f"IntegrityError: {e}")
+            raise CustomHTTPException(400, f"Integrity error: {e.orig}")
+        except DataError as e:
+            self.session.rollback()
+            # Log the error as well if logging is setup
+            # logging.error(f"DataError: {e}")
+            raise CustomHTTPException(400, f"Data error: {e.orig}")
+        except Exception as e:
+            self.session.rollback()
+            # Catch-all for any other unforeseen errors
+            # logging.error(f"Unexpected error: {e}")
+            raise CustomHTTPException(500, "An unexpected error occurred.")
+
+    def update(self, **kwargs) -> dict:
         """
         Updates an object in the database, based on the provided id and data.
 
-        Args:
-            obj (object): The SQLAlchemy object to update.
+        Kwargs:
+            lookup_val (int): The id of the object to update.
+            deserialized_data (dict): The data to update the object with.
 
         Returns:
-            object: The updated SQLAlchemy object.
-
+            dict: The updated object if successful, or an error message if not.
         """
-        obj = self.get_query(request.args.to_dict(), kwargs.get("lookup_val"), multiple=False)["query"]
+        lookup_val = kwargs.get("lookup_val")
+        if not lookup_val:
+            raise CustomHTTPException(400, "No lookup value provided for update.")
+
+        obj = self.get_query(request.args.to_dict(), lookup_val, multiple=False)["query"]
         if obj:
             body = kwargs.get("deserialized_data")
-            for key, value in body.items():
-                setattr(obj, key, value)
-            self.session.commit()
-            return {"query": obj}
-
-        abort(404)
+            if body is None:
+                raise CustomHTTPException(400, "No data provided for update.")
+            try:
+                for key, value in body.items():
+                    if hasattr(obj, key):
+                        setattr(obj, key, value)
+                    else:
+                        raise CustomHTTPException(400, f"Invalid field '{key}' for update.")
+                self.session.commit()
+                return {"query": obj}
+            except sqlalchemy.exc.IntegrityError as e:
+                self.session.rollback()
+                raise CustomHTTPException(400, f"Integrity error during update: {e}")
+            except Exception as e:
+                self.session.rollback()
+                raise CustomHTTPException(500, f"Unexpected error during update: {e}")
+        else:
+            raise CustomHTTPException(404, "Object not found for update.")
 
     def delete(self, *args, **kwargs) -> dict:
         """
-                Deletes an object from the database, based on the provided id.
-
+        Deletes an object from the database, based on the provided id, with optional cascading delete.
 
         Kwargs:
             lookup_val (int): The id of the object to delete.
 
         Returns:
-            dict: "complete: True if the object was successfully deleted, False otherwise.
-
+            dict: "complete": True if the object was successfully deleted, False otherwise.
         """
-        obj = self.get_query(request.args.to_dict(), kwargs.get("lookup_val"), multiple=False)["query"]
+        lookup_val = kwargs.get("lookup_val")
+        args = request.args.to_dict()
+        cascade_delete = "cascade_delete" in args and args.pop('cascade_delete') in ('true', '1')
+
+        if not lookup_val:
+            raise CustomHTTPException(400, "No lookup value provided for deletion.")
+
+        obj = self.get_query(args, lookup_val, multiple=False)["query"]
         if obj:
-            self.session.delete(obj)
-            self.session.commit()
-            return {"complete": True}
-        abort(404)
+            try:
+                if cascade_delete:
+                    # Iterate over all relationships and delete related objects if cascade_delete is True
+                    for relationship in class_mapper(obj.__class__).relationships:
+                        related_objects = getattr(obj, relationship.key)
+                        if isinstance(related_objects, list):
+                            for related_obj in related_objects:
+                                self.session.delete(related_obj)
+                        else:
+                            self.session.delete(related_objects)
+
+                self.session.delete(obj)
+                self.session.commit()
+                return {"complete": True}
+
+            except sqlalchemy.exc.IntegrityError as e:
+                self.session.rollback()
+                if not cascade_delete:
+                    # Build a detailed error message
+                    related_entities = [rel.key for rel in class_mapper(obj.__class__).relationships]
+                    if related_entities:
+                        related_entities_str = ", ".join(related_entities)
+                        error_message = f"Deletion failed due to existing related records with not null constraints. "
+                        error_message += f"Consider adding '?cascade_delete=1' to the request URL to delete all related records including: {related_entities_str}"
+                    else:
+                        error_message = "Deletion failed due to existing related records. "
+                        error_message += "Consider adding '?cascade_delete=1' to the request URL to delete all related records."
+                    raise CustomHTTPException(500, error_message)
+                else:
+                    raise CustomHTTPException(500, "An error occurred during cascading delete.")
+        else:
+            raise CustomHTTPException(404, "Object not found for deletion.")

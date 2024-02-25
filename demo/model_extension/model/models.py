@@ -13,9 +13,9 @@ from sqlalchemy import (
     Float,
 )
 from sqlalchemy.ext.hybrid import hybrid_property
-from sqlalchemy.orm import mapped_column, Mapped, relationship, DeclarativeBase
+from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from demo.model_extension.models import db
+from demo.model_extension.model.extensions import db
 
 book_category_table = Table(
     "book_category",
@@ -59,11 +59,11 @@ class Author(db.Model):
                                           "example": 1})
 
     first_name: Mapped[str] = mapped_column(String,
-                                            info={"description": "The author's name", "format": "name",
+                                            info={"description": "The author's name", "format": "text",
                                                   "example": "John"})
 
     last_name: Mapped[str] = mapped_column(String,
-                                           info={"description": "The author's last name", "format": "name",
+                                           info={"description": "The author's last name", "format": "text",
                                                  "example": "Doe"})
 
     biography: Mapped[str] = mapped_column(Text,
@@ -75,7 +75,7 @@ class Author(db.Model):
                                                           "example": "1970-01-01"})
 
     nationality: Mapped[str] = mapped_column(String,
-                                             info={"description": "The author's nationality", "format": "name",
+                                             info={"description": "The author's nationality", "format": "text",
                                                    "example": "English"})
 
     website: Mapped[Optional[str]] = mapped_column(String,
@@ -102,6 +102,7 @@ class Book(db.Model):
         # references in redocly api docs.
         tag_group = "Books"
         tag = "Books"
+
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     title: Mapped[str] = mapped_column(String)
@@ -165,3 +166,19 @@ class Category(db.Model):
     books = relationship(
         "Book", secondary=book_category_table, back_populates="categories"
     )
+
+
+class APICalls(db.Model):
+    __tablename__ = "api_calls"
+
+    class Meta:
+        # all models should have class Meta object and the following fields which defines how the model schema's are
+        # references in redocly api docs.
+        tag_group = "Stats"
+        tag = "APICalls"
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    endpoint: Mapped[str] = mapped_column(String)
+    args: Mapped[Optional[str]] = mapped_column(String)
+    method: Mapped[str] = mapped_column(String)
+    ip: Mapped[Optional[str]] = mapped_column(String)

@@ -37,10 +37,10 @@ Actual KEys
     - API_BASE_MODEL        db.Model
     - API_BASE_SCHEMA=     AutoSchema
     - AUTO_NAME_ENDPOINTS   # check what this does 
-    - FULL_AUTO:                                Optional[callable] = True  # does the lot.
+    - FULL_AUTO:                                 Optional[callable] = True  # does the lot.
     - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
-    {x} - API_CONVERT_TO_CAMEL_CASE:                 Optional[callable] = True  # Convert json output to camel case
-
+    {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True  # Convert json output to camel case
+    - API_STOP_CASCADE_DELETE:                   Optional[callable] = False  # When True, will not cascade delete on delete
     authenticate_route: Optional[bool, Callable] 
     base_model
     base_schema
@@ -48,10 +48,10 @@ Actual KEys
         
     - API_IGNORE_UNDERSCORE_ATTRIBUTE:          Optional[boolean] = True #Ignore model fields that start with underscore
     
-    - API_SERIALIZATION_TYPE                    Optional[str] = "json"  | "url" | "hybrid" | None   # json -> serialise all, url -> to_only url, hybrid -> serialise single items, url lists. None -> No serialisation of nested items 
+    - API_SERIALIZATION_TYPE                    Optional[str] = "json"  | "url" | "hybrid" | False   # json -> serialise all, url -> to_only url, hybrid -> serialise single items, url lists. None -> No serialisation of nested items 
     - API_SERIALIZATION_DEPTH                   Optional[int] = 1
-
-
+    - API_PAGE_SIZE                             Optional[int] = 20
+    - API_PAGE_MAX                              Optional[int] = 100
 
 [//]: # (    - AUTO_NAME_ENDPOINTS:                      Optional[bool, Callable] = True)
     - API_DOCUMENTATION_URL:                    Optional[callable] ="/docs"         Docuentation URL 
@@ -68,6 +68,8 @@ Dual:
     - API_ALLOW_JOIN:                                 Optional[callable] = True # Allow aggregation
     - API_ALLOW_GROUPBY:                              Optional[callable] = True # Allow aggregation
     - API_ALLOW_AGGREGATION:                          Optional[callable] = TRUE #Allow aggregation
+
+    - block_methods:                               Optional[callable] = [] # Allow aggregation
 - 
 API OUTPUT: 
 

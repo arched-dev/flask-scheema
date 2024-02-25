@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from demo.model_extension.models.models import Category, Publisher, Author, Book, Review
+from demo.model_extension.model.models import Review, Book, Category, Publisher, Author
 
 categories = {
     "Fantasy": "Features magical elements, mythical creatures, and imaginary worlds.",

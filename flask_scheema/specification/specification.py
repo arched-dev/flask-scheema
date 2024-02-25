@@ -51,7 +51,7 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         AttributeInitializerMixin.__init__(self, app=naan.app, *args, **kwargs)
 
         if self.create_api_docs:
-            # Set the naan object, the main flask_scheemaa object
+            # Set the naan object, the main flask_scheema object
 
             # Validate the api spec arguments
             self.validate_init_apispec_args()

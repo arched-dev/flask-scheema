@@ -5,7 +5,7 @@ from marshmallow import Schema
 from sqlalchemy import inspect
 from sqlalchemy.orm import DeclarativeBase
 
-from flask_scheema.extensions import logger
+from flask_scheema.logging import logger
 from flask_scheema.utilities import get_config_or_model_meta
 
 

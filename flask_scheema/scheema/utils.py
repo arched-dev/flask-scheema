@@ -6,7 +6,7 @@ from marshmallow_sqlalchemy.fields import Nested, Related, RelatedList
 
 from flask_scheema.utilities import get_config_or_model_meta
 
-def convert_snake(snake_str):
+def convert_snake_to_camel(snake_str):
     """
     Convert a snake_case string to camelCase.
 
@@ -21,27 +21,6 @@ def convert_snake(snake_str):
     # join them together, and return.
     return components[0] + ''.join(x.title() for x in components[1:])
 
-
-def convert_camel(camel_str):
-    """
-    Convert a camelCase string to snake_case.
-
-    Args:
-    - camel_str (str): The camelCase string to convert.
-
-    Returns:
-    - str: The converted snake_case string.
-    """
-    snake_str = [camel_str[0].lower()]  # Start with the first character in lowercase.
-
-    for c in camel_str[1:]:
-        if c.isupper():  # If the character is uppercase, it starts a new word.
-            snake_str.append('_')
-            snake_str.append(c.lower())
-        else:
-            snake_str.append(c)
-
-    return ''.join(snake_str)
 
 
 def get_scheema_subclass(model: callable, dump: Optional[bool] = False):
@@ -235,8 +214,8 @@ def get_description_and_example_add(openapi_type_info, field_obj):
                     openapi_type_info["description"] = desc
 
             if model_field_metadata.get("example"):
-                desc = model_field_metadata.get("example")
-                if desc:
-                    openapi_type_info["description"] = desc
+                example = model_field_metadata.get("example")
+                if example:
+                    openapi_type_info["example"] = example
 
     return openapi_type_info

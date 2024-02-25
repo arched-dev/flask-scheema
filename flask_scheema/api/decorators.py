@@ -154,6 +154,16 @@ def handle_one(
 
     return decorator
 
+def get_count(result, value):
+    # Check if value is a list, a single item, or None, and adjust count accordingly
+    if result.get("total_count", None):
+        return result.get("total_count")
+    elif isinstance(value, list):
+        return len(value)
+    elif value is None:
+        return 0
+    else:
+        return 1
 
 def handle_error(e: Any, status_code):
     """
@@ -184,7 +194,7 @@ def handle_result(result):
 
     if isinstance(result, dict):
         value = result.get("query", result)
-        count = result.get("count", 1)
+        count = get_count(result, value)
         next_url = result.get("next_url")
         previous_url = result.get("previous_url")
     if isinstance(result, CustomResponse):

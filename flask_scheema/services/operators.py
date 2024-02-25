@@ -27,8 +27,7 @@ aggregate_funcs = {
     "min": func.min,
     "max": func.max,
 }
-PAGINATION_DEFAULTS = {"page": 0, "limit": 20}
-PAGINATION_MAX = {"page": 0, "limit": 100}
+
 OTHER_FUNCTIONS = ["groupby", "fields", "join", "orderby"]
 
 
@@ -45,19 +44,24 @@ def get_pagination(args_dict: Dict[str, str]):
     """
 
     # Handle Pagination
+    from flask_scheema.utilities import get_config_or_model_meta
+    PAGINATION_DEFAULTS = {"page": 1, "limit": get_config_or_model_meta("API_PAGE_SIZE", default=20)}
+    PAGINATION_MAX = {"page": 1, "limit": get_config_or_model_meta("API_PAGE_SIZE_MAX", default=20)}
+
     page = args_dict.get("page", PAGINATION_DEFAULTS["page"])
     limit = args_dict.get("limit", PAGINATION_DEFAULTS["limit"])
     try:
         page = int(page)
     except ValueError:
-        page = PAGINATION_DEFAULTS["page"]
+        raise CustomHTTPException(400, f"Invalid page value: {page} (must be an integer)")
 
     try:
         limit = int(limit)
-        if limit > PAGINATION_MAX["limit"]:
-            limit = PAGINATION_MAX["limit"]
-    except ValueError:
-        limit = PAGINATION_DEFAULTS["limit"]
+    except:
+        raise CustomHTTPException(400, f"Invalid limit value: {limit} (must be an integer)")
+
+    if limit > PAGINATION_MAX["limit"]:
+        raise CustomHTTPException(400, f"Limit exceeds maximum value of {PAGINATION_MAX['limit']}")
 
     return page, limit
 
@@ -251,6 +255,8 @@ def create_conditions_from_args(
         '[account__eq,id__eq]': '12345,1' would return (Addresses.account == '12345') | (Addresses.id == 1)
 
     """
+    from flask_scheema.utilities import get_config_or_model_meta
+    PAGINATION_DEFAULTS = {"page": 1, "limit": get_config_or_model_meta("API_PAGE_SIZE", default=20)}
 
     conditions = []
     or_conditions = []

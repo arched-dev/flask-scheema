@@ -1,4 +1,4 @@
-from demo.model_extension.models import create_app
+from demo.model_extension.model import create_app
 
 app = create_app()
 

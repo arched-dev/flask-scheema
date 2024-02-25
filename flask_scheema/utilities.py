@@ -8,7 +8,7 @@ from marshmallow import Schema
 from sqlalchemy import inspect
 from sqlalchemy.orm import DeclarativeBase
 
-from flask_scheema.extensions import logger
+from flask_scheema.logging import logger
 from flask_scheema.specification.doc_generation import (
     make_endpoint_description,
 )
@@ -96,59 +96,77 @@ def get_nested_attr(obj, nested_key: str, default=None) -> Any:
     return obj
 
 
+def normalize_key(key: str) -> str:
+    """
+    Normalize the key to handle different cases.
+
+    Args:
+        key (str): The original key.
+
+    Returns:
+        str: The normalized key.
+    """
+    # Convert to uppercase
+    return key.upper()
+
 def get_config_or_model_meta(
     key: str,
     model: Optional[DeclarativeBase] = None,
     output_schema: Optional[Schema] = None,
     input_schema: Optional[Schema] = None,
     default=None,
+    allow_join=False,
 ) -> Any:
     """
-    Used to get either the flask config or the Meta attribute from the model, or schemas.
-
-    Args:
-        key (str): The key to get.
-        model (DeclarativeBase): The model to get the key from.
-        output_schema (Schema): The output schema to get the key from.
-        input_schema (Schema): The input schema to get the key from.
-        default (Any): The default value to return if the key is not found.
-
-    Returns:
-        Any: The value of the key.
+    Gets the configuration or Meta attribute from the model, or schemas, with precedence to models and schemas over Flask config.
     """
-    app = current_app
+    normalized_key = normalize_key(key)
+    api_prefixed_key = 'API_' + normalized_key
+    values_to_join = []
 
-    # Check Flask config
-    config_value = app.config.get(key.upper())
+    # Helper function for processing Meta attributes, considering 'API_' prefix
+    def process_meta_attribute(source, key, api_key, allow_join, values_to_join):
+        meta_value = get_nested_attr(source, f"Meta.{key}", default=None) or \
+                     get_nested_attr(source, f"Meta.{api_key}", default=None)
+        if meta_value is not None:
+            if allow_join and isinstance(meta_value, list):
+                values_to_join.extend(meta_value)
+            elif not allow_join:
+                return meta_value
+        return None
+
+    # Attempt to retrieve the value from models and schemas first
+    for source in (model, output_schema, input_schema):
+        if source is not None:
+            result = process_meta_attribute(source, normalized_key, api_prefixed_key, allow_join, values_to_join)
+            if result is not None:
+                return result
+
+    # Helper function to try accessing Flask config with and without 'API_' prefix
+    def try_get_config(key):
+        app = current_app
+        conf_val = app.config.get(key)
+        conf_val_api = app.config.get('API_' + key)
+        if conf_val is not None:
+            return conf_val
+        elif conf_val_api is not None:
+            return conf_val_api
+        return None
+
+    # Finally, check Flask config if the value was not found in models or schemas
+    config_value = try_get_config(normalized_key)
     if config_value is not None:
-        return config_value
+        if allow_join and isinstance(config_value, list):
+            values_to_join.extend(config_value)
+        else:
+            return config_value
 
-    # Check model Meta
-
-    if model is not None:
-        model_meta_value = get_nested_attr(model, f"Meta.{key}", default=None)
-        if model_meta_value is not None:
-            return model_meta_value
-
-    # Check output_schema Meta
-    if output_schema is not None:
-        output_schema_meta_value = get_nested_attr(
-            output_schema, f"Meta.{key}", default=None
-        )
-        if output_schema_meta_value is not None:
-            return output_schema_meta_value
-
-    # Check input_schema Meta
-    if input_schema is not None:
-        input_schema_meta_value = get_nested_attr(
-            input_schema, f"Meta.{key}", default=None
-        )
-        if input_schema_meta_value is not None:
-            return input_schema_meta_value
+    # If allow_join is True and lists were collected, return the joined list
+    if allow_join and values_to_join:
+        return values_to_join
 
     # Return default if none of the above
     return default
-
 
 def scrape_extra_info_from_spec_data(
     spec_data: Dict[str, Any], method: str

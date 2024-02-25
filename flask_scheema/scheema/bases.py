@@ -10,8 +10,8 @@ from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import class_mapper, RelationshipProperty, ColumnProperty
 
 from flask_scheema.api.utils import endpoint_namer
-from flask_scheema.extensions import logger
-from flask_scheema.scheema.utils import get_openapi_meta_data, get_input_output_from_model_or_make, convert_snake
+from flask_scheema.logging import logger
+from flask_scheema.scheema.utils import get_openapi_meta_data, get_input_output_from_model_or_make, convert_snake_to_camel
 from flask_scheema.utilities import get_config_or_model_meta
 
 type_mapping = {
@@ -153,7 +153,7 @@ class AutoScheema(Schema):
 
             original_attribute = attribute
             if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
-                attribute = convert_snake(attribute)
+                attribute = convert_snake_to_camel(attribute)
 
             if not attribute.startswith('_'):
                 # relations
@@ -202,7 +202,6 @@ class AutoScheema(Schema):
         if attribute.startswith("_"):
             return
 
-        # For demonstration purposes, I'm using the Marshmallow's fields.Str field.
         # You might need to determine the appropriate field type differently.
         if field_type:
             field_type = type_mapping.get(field_type, fields.Str)
