@@ -1,9 +1,7 @@
 import pytest
 
-from demo.basic.basic import create_app
-from demo.basic.basic.models import Author
+from demo.basic_1.basic import create_app
 
-from demo.model_extension.model import create_app as create_app_models
 
 @pytest.fixture
 def app():
@@ -17,7 +15,6 @@ def app():
 @pytest.fixture
 def client(app):
     return app.test_client()
-
 
 
 def test_basic_select(client):
@@ -36,11 +33,60 @@ def test_basic_filter(client):
     assert len(filtered_books) == 1
 
 
+def test_advanced_filter(client):
+    author = client.get('/api/authors/2').json["value"]
+
+    eq = client.get('/api/authors?firstName__eq=' + author["firstName"]).json["value"]
+    assert eq[0]["firstName"] == author["firstName"]
+
+    ne = client.get('/api/authors?firstName__ne=' + author["firstName"]).json["value"]
+    assert ne[0]["firstName"] != author["firstName"]
+
+    lt = client.get(f'/api/authors?id__lt={author["id"]}').json["value"]
+    assert lt[0]["id"] == 1
+
+    le = client.get(f'/api/authors?id__le={author["id"]}').json["value"]
+    assert le[0]["id"] == 1 or le[0]["id"] == 2
+
+    gt = client.get(f'/api/authors?id__gt={author["id"]}').json["value"]
+    assert gt[0]["id"] != 1 and gt[0]["id"] != 2
+
+    ge = client.get(f'/api/authors?id__ge={author["id"]}').json["value"]
+    assert ge[0]["id"] != 1
+
+    _in = client.get('/api/authors?id__in=(10,11,12)').json["value"]
+    assert _in[0]["id"] in [10, 11, 12]
+
+    nin = client.get('/api/authors?id__nin=(1,2,3)').json["value"]
+    assert nin[0]["id"] not in [1, 2, 3]
+
+    like = client.get('/api/authors?fullName__like=' + author["firstName"]).json["value"]
+    assert like[0]["fullName"] == author["fullName"]
+
+    ilike = client.get('/api/authors?fullName__ilike=' + author["firstName"].lower()).json["value"]
+    assert ilike[0]["fullName"] == author["fullName"]
+
+
+    author_ONE = client.get('/api/authors/2').json["value"]["id"]
+    author_TWO = client.get('/api/authors/3').json["value"]["id"]
+
+    eq_or = client.get(f'/api/authors?or[id__eq={author_ONE}, id__eq={author_TWO}]').json["value"]
+    ids = [author["id"] for author in eq_or]
+    assert 2 in ids and 3 in ids
+
 def test_basic_pagination(client, app):
     books = client.get('/api/books?order_by=id').json
     assert len(books["value"]) == 20
 
-    app.config["API_PAGE_SIZE"] = 5
+    books = client.get('/api/books?limit=10&page=1').json
+    assert books["nextUrl"] == f"http://localhost/api/books?limit=10&page=2"
+    assert books["previousUrl"] is None
+
+    books = client.get('/api/books?limit=5&page=2').json
+    assert books["nextUrl"] == f"http://localhost/api/books?limit=5&page=3"
+    assert books["previousUrl"] == f"http://localhost/api/books?limit=5&page=1"
+
+    app.config["API_PAGINATION_SIZE_DEFAULT"] = 5
     books = client.get('/api/books?order_by=id').json
     assert len(books["value"]) == 5
 
@@ -54,7 +100,7 @@ def test_basic_pagination(client, app):
     books_error = client.get('/api/books?order_by=id&limit=d')
     assert books_error.status_code == 400
 
-    books_error = client.get('/api/books?order_by=id&page-=d&limit=d')
+    books_error = client.get('/api/books?order_by=id&page=d&limit=d')
     assert books_error.status_code == 400
 
 

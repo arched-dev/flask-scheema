@@ -1,9 +1,8 @@
 from functools import wraps
 from typing import Callable, Union, List
 
-from flask import abort, Blueprint, g, current_app, request
-
 from database_operations import User
+from flask import abort, Blueprint, g, current_app, request
 from flask_scheema.src.flask_scheema.api.decorators import handle_one, auth_required, handle_error, HTTP_UNAUTHORIZED
 from services import auth_service
 from webserv.extensions import scheema

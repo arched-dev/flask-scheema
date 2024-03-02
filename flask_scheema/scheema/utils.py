@@ -1,3 +1,4 @@
+import re
 from types import new_class
 from typing import Optional, Callable
 
@@ -6,21 +7,56 @@ from marshmallow_sqlalchemy.fields import Nested, Related, RelatedList
 
 from flask_scheema.utilities import get_config_or_model_meta
 
+
 def convert_snake_to_camel(snake_str):
     """
-    Convert a snake_case string to camelCase.
+    Convert a snake_case string to camelCase, preserving a leading underscore if present.
 
     Args:
     - snake_str (str): The snake_case string to convert.
 
     Returns:
-    - str: The converted camelCase string.
+    - str: The converted camelCase string, with a leading underscore preserved if it was present.
     """
-    components = snake_str.split('_')
-    # Capitalize the first letter of each component except the first one,
-    # join them together, and return.
-    return components[0] + ''.join(x.title() for x in components[1:])
+    # Check for a leading underscore and store this information
+    leading_underscore = snake_str.startswith("_")
 
+    # Split the string into components based on underscores
+    components = snake_str.split("_")
+
+    # If there was a leading underscore, the first component will be empty, so remove it
+    if leading_underscore:
+        components.pop(0)
+
+    # Capitalize the first letter of each component except the first one,
+    # join them together, and prepend an underscore if there was one originally
+    return (
+        ("_" if leading_underscore else "")
+        + components[0]
+        + "".join(x.title() for x in components[1:])
+    )
+
+
+def convert_camel_to_snake(camel_str):
+    """
+    Convert a camelCase string to snake_case.
+
+    Args:
+    - camel_str (str): The camelCase string to convert.
+
+    Returns:
+    - str: The converted snake_case string.
+    """
+    # Insert an underscore before any uppercase letters and convert the whole string to lowercase.
+    snake_str = re.sub("(.)([A-Z][a-z]+)", r"\1_\2", camel_str)
+    return re.sub("([a-z0-9])([A-Z])", r"\1_\2", snake_str).lower()
+
+
+def convert_kebab_to_snake(name: str) -> str:
+    """
+    Converts kebab case to snake case.
+    """
+    return name.replace("-", "_")
 
 
 def get_scheema_subclass(model: callable, dump: Optional[bool] = False):
@@ -38,7 +74,7 @@ def get_scheema_subclass(model: callable, dump: Optional[bool] = False):
     from flask_scheema.scheema.bases import AutoScheema
 
     schema_base = get_config_or_model_meta(
-    "API_BASE_SCHEMA", model=model, default=AutoScheema
+        "API_BASE_SCHEMA", model=model, default=AutoScheema
     )
 
     for subclass in schema_base.__subclasses__():
@@ -135,11 +171,13 @@ def get_openapi_meta_data(field_obj):
     field_type = type(field_obj)
 
     if (
-            hasattr(field_obj, "parent")
-            and hasattr(field_obj.parent, "Meta")
-            and hasattr(field_obj.parent.Meta, "model")
+        hasattr(field_obj, "parent")
+        and hasattr(field_obj.parent, "Meta")
+        and hasattr(field_obj.parent.Meta, "model")
     ):
-        openapi_type_info = get_description_and_example_add(openapi_type_info, field_obj)
+        openapi_type_info = get_description_and_example_add(
+            openapi_type_info, field_obj
+        )
 
     # Handle basic types
     openapi_type = type_mapping.get(
@@ -178,16 +216,16 @@ def get_openapi_meta_data(field_obj):
 
         if related_schema_name:
             if (
-                    hasattr(field_obj, "many") and field_obj.many
+                hasattr(field_obj, "many") and field_obj.many
             ) or field_type == RelatedList:
                 openapi_type_info["type"] = "array"
                 openapi_type_info["items"] = {
                     "$ref": f"#/components/schemas/{related_schema_name}"
                 }
             else:
-                openapi_type_info[
-                    "$ref"
-                ] = f"#/components/schemas/{related_schema_name}"
+                openapi_type_info["$ref"] = (
+                    f"#/components/schemas/{related_schema_name}"
+                )
 
     return openapi_type_info
 

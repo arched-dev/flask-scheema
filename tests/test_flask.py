@@ -1,11 +1,7 @@
 import pytest
 
-from demo.basic.basic import create_app
-from demo.basic.basic.models import Author
-
-from demo.model_extension.model import create_app as create_app_models
-
-
+from demo.basic_1.basic import create_app
+from demo.model_extension_2.model import create_app as create_app_models
 
 
 @pytest.fixture
@@ -24,7 +20,6 @@ def client_meta_model(app_model_meta):
 
 
 def test_model_block_methods(client_meta_model):
-
     app = create_app_models()
 
     client = app.test_client()
@@ -37,18 +32,13 @@ def test_model_block_methods(client_meta_model):
 
     resp_delete_fail = client.delete("/api/authors/1")
     resp_delete = client.delete("/api/authors/1?cascade_delete=1")
-    resp_put = client.put("/api/authors", json=resp_auth.json["value"])
+    resp_patch = client.patch("/api/authors", json=resp_auth.json["value"])
     resp_post = client.post("/api/authors", json=resp_auth.json["value"])
 
     assert resp_delete_fail.status_code == 500
-    assert resp_put.status_code == 200
+    assert resp_patch.status_code == 200
     assert resp_post.status_code == 200
     assert resp_delete.status_code == 405
-
-
-
-
-
 
 # def test_post_get_config_method():
 #     def add_key_to_output(*args, **kwargs):
@@ -59,7 +49,7 @@ def test_model_block_methods(client_meta_model):
 #     class Meta:
 #         API_POST_GET = add_key_to_output
 #
-#     from demo.basic.basic.models import Book
+#     from demo.basic_1.basic.models import Book
 #
 #     setattr(Book, "Meta", Meta)
 #

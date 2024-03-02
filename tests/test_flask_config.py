@@ -1,5 +1,7 @@
 import pytest
-from demo.basic.basic import create_app
+
+from demo.basic_1.basic import create_app
+from demo.model_extension_2.model import create_app as create_app_models
 
 
 @pytest.fixture
@@ -13,8 +15,8 @@ def app():
 
 
 @pytest.fixture
-def client_one(app_one):
-    return app_one.test_client()
+def client(app):
+    return app.test_client()
 
 
 # check to make sure that the title and version are changed
@@ -32,20 +34,20 @@ def test_basic_change_title_and_version(client):
 
 # block methods from the API
 def test_block_methods():
-    app = create_app({
-        'API_BLOCK_METHODS': ["POST", "PUT", "DELETE"],
+    app_new = create_app({
+        'API_BLOCK_METHODS': ["POST", "PATCH", "DELETE"],
     })
 
-    client = app.test_client()
-    resp = client.get("/api/books/1")
+    client_new = app_new.test_client()
+    resp = client_new.get("/api/books/1")
 
     assert len(resp.json["value"]["created"]) > 0
 
-    resp_put = client.put("/api/books", json=resp.json["value"])
-    resp_post = client.post("/api/books", json=resp.json["value"])
-    resp_delete = client.delete("/api/books/1")
+    resp_patch = client_new.patch("/api/books", json=resp.json["value"])
+    resp_post = client_new.post("/api/books", json=resp.json["value"])
+    resp_delete = client_new.delete("/api/books/1")
 
-    assert resp_put.status_code == 405
+    assert resp_patch.status_code == 405
     assert resp_post.status_code == 405
     assert resp_delete.status_code == 405
 
@@ -61,18 +63,54 @@ def test_read_only():
 
     assert len(resp.json["value"]["created"]) > 0
 
-    resp_put = client.put("/api/books", json=resp.json["value"])
+    resp_patch = client.patch("/api/books", json=resp.json["value"])
     resp_post = client.post("/api/books", json=resp.json["value"])
     resp_delete = client.delete("/api/books/1")
 
-    assert resp_put.status_code == 405
+    assert resp_patch.status_code == 405
     assert resp_post.status_code == 405
     assert resp_delete.status_code == 405
 
 
+# check to make sure that changing the docs url works
+def test_docs_path():
+    app = create_app({
+        'API_DOCUMENTATION_URL': "/my_docs",
+        "API_TITLE": "Change docs url"
+    })
+
+    client = app.test_client()
+    resp = client.get("/my_docs")
+
+    assert resp.status_code == 200
+    assert "Change docs url" in resp.text
+
+
+# check to make sure that contact details are working in the docs
+def test_docs_extra_info():
+    app = create_app({
+        "API_CONTACT_NAME": "Test User",
+        "API_CONTACT_EMAIL": "help@test.com",
+        "API_CONTACT_URL": "https://test.com/contact",
+        "API_LICENCE_NAME": "MIT",
+        "API_LICENCE_URL": "https://opensource.org/licenses/MIT",
+        "API_SERVER_URLS": [{"url": "http://localhost:5000/api", "description": "Local server"},
+                            {"url": "http://sandbox.localhost:5000/api", "description": "sandbox server"}]
+    })
+
+    client = app.test_client()
+    resp = client.get("/swagger.json")
+
+    assert resp.json["info"]["contact"] == {'email': 'help@test.com', 'name': 'Test User',
+                                            'url': 'https://test.com/contact'}
+    assert resp.json["info"]["license"] == {'name': 'MIT', 'url': 'https://opensource.org/licenses/MIT'}
+    assert resp.json["servers"] == [{'description': 'Local server', 'url': 'http://localhost:5000/api'},
+                                    {'description': 'sandbox server', 'url': 'http://sandbox.localhost:5000/api'}]
+
+
 # check to make sure that the base response from the API contains the correct keys
-def test_basic_no_change_api_output(client_one):
-    books = client_one.get('/api/books').json
+def test_basic_no_change_api_output(client):
+    books = client.get('/api/books').json
 
     assert "datetime" in books.keys()
     assert "apiVersion" in books.keys()
@@ -82,7 +120,7 @@ def test_basic_no_change_api_output(client_one):
     assert "previousUrl" in books.keys()
     assert "error" in books.keys()
 
-    book = client_one.get('/api/books/1').json
+    book = client.get('/api/books/1').json
 
     assert "datetime" in book.keys()
     assert "apiVersion" in book.keys()
@@ -211,3 +249,56 @@ def test_serialize_none():
     assert "author" not in resp.json["value"]
     assert "categories" not in resp.json["value"]
     assert "reviews" not in resp.json["value"]
+
+def test_rate_limit():
+    app_rl = create_app({'API_RATE_LIMIT': "1 per 2 seconds"})
+    client_rl = app_rl.test_client()
+    resp = client_rl.get("/api/books/1")
+    resp_limited = client_rl.get("/api/books/1")
+
+    assert resp.status_code == 200
+    assert resp_limited.status_code == 429
+    assert resp_limited.json["errors"][0]["error"] == "Too Many Requests"
+    assert resp_limited.json["errors"][0]["reason"] == "1 per 2 second"
+
+
+@pytest.fixture
+def app_one():
+    app_one = create_app_models({
+        'API_TITLE': 'Automated test',
+        'API_VERSION': '0.2.0',
+        'API_IGNORE_UNDERSCORE_ATTRIBUTES': False,
+        # Other configurations specific to this test
+    })
+    yield app_one
+
+
+@pytest.fixture
+def client_one(app_one):
+    return app_one.test_client()
+
+
+def test_show_underscore_attributes(client_one):
+    authors_response = client_one.get('/api/authors').json
+    assert "_hiddenField" in authors_response["value"][0].keys()
+
+
+@pytest.fixture
+def app_two():
+    app_two = create_app_models({
+        'API_TITLE': 'Automated test',
+        'API_VERSION': '0.2.0',
+        'API_IGNORE_UNDERSCORE_ATTRIBUTES': True,
+        # Other configurations specific to this test
+    })
+    yield app_two
+
+
+@pytest.fixture
+def client_two(app_two):
+    return app_two.test_client()
+
+
+def test_hide_underscore_attributes(client_two):
+    authors_response = client_two.get('/api/authors').json
+    assert "_hiddenField" in authors_response["value"][0].keys()

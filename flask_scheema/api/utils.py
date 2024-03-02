@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 from sqlalchemy.orm import DeclarativeBase
 
 from flask_scheema.logging import logger
+from flask_scheema.services.operators import get_all_columns_and_hybrids
 from flask_scheema.utilities import get_config_or_model_meta
 
 
@@ -28,7 +29,7 @@ def get_description(kwargs):
     if kwargs.get("child_model"):
         parent = kwargs.get("parent_model")
         url_naming_function = get_config_or_model_meta(
-            "endpoint_namer", parent, default=endpoint_namer
+            "API_ENDPOINT_NAMER", parent, default=endpoint_namer
         )
         return f"Get multiple `{name}` records from the database based on the parent {url_naming_function(parent)} id"
 
@@ -40,7 +41,7 @@ def get_description(kwargs):
     # Fallback to default descriptions
     return {
         "DELETE": f"Delete a single `{name}` in the database by its id",
-        "PUT": f"Put (update) a single `{name}` in the database.",
+        "PATCH": f"Patch (update) a single `{name}` in the database.",
         "POST": f"Post (create) a single `{name}` in the database.",
         "GET": f"Get a single `{name}` in the database by its id"
         if not kwargs.get("multiple", False)
@@ -83,157 +84,56 @@ def setup_route_function(service, method, multiple=False, join_model: Optional[C
         function: The route function.
     """
 
-    def pre_process(pre_hook, **kwargs):
-        if pre_hook:
-            pre_hook(model=service.model, **kwargs)
-
-    def post_process(post_hook, output):
+    def post_process(post_hook, output, id=id, field=get_field, join_model=join_model, **kwargs):
         if post_hook:
             return post_hook(model=service.model, output=output)
         return output
 
-    def route_function_factory(action, pre_hook=None, post_hook=None, **kwargs):
+    def route_function_factory(action, post_hook=None, **kwargs):
         def route_function(id=None, **kwargs):
-            pre_process(pre_hook, args=request.args.to_dict(), id=id, get_field=get_field, join_model=join_model,
-                        multiple=multiple)
+
             action_kwargs = {'lookup_val': id} if id else {}
             action_kwargs.update(kwargs)
             output = action(**action_kwargs) or abort(404)
-            return post_process(post_hook, output)
+            return post_process(post_hook, output, id=id, field=get_field, join_model=join_model, **kwargs)
 
         return route_function
 
-    pre_hook = get_config_or_model_meta(f"API_PRE_{method}", model=service.model, default=None)
-    post_hook = get_config_or_model_meta(f"API_POST_{method}", model=service.model, default=None)
+
+    post_hook = get_config_or_model_meta(f"API_CALLBACK", model=service.model, default=None, method=method)
 
     if method == "GET":
         action = lambda **kwargs: service.get_query(request.args.to_dict(), alt_field=get_field, multiple=multiple,
                                                     **kwargs)
     elif method == "DELETE":
         action = service.delete
-    elif method == "PUT":
+    elif method == "PUT" or method == "PATCH":
         action = lambda **kwargs: service.update(**kwargs)
     elif method == "POST":
         action = lambda **kwargs: service.create(**kwargs)
 
-    return route_function_factory(action, pre_hook, post_hook)
+    return route_function_factory(action, post_hook)
 
-# def setup_route_function(
-#     service,
-#     method,
-#     multiple=False,
-#     join_model: Optional[Callable] = None,
-#     get_field: Optional[str] = None,
-# ):
-#     """
-#     Sets up the route function for the API, based on the method. Returns a function that can be used as a route.
-#
-#     Args:
-#         service (CrudService): The CRUD service for the model.
-#         method (str): The HTTP method.
-#         multiple (bool): Whether the route is for multiple records or not.
-#         join_model (Callable): The model to use in the join.
-#         get_field (str): The field to get the record by.
-#
-#     Returns:
-#         function: The route function.
-#     """
-#     if method == "GET":
-#
-#         pre_get = get_config_or_model_meta("API_PRE_GET", model=service.model, default=None)
-#         post_get = get_config_or_model_meta("API_POST_GET", model=service.model, default=None)
-#
-#         if get_field and not join_model:
-#             def get_route_function(id):
-#                 if pre_get:
-#                     pre_get(model=service.model, args=request.args.to_dict(), id=id, get_field=get_field, join_model=join_model, multiple=multiple)
-#                 out = service.get_query(request.args.to_dict(), alt_field=get_field, lookup_val=id, multiple=multiple) or abort(404)
-#                 if post_get:
-#                     out = post_get(model=service.model, output=out)
-#                 return out
-#             return get_route_function
-#
-#         if get_field and join_model:
-#             def get_join_route_function(id):
-#                 if pre_get:
-#                     pre_get(model=service.model, args=request.args.to_dict(), id=id, get_field=get_field, join_model=join_model,
-#                             multiple=multiple)
-#                 out = service.get_query(request.args.to_dict(), alt_field=get_field, lookup_val=id, multiple=multiple, other_model=join_model) or abort(404)
-#                 if post_get:
-#                     out = post_get(model=service.model, output=out)
-#                 return out
-#             return get_join_route_function
-#
-#         if multiple:
-#             def get_multiple_route_function():
-#                 if pre_get:
-#                     pre_get(model=service.model, args=request.args.to_dict(), multiple=multiple)
-#                 out = service.get_query(request.args.to_dict(), multiple=multiple)
-#                 if post_get:
-#                     out = post_get(model=service.model, output=out)
-#                 return out
-#             return get_multiple_route_function
-#
-#         def get_single_route_function(id):
-#             if pre_get:
-#                 pre_get(model=service.model, args=request.args.to_dict(), id=id, multiple=multiple)
-#             out = service.get_query(request.args.to_dict(), lookup_val=id, multiple=multiple) or abort(404)
-#             if post_get:
-#                 out = post_get(model=service.model, output=out)
-#             return out
-#
-#         return get_single_route_function
-#
-#     elif method == "DELETE":
-#         def delete_route_function(id):
-#             pre_delete = get_config_or_model_meta("API_PRE_DELETE", model=service.model, default=None)
-#             post_delete = get_config_or_model_meta("API_POST_DELETE", model=service.model, default=None)
-#
-#             if pre_delete:
-#                 pre_delete(model=service.model, args=request.args.to_dict(), id=id)
-#
-#             out =  service.delete(id) or abort(404)
-#
-#             if post_delete:
-#                 out = post_delete(model=service.model, output=out)
-#
-#             return out
-#
-#         return delete_route_function
-#
-#     elif method == "PUT":
-#         def put_route_function():
-#             pre_put = get_config_or_model_meta("API_PRE_PUT", model=service.model, default=None)
-#             post_put= get_config_or_model_meta("API_POST_PUT", model=service.model, default=None)
-#
-#             if pre_put:
-#                 pre_put(model=service.model, args=request.args.to_dict(), json=request.json)
-#
-#             out = service.update(request.json) or abort(404)
-#
-#             if post_put:
-#                 out = post_put(model=service.model, output=out)
-#
-#             return out
-#         return put_route_function
-#
-#     elif method == "POST":
-#         def post_route_function():
-#             pre_post = get_config_or_model_meta("API_PRE_POST", model=service.model, default=None)
-#             post_post = get_config_or_model_meta("API_POST_POST", model=service.model, default=None)
-#
-#             if pre_post:
-#                 pre_post(model=service.model, args=request.args.to_dict(), json=request.json)
-#
-#             out = service.create(request.json)
-#
-#             if post_post:
-#                 out = post_post(model=service.model, output=out)
-#
-#             return out
-#
-#         return post_route_function
 
+def table_namer(model: Optional[DeclarativeBase] = None) -> str:
+    """
+    Gets the table name from the model name by converting camel case and kebab-case to snake_case.
+    Args:
+        model (DeclarativeBase): The model to get the table name for.
+
+    Returns:
+        str: The table name in snake_case.
+    """
+    from flask_scheema.scheema.utils import convert_camel_to_snake, convert_kebab_to_snake
+
+    if model is None:
+        return ""
+    model_name = model.__name__
+    # First convert kebab-case to snake_case
+    snake_case_name = convert_kebab_to_snake(model_name)
+    # Then convert camelCase to snake_case
+    snake_case_name = convert_camel_to_snake(snake_case_name)
+    return snake_case_name
 
 def endpoint_namer(
         model: Optional[DeclarativeBase] = None,
@@ -262,13 +162,53 @@ def endpoint_namer(
                 result.extend([char])
         return "".join(result)
 
-    kebab_name = camel_to_kebab(model.__name__)
+    kebab_name = camel_to_kebab(model.__name__).replace("_", "-")
     if kebab_name.endswith("s"):
         return kebab_name
     elif kebab_name.endswith("y"):
         return kebab_name[:-1] + "ies"
     else:
         return kebab_name + "s"
+
+
+def get_url_pk(model: DeclarativeBase):
+    """
+    Gets the primary key for the model, based on the model's primary key.
+
+    Args:
+        model (DeclarativeBase): The model to get the primary key for.
+
+    Returns:
+        str: The flask primary key for the model
+
+    """
+    parent_model_pk = get_primary_keys(model)
+    pk_key = parent_model_pk.key
+    if parent_model_pk.type.python_type == int:
+        pk_key = f"<int:{pk_key}>"
+    elif parent_model_pk.type.python_type == str:
+        pk_key = f"<{pk_key}>"
+    elif parent_model_pk.type.python_type == float:
+        pk_key = f"<float:{pk_key}>"
+    elif parent_model_pk.type.python_type == bool:
+        pk_key = f"<bool:{pk_key}>"
+    elif parent_model_pk.type.python_type == list:
+        pk_key = f"<list:{pk_key}>"
+    elif parent_model_pk.type.python_type == dict:
+        pk_key = f"<dict:{pk_key}>"
+    elif parent_model_pk.type.python_type == set:
+        pk_key = f"<set:{pk_key}>"
+    elif parent_model_pk.type.python_type == tuple:
+        pk_key = f"<tuple:{pk_key}>"
+    elif parent_model_pk.type.python_type == bytes:
+        pk_key = f"<bytes:{pk_key}>"
+    elif parent_model_pk.type.python_type == bytearray:
+        pk_key = f"<bytearray:{pk_key}>"
+    elif parent_model_pk.type.python_type == memoryview:
+        pk_key = f"<memoryview:{pk_key}>"
+    elif parent_model_pk.type.python_type == complex:
+        pk_key = f"<complex:{pk_key}>"
+    return pk_key
 
 
 def get_models_relationships(model: Callable):
@@ -284,6 +224,9 @@ def get_models_relationships(model: Callable):
         list: A list of relations
 
     """
+    if not model:
+        return []
+
     mapper = inspect(model)
     relationships = []
 
@@ -343,3 +286,29 @@ def get_primary_keys(model):
     for column in mapper.primary_key:
         primary_key_columns.append(column)
     return primary_key_columns[0]
+
+
+def list_model_columns(model: "CustomBase"):
+    """
+        Get all columns and hybrids from a sqlalchemy model
+
+    Args:
+        model (CustomBase): The model to get the columns from
+
+    Returns:
+        List: A list of all the columns
+
+    """
+
+    from flask_scheema.utilities import get_config_or_model_meta
+    from flask_scheema.api.utils import table_namer
+
+    table_namer_func = get_config_or_model_meta(key="api_table_namer", model=model, default=table_namer)
+
+    all_model_columns, _ = get_all_columns_and_hybrids(model, {})
+    all_model_columns = all_model_columns.get(table_namer_func(model))
+
+    try:
+        return list(all_model_columns.keys())
+    except:
+        return all_model_columns

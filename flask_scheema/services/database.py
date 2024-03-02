@@ -3,10 +3,10 @@ from typing import Callable, Union, Dict, List, Optional, Any
 from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
 
 import sqlalchemy
-from flask import request, abort
+from flask import request
 from sqlalchemy import desc, inspect, Column, and_, func
 from sqlalchemy.exc import IntegrityError, DataError
-from sqlalchemy.orm import Query, Session, DeclarativeBase, class_mapper
+from sqlalchemy.orm import Query, Session, class_mapper
 
 from flask_scheema.api.utils import get_primary_keys
 from flask_scheema.exceptions import CustomHTTPException
@@ -23,6 +23,7 @@ from flask_scheema.services.operators import (
     get_column_and_table_name_and_operator,
     get_check_table_columns,
 )
+from flask_scheema.utilities import get_config_or_model_meta
 
 
 def add_dict_to_query(f: Callable) -> Callable:
@@ -41,7 +42,9 @@ def add_dict_to_query(f: Callable) -> Callable:
         if isinstance(output, dict):
             try:
                 if isinstance(output["query"], list):
-                    output["dictionary"] = [result._asdict() for result in output["query"]]
+                    output["dictionary"] = [
+                        result._asdict() for result in output["query"]
+                    ]
                 output["dictionary"] = output["query"]._asdict()
 
             except AttributeError:
@@ -89,7 +92,9 @@ def add_page_totals_and_urls(f: Callable) -> Callable:
 
         # Calculate total_pages and current_page
         if total_count and limit:
-            total_pages = -(-total_count // limit)  # Equivalent to math.ceil(count / limit)
+            total_pages = -(
+                -total_count // limit
+            )  # Equivalent to math.ceil(count / limit)
             current_page = page
 
             # Update the 'page' query parameter for the next and previous URLs
@@ -102,7 +107,7 @@ def add_page_totals_and_urls(f: Callable) -> Callable:
 
             # Determine if there are next and previous pages
             next_page = page + 1 if (page + 1) * limit < total_count else None
-            prev_page = page - 1 if page > 0 else None
+            prev_page = page - 1 if page > 1 else None
 
             # Construct next and previous URLs
             next_url = (
@@ -241,7 +246,7 @@ class CrudService:
         join_models: Dict = get_models_for_join(args_dict, self.get_model_by_name)
 
         # get all columns in the model
-        all_columns: Dict[str, Dict[str:Column]] = get_all_columns_and_hybrids(
+        all_columns, all_models = get_all_columns_and_hybrids(
             self.model, join_models
         )  # table name, column name, column
 
@@ -254,7 +259,7 @@ class CrudService:
         conditions: List = [
             x
             for x in create_conditions_from_args(
-                args_dict, self.model, all_columns, join_models
+                args_dict, self.model, all_columns, all_models, join_models
             )
             if x is not None
         ]
@@ -298,7 +303,7 @@ class CrudService:
         return query
 
     def calculate_aggregates(
-            self, aggregate_conditions: Dict, all_columns: Dict[str, Dict[str, Column]]
+        self, aggregate_conditions: Dict, all_columns: Dict[str, Dict[str, Column]]
     ):
         """
                 Applies aggregate conditions to a query and returns the aggregated query.
@@ -320,7 +325,9 @@ class CrudService:
             column_name, table_name, agg_func = get_column_and_table_name_and_operator(
                 key, self.model
             )
-            column = get_check_table_columns(table_name, column_name, all_columns)
+            column, column_name = get_check_table_columns(
+                table_name, column_name, all_columns
+            )
 
             aggregate_func = aggregate_funcs.get(agg_func)
             if aggregate_func:
@@ -342,11 +349,14 @@ class CrudService:
 
     @add_page_totals_and_urls
     @add_dict_to_query
-    def get_query(self, args_dict: Dict[str, Union[str, int]],
-                  lookup_val: Optional[Union[int, str]] = None,
-                  alt_field: Optional[str] = None,
-                  multiple: Optional[bool] = True,
-                  other_model=None) -> Dict[str, Any]:
+    def get_query(
+        self,
+        args_dict: Dict[str, Union[str, int]],
+        lookup_val: Optional[Union[int, str]] = None,
+        alt_field: Optional[str] = None,
+        multiple: Optional[bool] = True,
+        other_model=None,
+    ) -> Dict[str, Any]:
         """
                 Retrieves a list of objects from the database, optionally paginated.
 
@@ -366,7 +376,7 @@ class CrudService:
         pk = get_primary_keys(self.model)
         query = self.get_query_from_args(args_dict)
 
-        if lookup_val: # and not multiple:
+        if lookup_val:  # and not multiple:
 
             if alt_field:
                 query = query.filter_by(**{alt_field: lookup_val})
@@ -375,7 +385,9 @@ class CrudService:
 
             results = query.first()
             if not results:
-                raise CustomHTTPException(404, f"{self.model.__name__} not found with {pk.key} {lookup_val}")
+                raise CustomHTTPException(
+                    404, f"{self.model.__name__} not found with {pk.key} {lookup_val}"
+                )
             return {"query": results}
 
         else:
@@ -394,7 +406,12 @@ class CrudService:
             else:
                 results = query.items
 
-            return {"query": results, "total_count": count, "page": page, "limit": limit}
+            return {
+                "query": results,
+                "total_count": count,
+                "page": page,
+                "limit": limit,
+            }
 
     def create(self, **kwargs) -> object:
         """
@@ -447,7 +464,9 @@ class CrudService:
         if not lookup_val:
             raise CustomHTTPException(400, "No lookup value provided for update.")
 
-        obj = self.get_query(request.args.to_dict(), lookup_val, multiple=False)["query"]
+        obj = self.get_query(request.args.to_dict(), lookup_val, multiple=False)[
+            "query"
+        ]
         if obj:
             body = kwargs.get("deserialized_data")
             if body is None:
@@ -457,7 +476,9 @@ class CrudService:
                     if hasattr(obj, key):
                         setattr(obj, key, value)
                     else:
-                        raise CustomHTTPException(400, f"Invalid field '{key}' for update.")
+                        raise CustomHTTPException(
+                            400, f"Invalid field '{key}' for update."
+                        )
                 self.session.commit()
                 return {"query": obj}
             except sqlalchemy.exc.IntegrityError as e:
@@ -481,15 +502,20 @@ class CrudService:
         """
         lookup_val = kwargs.get("lookup_val")
         args = request.args.to_dict()
-        cascade_delete = "cascade_delete" in args and args.pop('cascade_delete') in ('true', '1')
-
+        cascade_delete = "cascade_delete" in args and args.pop("cascade_delete") in (
+            "true",
+            "1",
+        )
+        allow_cascade = get_config_or_model_meta(
+            "API_ALLOW_CASCADE_DELETE", default=True
+        )
         if not lookup_val:
             raise CustomHTTPException(400, "No lookup value provided for deletion.")
 
         obj = self.get_query(args, lookup_val, multiple=False)["query"]
         if obj:
             try:
-                if cascade_delete:
+                if cascade_delete and allow_cascade:
                     # Iterate over all relationships and delete related objects if cascade_delete is True
                     for relationship in class_mapper(obj.__class__).relationships:
                         related_objects = getattr(obj, relationship.key)
@@ -507,16 +533,28 @@ class CrudService:
                 self.session.rollback()
                 if not cascade_delete:
                     # Build a detailed error message
-                    related_entities = [rel.key for rel in class_mapper(obj.__class__).relationships]
-                    if related_entities:
+                    related_entities = [
+                        rel.key for rel in class_mapper(obj.__class__).relationships
+                    ]
+                    if related_entities and allow_cascade:
                         related_entities_str = ", ".join(related_entities)
                         error_message = f"Deletion failed due to existing related records with not null constraints. "
                         error_message += f"Consider adding '?cascade_delete=1' to the request URL to delete all related records including: {related_entities_str}"
-                    else:
-                        error_message = "Deletion failed due to existing related records. "
+
+                    elif related_entities and not allow_cascade:
+                        related_entities_str = ", ".join(related_entities)
+                        error_message = f"Deletion failed due to existing related records including: {related_entities_str}"
+
+                    elif allow_cascade:
+                        error_message = (
+                            "Deletion failed due to existing related records. "
+                        )
                         error_message += "Consider adding '?cascade_delete=1' to the request URL to delete all related records."
+
                     raise CustomHTTPException(500, error_message)
                 else:
-                    raise CustomHTTPException(500, "An error occurred during cascading delete.")
+                    raise CustomHTTPException(
+                        500, "An error occurred during cascading delete."
+                    )
         else:
             raise CustomHTTPException(404, "Object not found for deletion.")

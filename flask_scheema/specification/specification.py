@@ -8,7 +8,8 @@ from flask import Blueprint, Flask
 from flask_scheema.specification.doc_generation import (
     register_routes_with_spec,
 )
-from flask_scheema.specification.utilities import read_readme_content_to_string, generate_readme_html
+from flask_scheema.specification.utilities import generate_readme_html, \
+    pretty_print_dict, make_base_dict
 from flask_scheema.utilities import (
     AttributeInitializerMixin,
     get_config_or_model_meta,
@@ -83,35 +84,107 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
 
     def make_api_spec_data(self) -> dict:
         """
-        Creates the data for the api spec object.
+        Creates the data for the API spec object.
 
         Returns:
-            dict: The data for the api spec object.
-
+            dict: The data for the API spec object.
         """
-        api_description = self.api_description or get_config_or_model_meta("API_DESCRIPTION", default=os.path.abspath("./basic/templates/readme.MD.j2"))
-        if os.path.isfile(api_description):
-            api_description = read_readme_content_to_string(generate_readme_html(api_description, config=self.naan.app.config))
+        desc_path = get_config_or_model_meta("API_DESCRIPTION",
+                                             default=os.path.abspath(self.naan.base_dir + "/html/base_readme.MD"))
+        api_description = self._get_api_description(desc_path)
 
         api_spec_data = {
             "openapi_version": "3.0.2",
             "plugins": [MarshmallowPlugin()],
-            "title": self.api_title
-            or get_config_or_model_meta("API_TITLE", default="My API"),
-            "version": self.api_version
-            or get_config_or_model_meta("API_VERSION", default="1.0.0"),
-            "info": {"description": api_description},
+            "title": self._get_config("API_TITLE", "My API"),
+            "version": self._get_config("API_VERSION", "1.0.0"),
+            "info": {
+                "description": api_description,
+                **self._get_contact_info(),
+                **self._get_license_info(),
+                **self._get_logo_info(),
+            },
+            **self._get_servers_info(),
         }
 
-        if self.api_logo_url:
-            api_spec_data["info"]["x-logo"] = {
-                "url": self.api_logo_url or get_config_or_model_meta("API_LOGO_URL"),
-                "backgroundColor": self.api_logo_background
-                or get_config_or_model_meta("API_LOGO_BACKGROUND", "#ffffff"),
-                "altText": self.api_title + " logo.",
-            }
-
         return api_spec_data
+
+    def _get_api_description(self, desc_path: str) -> str:
+        """
+        Generates HTML description from a Markdown file if it exists, or returns a default description.
+
+        Args:
+            desc_path (str): Path to the description file.
+
+        Returns:
+            str: API description in HTML format.
+        """
+        if os.path.isfile(desc_path):
+            api_output_example = pretty_print_dict(make_base_dict())
+            return generate_readme_html(desc_path, config=self.naan.app.config, api_output_example=api_output_example)
+        else:
+            return desc_path
+
+    def _get_config(self, key: str, default: str) -> str:
+        """
+        Retrieves configuration or model metadata.
+
+        Args:
+            key (str): The configuration key to retrieve.
+            default (str): The default value if the key is not found.
+
+        Returns:
+            str: The value for the given configuration key.
+        """
+        return get_config_or_model_meta(key, default=default)
+
+    def _get_contact_info(self) -> dict:
+        """
+        Constructs the contact information section of the API spec.
+
+        Returns:
+            dict: A dictionary with the contact information.
+        """
+        contact_info = {key: self._get_config(f"API_CONTACT_{key.upper()}", None) for key in ['name', 'email', 'url']}
+        return {"contact": {k: v for k, v in contact_info.items() if v}} if any(contact_info.values()) else {}
+
+    def _get_license_info(self) -> dict:
+        """
+        Constructs the license information section of the API spec.
+
+        Returns:
+            dict: A dictionary with the license information.
+        """
+        license_info = {key: self._get_config(f"API_LICENCE_{key.upper()}", None) for key in ['name', 'url']}
+        return {"license": {k: v for k, v in license_info.items() if v}} if any(license_info.values()) else {}
+
+    def _get_servers_info(self) -> dict:
+        """
+        Retrieves server URLs from configuration and formats them for the API spec.
+
+        Returns:
+            dict: A dictionary containing server information.
+        """
+        servers = self._get_config("API_SERVER_URLS", None)
+        return {"servers": servers} if servers else {}
+
+    def _get_logo_info(self) -> dict:
+        """
+        Constructs the logo information for the API spec.
+
+        Returns:
+            dict: A dictionary with the logo information.
+        """
+        logo_url = self._get_config("API_LOGO_URL", None)
+        if logo_url:
+            return {
+                "x-logo": {
+                    "url": logo_url,
+                    "backgroundColor": self._get_config("API_LOGO_BACKGROUND", "#ffffff"),
+                    "altText": f"{self._get_config('API_TITLE', 'My API')} logo."
+                }
+            }
+        return {}
 
     def validate_init_apispec_args(self):
         """

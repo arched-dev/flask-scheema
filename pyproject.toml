@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flask-scheema"
+version = "0.1.2"
+authors = [{name = "arched.dev (Lewis Morris)", email = "hello@arched.dev"}]
+description = "Create rapid production ready Flask/SQLAlchemy APIs, with automatically generated redoc documentation with this advanced tool. Designed for agility, it allows for swift creation of high-quality API's, with rate limits, caching, authentication. With customizable configuration options it ensures scalability and adaptability for real-world applications."
+readme = "README.md"
+license = {file = "LICENSE"}
+keywords = ["flask", "sqlalchemy", "api", "documentation"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+urls = {"Homepage":"https://github.com/arched-dev/flask-scheema"}
+
+[project.urls]
+"Documentation" = "https://flask-scheema.readthedocs.io/"
+"Source" = "https://github.com/arched-dev/flask-scheema"
+"Issue Tracker" = "https://github.com/arched-dev/flask-scheema/issues"
+
+[tool.setuptools]
+packages = find_namespace:
+python_requires = ">=3.6"

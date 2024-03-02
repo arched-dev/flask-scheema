@@ -1,14 +1,11 @@
-import traceback
 from functools import wraps
-from typing import List, Optional
+from functools import wraps
+from typing import Optional, List
 from typing import Type, Callable, Any, Dict, Union
 
-import jwt
-from flask import request, current_app
-
+from flask import request
 from marshmallow import Schema
 from sqlalchemy.exc import ProgrammingError
-
 from werkzeug.exceptions import HTTPException
 
 from flask_scheema.api.responses import (
@@ -17,11 +14,10 @@ from flask_scheema.api.responses import (
     create_response,
     CustomResponse,
 )
+from flask_scheema.api.utils import list_model_columns
 from flask_scheema.exceptions import CustomHTTPException
 from flask_scheema.scheema.bases import AutoScheema
-from flask_scheema.services.operators import (
-    get_all_columns_and_hybrids,
-)
+from flask_scheema.utilities import get_config_or_model_meta
 
 HTTP_OK = 200
 HTTP_BAD_REQUEST = 400
@@ -57,7 +53,7 @@ def handle_many(output_schema: Type[AutoScheema], input_schema=None) -> Callable
         @standardize_response
         @fields(output_schema, many=True)
         def wrapper(
-                *args: Any, **kwargs: Dict[str, Any]
+            *args: Any, **kwargs: Dict[str, Any]
         ) -> Union[Dict[str, Any], tuple]:
             """Inner wrapper function that gets executed when decorated function is called."""
 
@@ -71,7 +67,9 @@ def handle_many(output_schema: Type[AutoScheema], input_schema=None) -> Callable
             if new_output_schema:
                 model = new_output_schema.Meta.model
 
-                model_columns = list_model_columns(model)  # todo check whats happening here!! Why is this here?
+                model_columns = list_model_columns(
+                    model
+                )  # todo check whats happening here!! Why is this here?
                 schema_columns = list_schema_fields(new_output_schema)
 
                 return check_serialise_method_and_return(
@@ -89,7 +87,7 @@ def handle_many(output_schema: Type[AutoScheema], input_schema=None) -> Callable
 
 
 def handle_one(
-        output_schema: Type[AutoScheema], input_schema: Optional[Type[AutoScheema]] = None
+    output_schema: Type[AutoScheema], input_schema: Optional[Type[AutoScheema]] = None
 ) -> Callable:
     """
     Decorator to handle input and output using Marshmallow schemas for single record operations.
@@ -128,7 +126,7 @@ def handle_one(
         @standardize_response
         @fields(output_schema, many=False)
         def wrapper(
-                *args: Any, **kwargs: Dict[str, Any]
+            *args: Any, **kwargs: Dict[str, Any]
         ) -> Union[Dict[str, Any], tuple]:
             """Inner wrapper function that gets executed when decorated function is called."""
 
@@ -154,6 +152,7 @@ def handle_one(
 
     return decorator
 
+
 def get_count(result, value):
     # Check if value is a list, a single item, or None, and adjust count accordingly
     if result.get("total_count", None):
@@ -164,6 +163,7 @@ def get_count(result, value):
         return 0
     else:
         return 1
+
 
 def handle_error(e: Any, status_code):
     """
@@ -207,13 +207,27 @@ def handle_result(result):
 def standardize_response(f: Callable) -> Callable:
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        print_exc = get_config_or_model_meta(key="API_PRINT_EXCEPTIONS", default=True)
+
+        def print_exc():
+            """
+            Print the exception and the stack trace.
+            Returns:
+                None
+            """
+            if print_exc:
+                import traceback
+
+                print(e)
+                traceback.print_exc()
+
         try:
             result = f(*args, **kwargs)
             status_code, value, count, next_url, previous_url = handle_result(result)
             error = None if status_code < HTTP_BAD_REQUEST else value
             return create_response(
                 value=value if not error else None,
-                error=error,
+                errors=error,
                 status=status_code,
                 count=count,
                 next_url=next_url,
@@ -221,25 +235,28 @@ def standardize_response(f: Callable) -> Callable:
             )
 
         except HTTPException as e:
+            print_exc()
             return create_response(
-                status=e.code, error={"error": e.name, "reason": e.description}
+                status=e.code, errors=[{"error": e.name, "reason": e.description}]
             )
         except ProgrammingError as e:
+            print_exc()
             text = str(e).split(")")[1].split("\n")[0].strip().capitalize()
             return create_response(
                 status=HTTP_BAD_REQUEST,
-                error={"error": "SQL Format Error", "reason": text},
+                errors=[{"error": "SQL Format Error", "reason": text}],
             )
         except CustomHTTPException as e:
-            traceback.print_exc()
+            print_exc()
             return create_response(
-                status=e.status_code, error={"error": e.error, "reason": str(e.reason)}
+                status=e.status_code,
+                errors=[{"error": e.error, "reason": str(e.reason)}],
             )
         except Exception as e:
-            traceback.print_exc()
+            print_exc()
             return create_response(
                 status=HTTP_INTERNAL_SERVER_ERROR,
-                error={"error": "Internal Server Error", "reason": str(e)},
+                errors=[{"error": "Internal Server Error", "reason": str(e)}],
             )
 
     return decorated_function
@@ -296,21 +313,6 @@ def fields(model_schema: Type[AutoScheema], many: bool = False) -> Callable:
     return decorator
 
 
-def list_model_columns(model: "CustomBase"):
-    """
-        Get all columns and hybrids from a sqlalchemy model
-
-    Args:
-        model (CustomBase): The model to get the columns from
-
-    Returns:
-        List: A list of all the columns
-
-    """
-    all_model_columns = get_all_columns_and_hybrids(model, {}).get(model.__name__)
-    return list(all_model_columns.keys())
-
-
 def list_schema_fields(schema: Schema):
     """
         Get all the fields from a schema
@@ -327,7 +329,7 @@ def list_schema_fields(schema: Schema):
 
 
 def check_serialise_method_and_return(
-        result: Dict, schema: AutoScheema, model_columns: List, schema_columns: List
+    result: Dict, schema: AutoScheema, model_columns: List, schema_columns: List
 ):
     """
         Checks to see if the columns that have been output match the columns in the model and schema, if not its likely a
@@ -345,6 +347,8 @@ def check_serialise_method_and_return(
     Returns:
         Dict: A dictionary of all the fields
     """
+    from flask_scheema.api.responses import serialize_output_with_mallow
+
     output_list = result.pop("dictionary", list())
     mallow_serialise = True
     if len(output_list) > 0:
@@ -356,4 +360,8 @@ def check_serialise_method_and_return(
         if missing_model_columns > 0 or missing_schema_columns > 0:
             mallow_serialise = False
 
-    return serialize_output_with_mallow(schema, result) if mallow_serialise else output_list
+    return (
+        serialize_output_with_mallow(schema, result)
+        if mallow_serialise
+        else output_list
+    )

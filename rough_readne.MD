@@ -17,7 +17,6 @@ use:
 class User(Base):
 class Meta
 docs_description="This represents a user"
-add_relationship_route=True
 
     __tablename__ = "user"
 
@@ -25,53 +24,109 @@ add_relationship_route=True
 
 # and not request bodies.
 
-Actual KEys
-    - CREATE_API_DOCS = True
-    - API_DESCRIPTION
-    {x} - API_TITLE
-    {x} - API_VERSION
-    - API_KEYWORDS
-    - API_DESCRIPTION
-    - API_LOGO_URL
-    - API_LOGO_BACKGROUND
-    - API_BASE_MODEL        db.Model
-    - API_BASE_SCHEMA=     AutoSchema
-    - AUTO_NAME_ENDPOINTS   # check what this does 
-    - FULL_AUTO:                                 Optional[callable] = True  # does the lot.
-    - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
-    {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True  # Convert json output to camel case
-    - API_STOP_CASCADE_DELETE:                   Optional[callable] = False  # When True, will not cascade delete on delete
-    authenticate_route: Optional[bool, Callable] 
-    base_model
-    base_schema
-    db_service   
-        
-    - API_IGNORE_UNDERSCORE_ATTRIBUTE:          Optional[boolean] = True #Ignore model fields that start with underscore
-    
-    - API_SERIALIZATION_TYPE                    Optional[str] = "json"  | "url" | "hybrid" | False   # json -> serialise all, url -> to_only url, hybrid -> serialise single items, url lists. None -> No serialisation of nested items 
-    - API_SERIALIZATION_DEPTH                   Optional[int] = 1
-    - API_PAGE_SIZE                             Optional[int] = 20
-    - API_PAGE_MAX                              Optional[int] = 100
+Documentation
 
+- CREATE_API_DOCS = True
+xxx {x} - API_DOCUMENTATION_URL
+xxx {x} - API_TITLE is a required string that sets the title of your API in the generated ReDoc documentation. This title
+  is a crucial piece of your API's identity, succinctly conveying the essence of your service to consumers. It appears
+  prominently in the documentation, serving as a headline for users exploring your API.
+xxx  {x} - API_VERSION
+xxx - API_LOGO_URL
+xxx - API_LOGO_BACKGROUND
+- API_KEYWORDS
+- 
+- API_DESCRIPTION accepts a string or a filepath string, with a default behavior that auto-generates a comprehensive
+  documentation description. If a filepath is provided, it can point to a Jinja template that dynamically accesses the
+  Flask configuration via {config.xxxx} placeholders. This flexible approach allows for a rich, context-aware
+  description in your ReDoc documentation.
+- 
+- API_DOCS_FONT = configures the font style for your ReDoc documentation, with jetbrains_mono as the default. Options
+  include jetbrains_mono, sourcecode_pro, roboto, montserrat, and lato. This setting allows for visual customization to
+  match your documentation's aesthetic preferences.
+- 
+- API_CONTACT_NAME = None (str) Specifies the contact name for inquiries and support in the redoc documentation. If not
+  provided, the field name will not be displayed in the docs.
+- API_CONTACT_EMAIL = None (str) Specifies the contact email for inquiries and support in the redoc documentation. If
+  not provided, the field name will not be displayed in the docs.
+- API_CONTACT_URL = None (str) Specifies the contact web address for inquiries and support in the redoc documentation.
+  If not provided, the field name will not be displayed in the docs.
+- API_LICENCE_NAME = None (str) Specifies the licence type for the API in the redoc documentation. If not provided, the
+  field name will not be displayed in the docs.
+- API_LICENCE_URL = None (str) Specifies a url to the licence type for the API in the redoc documentation. If not
+  provided, the field name will not be displayed in the docs.
+- API_SERVER_URLS = List[Dict[str, str]] default None,
+  example: [{"url": "http://localhost:5000", "description": "Local server"}...]  Specifies the server(s) used for
+  calling the API in the redoc documentation. If not provided, the field name will not be displayed in the docs.
+
+
+- API_PRINT_EXCEPTIONS = True Defines whether to print exceptions to console when they occur.
+    - API_BASE_MODEL db.Model
+    - API_BASE_SCHEMA = AutoSchema
+    - AUTO_NAME_ENDPOINTS # check what this does
+    - FULL_AUTO:                                 Optional[callable] = True # does the lot.
+    - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
+      {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True # Convert json output to camel case
+    - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
+      delete
+    -
+    -
+        -
+            - Optional[callable] = True # Weather to add GET relationship routes to each model i.e /books/1/authors    
+              base_model
+              base_schema
+              db_service
+
+
+- API_IGNORE_UNDERSCORE_ATTRIBUTE:          Optional[boolean] = When enabled model or schema fields that start with an
+  underscore will be ignored from all documentation and api outputs.
+
+{x} - API_SERIALIZATION_TYPE Optional[str] = "json"  | "url" | "hybrid" | False # json -> serialise all, url -> to_only
+url, hybrid -> serialise single items, url lists. None -> No serialisation of nested items
+
+- API_SERIALIZATION_DEPTH Optional[int] = 1
+  {x} - API_PAGINATION_SIZE_DEFAULT Optional[int] = 20 Sets the default number of items returned in a single page of API
+  results, with a default value of 20. This configuration optimizes data retrieval by limiting the number of items
+  fetched.
+  {x} - API_PAGINATION_SIZE_MAX Optional[int] = 100 Sets the maximum allowed number of items returned in a single page
+  of API results  (specified with the url param ?limit=100)
+-
+
+API_ADD_RELATIONS
+-
 [//]: # (    - AUTO_NAME_ENDPOINTS:                      Optional[bool, Callable] = True)
+
     - API_DOCUMENTATION_URL:                    Optional[callable] ="/docs"         Docuentation URL 
     - API_DOCUMENTATION_URL_PREFIX:             Optional[callable] = "/"      Flask route url prefex field
     - API_PREFIX:                               Optional[callable] = "/api"
     - API_VERBOSITY_LEVEL:                      Optional[int] = 0  # no 
     - API_USER_MODEL:                           Optional[callable] = User
-Dual: 
-    ENDPOINT_NAMER:                            Optional[callable] = endpoint_namer
-    API_AUTHENTICATE:                          Optional[callable, bool] = False.   # must have a secret key in flask config 
-    ALLOWED_SERIALIZATION_DEPTH                Optional[int] = 1
-    {x} - API_ALLOW_SELECT_FIELDS:                               Optional[callable] = True # Allow aggregation
-    - API_ALLOW_ORDERBY:                              Optional[callable] = True # Allow aggregation
-    - API_ALLOW_JOIN:                                 Optional[callable] = True # Allow aggregation
-    - API_ALLOW_GROUPBY:                              Optional[callable] = True # Allow aggregation
-    - API_ALLOW_AGGREGATION:                          Optional[callable] = TRUE #Allow aggregation
+    - API_RATE_LIMIT_STORAGE_URI                Optional[str] = "memory"  or   "memcached://127.0.0.1:{port}" | "redis://127.0.0.1:{port}" | "mongodb://127.0.0.1:{port}"  # attempts to gather the suitable backend for you.
 
-    - block_methods:                               Optional[callable] = [] # Allow aggregation
-- 
-API OUTPUT: 
+- API_ENDPOINT_NAMER:                            Optional[callable] = endpoint_namer
+
+Dual only:
+
+- API_READ_ONLY = False When set to true, the API will not allow POST, PUT, PATCH, DELETE requests.
+- API_ALLOW_ORDERBY:                              Optional[callable] = True # Allow aggregation
+- API_ALLOW_JOIN:                                 Optional[callable] = True # Allow aggregation
+- API_ALLOW_GROUPBY:                              Optional[callable] = True # Allow aggregation
+- API_ALLOW_AGGREGATION:                          Optional[callable] = TRUE #Allow aggregation
+- API_ALLOW_SELECT_FIELDS
+- API_block_methods:                               Optional[callable] = [] # Allow aggregation
+
+Dual with methods:
+
+API_AUTHENTICATE:                          Optional[callable, bool] = False. # must have a secret key in flask config
+API_AUTHENTICATE_METHOD:                   Optional[str] =  "api_key" | "jwt" | "basic"
+{x} - API_ALLOW_SELECT_FIELDS:                               Optional[callable] = True # Allow aggregation
+
+- API_RETURN_CALLBACK
+- API_RATE_LIMIT:                               Optional[callable] = "1 per second"
+- API_RATE_LIMIT_CALLBACK:                      Optional[callable] = None # a function that is called on rate limit
+  being breached.
+
+API OUTPUT:
 
     {x} -  API_DUMP_DATETIME
     {x} -  API_DUMP_VERSION
@@ -82,28 +137,24 @@ API OUTPUT:
     {x} -  API_DUMP_NULL_PREVIOUS_URL
     {x} -  API_DUMP_NULL_ERROR
 
-{x} 
-Model meta: 
-    block_methods: Optional[List[str]] = None   i.e ["POST"]
+{x}
+Model meta:
 
+block_methods: Optional[List[str]] = None i.e ["POST"]
+get_single_description: Optional[str] = None
+get_many_description: Optional[str] = None
+post_description: Optional[str] = None
+put_description: Optional[str] = None
+delete_description: Optional[str] = None
 
 Needs implementing
-    - MAKE_RELATIONS = True # adds extra routes for each relation, needs backref on parent models
-    - API_PRE_GET                               optional[callable] = None  # per app, model or method   
-    - API_POST_GET                              optional[callable] = None  # per app, model or method 
-    - API_PRE_POST                              optional[callable] = None  # per app, model or method 
-    - API_POST_POST                             optional[callable] = None  # per app, model or method 
-    - API_PRE_DELETE                            optional[callable] = None  # per app, model or method 
-    - API_POST_DELETE                           optional[callable] = None  # per app, model or method 
-    - API_PRE_PUT                               optional[callable] = None  # per app, model or method 
-    - API_POST_PUT                              optional[callable] = None  # per app, model or method 
+
+- MAKE_RELATIONS = True # adds extra routes for each relation, needs backref on parent models
 
 
-current_user    IMPLEMENTED 
+current_user IMPLEMENTED
 
-
-If you put 
-
+If you put
 
 flask config:
 

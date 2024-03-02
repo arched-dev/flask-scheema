@@ -1,6 +1,7 @@
 import pytest
-from demo.model_extension.model import create_app
-from demo.model_extension.model.models import Author
+
+from demo.model_extension_2.model import create_app
+from demo.model_extension_2.model.models import Author
 
 
 @pytest.fixture
@@ -8,6 +9,7 @@ def app():
     app = create_app({
         'API_TITLE': 'Automated test',
         'API_VERSION': '0.2.0',
+        'API_IGNORE_UNDERSCORE_ATTRIBUTES': True,
         # Other configurations specific to this test
     })
     yield app
@@ -26,4 +28,4 @@ def test_examples_data_type_and_desc(client):
 
     swagger_response = client.get('/swagger.json').json
 
-    swagger_response
+    assert 1 == 2

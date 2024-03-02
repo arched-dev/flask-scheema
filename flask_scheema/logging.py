@@ -1,5 +1,6 @@
-from colorama import Fore, Style, init
 import re
+
+from colorama import Fore, Style, init
 
 # Initialize Colorama
 init(autoreset=True)
@@ -52,12 +53,12 @@ class CustomLogger:
     def debug(self, level, message):
         """Log a message if its level is less than or equal to the current verbosity level."""
         if level <= self.verbosity_level:
-            self._log(f"DEBUG {level}: ".ljust(10)  + message)
+            self._log(f"DEBUG {level}: ".ljust(10) + message)
 
     def error(self, level, message):
         """Log a message if its level is less than or equal to the current verbosity level."""
         if level <= self.verbosity_level:
-            self._log(Fore.RED+ f"ERROR {level}: ".ljust(10) + Style.RESET_ALL + message)
+            self._log(Fore.RED + f"ERROR {level}: ".ljust(10) + Style.RESET_ALL + message)
 
 
 logger = CustomLogger()

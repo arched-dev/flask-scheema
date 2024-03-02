@@ -2,6 +2,7 @@ from flask import Response
 from werkzeug.exceptions import HTTPException
 
 from flask_scheema.api.responses import create_response
+from flask_scheema.utilities import get_config_or_model_meta
 
 
 def handle_http_exception(e: HTTPException) -> Response:
@@ -15,6 +16,12 @@ def handle_http_exception(e: HTTPException) -> Response:
     Returns:
         Standardised response.
     """
+    print_exc = get_config_or_model_meta(key="API_PRINT_EXCEPTIONS", default=True)
+    if print_exc:
+        import traceback
+        print(e)
+        traceback.print_exc()
+
     return create_response(
-        status=e.code, error={"error": e.name, "reason": e.description}
+        status=e.code, errors=[{"error": e.name, "reason": e.description}]
     )

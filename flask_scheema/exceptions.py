@@ -24,7 +24,7 @@ class CustomHTTPException(Exception):
             status_code
         ).phrase  # Fetch the standard HTTP status phrase
         self.reason = (
-            reason or self.error
+                reason or self.error
         )  # Use the reason if provided, otherwise use the standard HTTP status phrase
 
     def to_dict(self):
@@ -33,3 +33,8 @@ class CustomHTTPException(Exception):
             "error": self.error,
             "reason": self.reason,
         }
+
+
+# Custom exceeded callback function
+def raise_exception():
+    raise CustomHTTPException(429, "Rate limit exceeded")

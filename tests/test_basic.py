@@ -1,9 +1,7 @@
 import pytest
 
-from demo.basic.basic import create_app
-from demo.basic.basic.models import Author
+from demo.basic_1.basic import create_app
 
-from demo.model_extension.model import create_app as create_app_models
 
 @pytest.fixture
 def app():
@@ -20,7 +18,6 @@ def client(app):
     return app.test_client()
 
 
-
 def test_get(client):
     get_resp = client.get('/api/books/1')
     get_resp_none = client.get('/api/books/99999')
@@ -34,6 +31,7 @@ def test_get(client):
     assert get_resp_child.status_code == 200
     assert len(get_resp_child.json["value"]) > 0
 
+
 def test_delete(client):
     delete_response = client.delete('/api/books/1')
     delete_response_fail = client.delete('/api/books/99999999')
@@ -46,14 +44,11 @@ def test_delete(client):
 
 
 def test_delete_with_cascade(client):
-
-
     books_pre_delete = client.get("/api/authors/1/books")
 
     resp_delete_fail = client.delete("/api/authors/1")
     resp_delete = client.delete("/api/authors/1?cascade_delete=1")
     books_post_delete = client.get("/api/authors/1/books")
-
 
     assert books_pre_delete.status_code == 200
     assert len(books_pre_delete.json["value"]) > 0
@@ -65,26 +60,27 @@ def test_delete_with_cascade(client):
     assert books_post_delete.status_code == 404
     assert books_post_delete.json["value"] is None
 
-def test_put(client):
+
+def test_patch(client):
     get_response = client.get('/api/books/1')
     data = get_response.json
     data["value"]["title"] = "New Title"
-    put_response = client.put('/api/books/1', json=data["value"])
+    patch_response = client.patch('/api/books/1', json=data["value"])
     new_get_response = client.get('/api/books/1')
 
-    assert put_response.status_code == 200
+    assert patch_response.status_code == 200
     assert new_get_response.json["value"]["title"] == "New Title"
 
 
-def test_hybrid_and_put(client):
+def test_hybrid_and_patch(client):
     get_response = client.get('/api/authors/1')
     data = get_response.json
     data["value"]["firstName"] = "Foo"
     data["value"]["lastName"] = "Bar"
-    put_response = client.put('/api/authors/1', json=data["value"])
+    patch_response = client.patch('/api/authors/1', json=data["value"])
     new_get_response = client.get('/api/authors/1')
 
-    assert put_response.status_code == 200
+    assert patch_response.status_code == 200
     assert new_get_response.json["value"]["fullName"] == "Foo Bar"
 
 
@@ -116,15 +112,14 @@ def test_basic_get_books(client):
     assert "title" in response.json["value"][0]
 
 
-def test_put_deleted(client):
-
+def test_patch_deleted(client):
     books_pre_delete = client.get("/api/books/1")
     resp_delete = client.delete("/api/books/1")
 
     book_data = books_pre_delete.json["value"]
     book_data["title"] = "New Title"
 
-    resp_put_fail = client.put("/api/books/1", json=book_data)
+    resp_patch_fail = client.patch("/api/books/1", json=book_data)
 
     assert resp_delete.status_code == 200
-    assert resp_put_fail.status_code == 404
+    assert resp_patch_fail.status_code == 404

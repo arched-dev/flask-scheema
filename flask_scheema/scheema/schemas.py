@@ -1,5 +1,3 @@
-
-
 class DeleteSuccessfulSchema(Schema):
     class Meta:
         name = "delete-success"
@@ -50,6 +48,7 @@ class ResetPasswordSchemaIn(Schema):
             "format": "email",
         },
     )
+
 
 class ResetPasswordSchemaOut(Schema):
     class Meta:

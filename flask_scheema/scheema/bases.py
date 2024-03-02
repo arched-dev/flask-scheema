@@ -1,17 +1,33 @@
-from contextlib import contextmanager
-
 from flask import request
-from marshmallow import fields, Schema, missing, ValidationError
+from marshmallow import fields, Schema, missing
 from marshmallow.validate import Length
-from sqlalchemy import Integer, String, Boolean, Float, Date, DateTime, Time, Text, Numeric, BigInteger, LargeBinary, \
-    Enum, ARRAY, Interval
+from sqlalchemy import (
+    Integer,
+    String,
+    Boolean,
+    Float,
+    Date,
+    DateTime,
+    Time,
+    Text,
+    Numeric,
+    BigInteger,
+    LargeBinary,
+    Enum,
+    ARRAY,
+    Interval,
+)
 from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import class_mapper, RelationshipProperty, ColumnProperty
 
 from flask_scheema.api.utils import endpoint_namer
 from flask_scheema.logging import logger
-from flask_scheema.scheema.utils import get_openapi_meta_data, get_input_output_from_model_or_make, convert_snake_to_camel
+from flask_scheema.scheema.utils import (
+    get_openapi_meta_data,
+    get_input_output_from_model_or_make,
+    convert_snake_to_camel,
+)
 from flask_scheema.utilities import get_config_or_model_meta
 
 type_mapping = {
@@ -28,13 +44,11 @@ type_mapping = {
     JSONB: fields.Raw,
     Numeric: fields.Decimal,
     BigInteger: fields.Int,
-
     # Additional types
     LargeBinary: fields.Str,
     Enum: fields.Str,
     ARRAY: fields.List,
     Interval: fields.TimeDelta,
-
     # Python built-in types
     str: fields.Str,
     int: fields.Int,
@@ -43,7 +57,6 @@ type_mapping = {
     dict: fields.Dict,
     list: fields.List,
 }
-
 
 
 def find_matching_relations(model1, model2):
@@ -96,6 +109,7 @@ def _get_relation_use_list_and_type(relationship_property):
 
     return not relationship_property.uselist, direction
 
+
 class DeleteSchema(Schema):
     complete = fields.Boolean(required=True, default=False)
 
@@ -108,12 +122,12 @@ class AutoScheema(Schema):
 
     def __init__(self, *args, render_nested=True, **kwargs):
 
-        only_fields = kwargs.pop('only', None)
+        only_fields = kwargs.pop("only", None)
 
         if not hasattr(self, "depth"):
-            self.depth = kwargs.pop('depth', 0)
+            self.depth = kwargs.pop("depth", 0)
         if not hasattr(self, "parent"):
-            self.parent = kwargs.pop('parent', 0)
+            self.parent = kwargs.pop("parent", 0)
 
         super().__init__(*args, **kwargs)
         self.context = {"current_depth": 0}  # Initialize an empty context dictionary
@@ -144,47 +158,74 @@ class AutoScheema(Schema):
             None
         """
         # Check if model is None
-        if self.Meta.model is None:
+        meta = getattr(self, "Meta")
+        model = None
+
+        if meta:
+            model = getattr(meta, "model")
+
+        if model is None:
             print("Warning: self.Meta.model is None. Skipping field generation.")
             return
 
-        mapper = class_mapper(self.Meta.model)
+        mapper = class_mapper(model)
         for attribute, mapper_property in mapper.all_orm_descriptors.items():
 
             original_attribute = attribute
             if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
                 attribute = convert_snake_to_camel(attribute)
 
-            if not attribute.startswith('_'):
+            ignore_underscore = get_config_or_model_meta(
+                "API_IGNORE_UNDERSCORE_ATTRIBUTES", model=model, default=True
+            )
+            is_underscore = attribute.startswith("_")
+            if (not ignore_underscore and is_underscore) or not is_underscore:
                 # relations
                 if isinstance(mapper_property, RelationshipProperty):
-                    self.add_relationship_field(attribute, original_attribute, mapper_property)
+                    self.add_relationship_field(
+                        attribute, original_attribute, mapper_property
+                    )
                 elif (
-                        hasattr(mapper_property, "property")
-                        and mapper_property.property._is_relationship
+                    hasattr(mapper_property, "property")
+                    and mapper_property.property._is_relationship
                 ):
-                    logger.debug(4,
-                                 f"Adding to mallow object |{self.__class__.__name__}| relationship field +{mapper_property}+")
-                    self.add_relationship_field(attribute, original_attribute, mapper_property)
+                    logger.debug(
+                        4,
+                        f"Adding to mallow object |{self.__class__.__name__}| relationship field +{mapper_property}+",
+                    )
+                    self.add_relationship_field(
+                        attribute, original_attribute, mapper_property
+                    )
                 # columns
                 elif hasattr(mapper_property, "property") and isinstance(
-                        mapper_property.property, ColumnProperty
+                    mapper_property.property, ColumnProperty
                 ):
-                    logger.debug(4,
-                                 f"Adding to mallow object |{self.__class__.__name__}| column field +{mapper_property}+")
+                    logger.debug(
+                        4,
+                        f"Adding to mallow object |{self.__class__.__name__}| column field +{mapper_property}+",
+                    )
                     self.add_column_field(
                         attribute, original_attribute, mapper_property
                     )
                 elif hasattr(mapper_property, "columns"):
-                    logger.debug(4,
-                                 f"Adding to mallow object |{self.__class__.__name__}| column field +{mapper_property}+")
-                    self.add_column_field(attribute, original_attribute, mapper_property.columns[0].type)
+                    logger.debug(
+                        4,
+                        f"Adding to mallow object |{self.__class__.__name__}| column field +{mapper_property}+",
+                    )
+                    self.add_column_field(
+                        attribute, original_attribute, mapper_property.columns[0].type
+                    )
                 # hybrid properties
                 elif isinstance(mapper_property, hybrid_property):
-                    logger.debug(4,
-                                 f"Adding to mallow object |{self.__class__.__name__}| hybrid property field +{mapper_property.__name__}+")
-                    self.add_hybrid_property_field(attribute, original_attribute,
-                                                   mapper_property.__annotations__.get("return"))
+                    logger.debug(
+                        4,
+                        f"Adding to mallow object |{self.__class__.__name__}| hybrid property field +{mapper_property.__name__}+",
+                    )
+                    self.add_hybrid_property_field(
+                        attribute,
+                        original_attribute,
+                        mapper_property.__annotations__.get("return"),
+                    )
 
     def add_hybrid_property_field(self, attribute, original_attribute, field_type):
         """
@@ -199,7 +240,11 @@ class AutoScheema(Schema):
             None
         """
         # Skip attributes that start with an underscore
-        if attribute.startswith("_"):
+        ignore_underscore = get_config_or_model_meta(
+            key="API_IGNORE_UNDERSCORE_ATTRIBUTE", default=True
+        )
+
+        if ignore_underscore and attribute.startswith("_"):
             return
 
         # You might need to determine the appropriate field type differently.
@@ -244,7 +289,14 @@ class AutoScheema(Schema):
         column_type = mapper.property.columns[0].type
 
         # Skip attributes that start with an underscore
-        if attribute.startswith("_") and get_config_or_model_meta("API_IGNORE_UNDERSCORE_ATTRIBUTE", default=True):
+        meta = getattr(self, "Meta")
+        model = None
+        if meta:
+            model = getattr(meta, "model", None)
+
+        if attribute.startswith("_") and get_config_or_model_meta(
+            "API_IGNORE_UNDERSCORE_ATTRIBUTES", model, default=True
+        ):
             return
 
         # Determine the Marshmallow field type based on the SQLAlchemy column type
@@ -257,7 +309,11 @@ class AutoScheema(Schema):
         column = self.model.__table__.columns.get(original_attribute)
         is_pk = False
         if column is not None:
-            if not column.nullable and (not column.primary_key and column.autoincrement and column.default is None):
+            if not column.nullable and (
+                not column.primary_key
+                and column.autoincrement
+                and column.default is None
+            ):
                 field_args["required"] = True
             if column.default is not None:
                 field_args["default"] = (
@@ -288,7 +344,9 @@ class AutoScheema(Schema):
             get_openapi_meta_data(self.fields[original_attribute])
         )
 
-    def add_relationship_field(self, attribute, original_attribute, relationship_property):
+    def add_relationship_field(
+        self, attribute, original_attribute, relationship_property
+    ):
         """
         Automatically add a field for a given relationship in the SQLAlchemy model.
         Args:
@@ -301,46 +359,79 @@ class AutoScheema(Schema):
         """
         _, rel_type = _get_relation_use_list_and_type(relationship_property)
 
-
-        serialization_type = get_config_or_model_meta("API_SERIALIZATION_TYPE", default="hybrid")
-        nested_schema = get_input_output_from_model_or_make(relationship_property.mapper.class_)[1]
+        serialization_type = get_config_or_model_meta(
+            "API_SERIALIZATION_TYPE", default="hybrid"
+        )
+        nested_schema = get_input_output_from_model_or_make(
+            relationship_property.mapper.class_
+        )[1]
         matching = find_matching_relations(self.Meta.model, nested_schema.Meta.model)[0]
 
-        if (serialization_type == "json" or (rel_type[-3:] == "ONE" and serialization_type == "hybrid")) and self.depth <= 1:
+        if (
+            serialization_type == "json"
+            or (rel_type[-3:] == "ONE" and serialization_type == "hybrid")
+        ) and self.depth <= 1:
 
             # If within allowed depth, serialize fully
-            logger.debug(3,f"Serialization type is `{serialization_type} - Serializing -{nested_schema.__name__}- relations to JSON`")
+            logger.debug(
+                3,
+                f"Serialization type is `{serialization_type} - Serializing -{nested_schema.__name__}- relations to JSON`",
+            )
             # nested_schema.depth = self.depth + 1
             # nested_schema.parent = self
 
             if rel_type[-3:] == "ONE":
-                self.fields[original_attribute] = fields.Nested(nested_schema, data_key=attribute, attribute=attribute, dump_only=True, many=False)
+                self.fields[original_attribute] = fields.Nested(
+                    nested_schema,
+                    data_key=attribute,
+                    attribute=attribute,
+                    dump_only=True,
+                    many=False,
+                )
             else:
-                self.fields[original_attribute] = fields.Nested(nested_schema, many=True,
-                                                                data_key=attribute, attribute=attribute, dump_only=True)
+                self.fields[original_attribute] = fields.Nested(
+                    nested_schema,
+                    many=True,
+                    data_key=attribute,
+                    attribute=attribute,
+                    dump_only=True,
+                )
 
-        elif serialization_type == "url" or (rel_type[-4:] == "MANY" and serialization_type == "hybrid"):
-            logger.debug(3,f"Serialization type is `{serialization_type} - Serializing -{nested_schema.__name__}- relations to URL`")
+        elif serialization_type == "url" or (
+            rel_type[-4:] == "MANY" and serialization_type == "hybrid"
+        ):
+            logger.debug(
+                3,
+                f"Serialization type is `{serialization_type} - Serializing -{nested_schema.__name__}- relations to URL`",
+            )
+
             def serialize_to_url(obj):
                 # Your logic here
 
-                namer = get_config_or_model_meta("API_ENDPOINT_NAMER", default=endpoint_namer)
+                namer = get_config_or_model_meta(
+                    "API_ENDPOINT_NAMER", default=endpoint_namer
+                )
                 if hasattr(obj, namer(nested_schema.Meta.model) + "_to_url"):
                     return getattr(obj, namer(nested_schema.Meta.model) + "_to_url")()
                 elif hasattr(obj, matching[0] + "to_url"):
                     return obj.to_url()
                 return None
 
-            self.fields[original_attribute] = fields.Function(serialize_to_url, data_key=attribute)
+            self.fields[original_attribute] = fields.Function(
+                serialize_to_url, data_key=attribute
+            )
 
         if self.fields.get(original_attribute):
             self.fields[original_attribute].parent = self
             self.fields[original_attribute].name = attribute
-            self.fields[original_attribute].metadata.update(get_openapi_meta_data(self.fields[original_attribute]))
+            self.fields[original_attribute].metadata.update(
+                get_openapi_meta_data(self.fields[original_attribute])
+            )
 
     def _make_not_required(self):
         """Makes all fields optional except the primary key."""
         from flask_scheema.api.utils import get_primary_keys
+
         primary_key_field = get_primary_keys(self.Meta.model)
         for field_name, field_obj in self.fields.items():
             if field_name != primary_key_field:
@@ -375,7 +466,7 @@ class AutoScheema(Schema):
     def load(self, data, *args, **kwargs):
         """Custom deserialization for SQLAlchemy model instances."""
         output_as_dict = kwargs.pop("output_as_dict", False)
-        is_update = request.method in ["PUT", "PATCH"]
+        is_update = request.method in ["PATCH"]
 
         if hasattr(self.Meta, "model") and self.Meta.model:
             if is_update:

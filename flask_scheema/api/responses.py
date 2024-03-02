@@ -18,15 +18,15 @@ class CustomResponse:
     """
 
     def __init__(
-            self,
-            value: Optional[Union[List, Any]] = None,
-            count: Optional[int] = 1,
-            error: Optional[Union[List, Dict, Any]] = None,
-            status_code: Optional[int] = 200,
-            next_url: Optional[str] = None,
-            previous_url: Optional[str] = None,
-            many: Optional[bool] = False,
-            response_ms: Optional[float] = None,
+        self,
+        value: Optional[Union[List, Any]] = None,
+        count: Optional[int] = 1,
+        error: Optional[Union[List, Dict, Any]] = None,
+        status_code: Optional[int] = 200,
+        next_url: Optional[str] = None,
+        previous_url: Optional[str] = None,
+        many: Optional[bool] = False,
+        response_ms: Optional[float] = None,
     ):
         self.response_ms = response_ms
         self.value = value
@@ -40,7 +40,7 @@ class CustomResponse:
 
 
 def deserialize_data(
-        input_schema: Type[Schema], data: Any
+    input_schema: Type[Schema], data: Any
 ) -> Union[Dict[str, Any], Tuple[Dict[str, Any], int]]:
     """
         Utility function to deserialize data using a given Marshmallow schema.
@@ -55,8 +55,8 @@ def deserialize_data(
     """
     try:
 
-        fields = [v.name for k,v in input_schema().fields.items() if not v.dump_only]
-        data = {k:v for k,v in data.items() if k in fields}
+        fields = [v.name for k, v in input_schema().fields.items() if not v.dump_only]
+        data = {k: v for k, v in data.items() if k in fields}
 
         # if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
         #     data = {convert_camel(k): v for k, v in data.items()}
@@ -83,15 +83,18 @@ def filter_keys(model, schema: Type[Schema], data_dict_list: List[Dict]):
         filtered_dict = {}
         for key, value in data_dict.items():
             if (
-                    key in all_model_keys
-                    or (key in schema_fields and schema._declared_fields[key].dump != False)
-                    or key not in all_model_keys
+                key in all_model_keys
+                or (key in schema_fields and schema._declared_fields[key].dump != False)
+                or key not in all_model_keys
             ):
                 filtered_dict[key] = value
         filtered_data.append(filtered_dict)
     return filtered_data
 
-def dump_schema_if_exists(schema: Schema, data: Union[dict, DeclarativeBase], is_list=False):
+
+def dump_schema_if_exists(
+    schema: Schema, data: Union[dict, DeclarativeBase], is_list=False
+):
     """
     Serialize the data using the schema if the data exists.
     Args:
@@ -107,9 +110,10 @@ def dump_schema_if_exists(schema: Schema, data: Union[dict, DeclarativeBase], is
         return schema.dump(data, many=is_list)
     return [] if is_list else None
 
+
 def serialize_output_with_mallow(
-        output_schema: Type[Schema],
-        data: Any,
+    output_schema: Type[Schema],
+    data: Any,
 ) -> CustomResponse:
     """
         Utility function to serialize output using a given Marshmallow schema.
@@ -123,7 +127,11 @@ def serialize_output_with_mallow(
     from flask_scheema.api.decorators import get_count
 
     try:
-        is_list = isinstance(data, list) or ("value" in data and isinstance(data["value"], list)) or ("query" in data and isinstance(data["query"], list))
+        is_list = (
+            isinstance(data, list)
+            or ("value" in data and isinstance(data["value"], list))
+            or ("query" in data and isinstance(data["query"], list))
+        )
         dump_data = data["query"] if "query" in data else data
         value = dump_schema_if_exists(output_schema, dump_data, is_list)
         # Check if value is a list, a single item, or None, and adjust count accordingly
@@ -155,13 +163,13 @@ def serialize_output_with_mallow(
 
 
 def create_response(
-        value: Optional[Any] = None,
-        status: int = 200,
-        error: Optional[Union[str, Dict]] = None,
-        count: Optional[int] = 1,
-        next_url: Optional[str] = None,
-        previous_url: Optional[str] = None,
-        response_ms: Optional[float] = None,
+    value: Optional[Any] = None,
+    status: int = 200,
+    errors: Optional[Union[str, List]] = None,
+    count: Optional[int] = 1,
+    next_url: Optional[str] = None,
+    previous_url: Optional[str] = None,
+    response_ms: Optional[float] = None,
 ) -> Response:  # New parameter for count
     """
         Create a standardised response.
@@ -169,7 +177,7 @@ def create_response(
     Args:
         value (Optional): The value to be returned.
         status (Optional): HTTP status code.
-        error (Optional): Error message.
+        errors (Optional): Error message.
         count (Optional): Number of objects returned.
         next_url (Optional): URL for the next page of results.
         previous_url (Optional): URL for the previous page of results.
@@ -197,8 +205,8 @@ def create_response(
     }
 
     if isinstance(value, CustomResponse):
-        status = value.status_code
-        error = value.error
+        status = int(value.status_code)
+        errors = value.error
         count = value.count
         response_ms = value.response_ms
         next_url = value.next_url
@@ -208,8 +216,8 @@ def create_response(
     data.update(
         {
             "value": value,
-            "status_code": str(status),
-            "error": error,
+            "status_code": int(str(status)),
+            "errors": errors,
             "response_ms": response_ms,
             "total_count": count,  # Include the count key here
         }
@@ -228,8 +236,12 @@ def create_response(
     if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
         data = {convert_snake_to_camel(k): v for k, v in data.items()}
 
+    # only include the error key if it is not None
+    if data["errors"] is None:
+        del data["errors"]
+
     response = jsonify(data)
-    response.status_code = str(status)
+    response.status_code = int(str(status))
 
     return response
 
@@ -243,24 +255,43 @@ def remove_values(data: dict) -> dict:
     Returns:
         dict: The response data with the specified keys removed.
     """
-    if "datetime" in data and not get_config_or_model_meta("API_DUMP_DATETIME", default=True):
+    if "datetime" in data and not get_config_or_model_meta(
+        "API_DUMP_DATETIME", default=True
+    ):
         data.pop("datetime")
-    if "api_version" in data and not get_config_or_model_meta("API_DUMP_VERSION", default=True):
+    if "api_version" in data and not get_config_or_model_meta(
+        "API_DUMP_VERSION", default=True
+    ):
         data.pop("api_version")
-    if "status_code" in data and not get_config_or_model_meta("API_DUMP_STATUS_CODE", default=True):
+    if "status_code" in data and not get_config_or_model_meta(
+        "API_DUMP_STATUS_CODE", default=True
+    ):
         data.pop("status_code")
-    if "response_ms" in data and not get_config_or_model_meta("API_DUMP_RESPONSE_MS", default=True):
+    if "response_ms" in data and not get_config_or_model_meta(
+        "API_DUMP_RESPONSE_MS", default=True
+    ):
         data.pop("response_ms")
-    if "total_count" in data and not get_config_or_model_meta("API_DUMP_TOTAL_COUNT", default=True):
+    if "total_count" in data and not get_config_or_model_meta(
+        "API_DUMP_TOTAL_COUNT", default=True
+    ):
         data.pop("total_count")
-    if "next_url" in data and not get_config_or_model_meta("API_DUMP_NULL_NEXT_URL", default=True) and not data.get(
-            "next_url"):
+    if (
+        "next_url" in data
+        and not get_config_or_model_meta("API_DUMP_NULL_NEXT_URL", default=True)
+        and not data.get("next_url")
+    ):
         data.pop("next_url")
-    if "previous_url" in data and not get_config_or_model_meta("API_DUMP_NULL_PREVIOUS_URL",
-                                                               default=True) and not data.get("previous_url"):
+    if (
+        "previous_url" in data
+        and not get_config_or_model_meta("API_DUMP_NULL_PREVIOUS_URL", default=True)
+        and not data.get("previous_url")
+    ):
         data.pop("previous_url")
-    if "error" in data and not get_config_or_model_meta("API_DUMP_NULL_ERROR", default=True) and not data.get(
-            "error"):
+    if (
+        "error" in data
+        and not get_config_or_model_meta("API_DUMP_NULL_ERROR", default=True)
+        and not data.get("error")
+    ):
         data.pop("error")
 
     return data

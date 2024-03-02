@@ -2,13 +2,13 @@ from functools import wraps
 from typing import Callable, List
 
 import jwt
+from flask import request, abort, g, current_app
+from jwt import ExpiredSignatureError, DecodeError
+from sqlalchemy.sql import roles
 from werkzeug.local import LocalProxy
 
 from flask_scheema.api.decorators import handle_error, HTTP_UNAUTHORIZED, HTTP_INTERNAL_SERVER_ERROR
 from flask_scheema.utilities import get_config_or_model_meta
-from flask import request, abort, g, current_app
-from jwt import ExpiredSignatureError, DecodeError
-from sqlalchemy.sql import roles
 
 
 def check_roles(user, roles: List[str]):
@@ -26,6 +26,7 @@ def check_roles(user, roles: List[str]):
     return "superuser" in user.role_names or any(
         role in roles for role in user.role_names
     )
+
 
 def validate_token(token: str):
     """

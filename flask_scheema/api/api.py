@@ -1,28 +1,25 @@
-import os
+import secrets
 import secrets
 import time
 from types import FunctionType
 from typing import Optional, Callable, Union, List, Any, Dict
 
 from flask import current_app, Blueprint, g
-from sqlalchemy.orm import Session, relationship, class_mapper
+from sqlalchemy.orm import Session
 from werkzeug.exceptions import default_exceptions
 
-from flask_scheema.api.auth import auth_required
-from flask_scheema.api.decorators import (
-    handle_many,
-    handle_one
-)
 from flask_scheema.api.exception_handling import handle_http_exception
 from flask_scheema.api.utils import (
     get_description,
     setup_route_function,
     get_tag_group,
     endpoint_namer,
-    get_models_relationships, get_primary_keys,
+    get_models_relationships,
+    get_primary_keys,
+    get_url_pk,
 )
 from flask_scheema.logging import logger
-from flask_scheema.scheema.bases import AutoScheema, DeleteSchema
+from flask_scheema.scheema.bases import DeleteSchema
 from flask_scheema.scheema.utils import (
     get_input_output_from_model_or_make,
 )
@@ -61,6 +58,7 @@ class RiceAPI(AttributeInitializerMixin):
             self.setup_models()
             self.validate()
             self.register_blueprint_and_error_handler()
+            self.register_jinja_template_functions()
             self.create_routes()
             # flask blueprints to be registered after all routes are created
             self.naan.app.register_blueprint(self.blueprint)
@@ -75,15 +73,9 @@ class RiceAPI(AttributeInitializerMixin):
         for base in self.api_base_model:
             for model_class in base.__subclasses__():
                 # Attempt to get a configuration or meta attribute to stop cascade
-                stop_cascade = get_config_or_model_meta("API_STOP_CASCADE_DELETE", model=model_class, default=False)
+                # todo - add any model setup here when needed
+                pass
 
-                if not stop_cascade:
-                    # Use SQLAlchemy's class_mapper to get relationship properties
-                    for rel in class_mapper(model_class).relationships:
-                        # Directly modify the cascade option of the relationship
-                        # todo check this, getting error due to applying on one to many. Do we need it?
-                        pass
-                        # rel.cascade = 'all, delete-orphan'
     def validate(self):
         """
         Validates the RiceAPI object.
@@ -105,7 +97,9 @@ class RiceAPI(AttributeInitializerMixin):
                         "the database session for that model."
                     )
 
-            if not current_app.config.get("FLASK_SECRET_KEY") and not current_app.config.get("SECRET_KEY"):
+            if not current_app.config.get(
+                "FLASK_SECRET_KEY"
+            ) and not current_app.config.get("SECRET_KEY"):
                 raise ValueError(
                     "SECRET_KEY must be set in the Flask app config. You can use this randomly generated key:\n"
                     f"{secrets.token_urlsafe(24)}\n"
@@ -114,14 +108,26 @@ class RiceAPI(AttributeInitializerMixin):
                 )
 
             user = get_config_or_model_meta("API_USER_MODEL", default=None)
-            auth = get_config_or_model_meta("API_AUTHENTICATE")
+            auth = get_config_or_model_meta("API_AUTHENTICATE", default=None)
+            auth_method = get_config_or_model_meta(
+                "API_AUTHENTICATE_METHOD", default=None
+            )
             if not user and auth and callable(auth):
                 raise ValueError(
                     "If API_AUTHENTICATE is set to a callable, API_USER_MODEL must be set to the user model."
                 )
 
-            if auth and callable(auth) and not hasattr(user, "email") and (
-                    not hasattr(user, "password") and not hasattr(user, "api_key")):
+            if auth and not auth_method:
+                raise ValueError(
+                    "If API_AUTHENTICATE is set to True, API_AUTHENTICATE_METHOD must be set either 'basic', 'jwt' or 'api_key'"
+                )
+
+            if (
+                auth
+                and callable(auth)
+                and not hasattr(user, "email")
+                and (not hasattr(user, "password") and not hasattr(user, "api_key"))
+            ):
                 raise ValueError(
                     "The user model must have an email and password or api_key field if a authentication function is set."
                 )
@@ -137,6 +143,15 @@ class RiceAPI(AttributeInitializerMixin):
                     session = model_class.get_session()
                     self.make_all_model_routes(model_class, session)
 
+    def register_jinja_template_functions(self):
+        """
+        Registers jinja template functions
+        Returns:
+
+        """
+
+        pass
+
     def register_blueprint_and_error_handler(self):
         """
         Register custom error handler for all http exceptions.
@@ -145,11 +160,13 @@ class RiceAPI(AttributeInitializerMixin):
         """
         # Use Flask's error handler to handle default HTTP exceptions
         api_prefix = get_config_or_model_meta("API_PREFIX", default="/api")
-        self.blueprint = Blueprint('api', __name__, url_prefix=api_prefix)
+        self.blueprint = Blueprint("api", __name__, url_prefix=api_prefix)
 
         for code in default_exceptions.keys():
-            logger.debug(4,
-                         f"Setting up custom error handler for blueprint |{self.blueprint.name}| with http code +{code}+.")
+            logger.debug(
+                4,
+                f"Setting up custom error handler for blueprint |{self.blueprint.name}| with http code +{code}+.",
+            )
             self.blueprint.register_error_handler(code, handle_http_exception)
 
         @self.blueprint.before_request
@@ -169,15 +186,18 @@ class RiceAPI(AttributeInitializerMixin):
 
         """
 
-        for _method in ["GETS", "GET", "POST", "PUT", "DELETE"]:
+        for _method in ["GETS", "GET", "POST", "PATCH", "DELETE"]:
             kwargs = self._prepare_route_data(model, session, _method)
             self.generate_route(**kwargs)
 
         # Sets up a secondary route for relations that is accessible from just the `foreign_key`
-        relations = get_models_relationships(model)
-        for relation_data in relations:
-            relation_data = self._prepare_relation_route_data(relation_data, session)
-            self._create_relation_route_and_to_url_function(relation_data)
+        if get_config_or_model_meta("API_ADD_RELATIONS", model=model, default=True):
+            relations = get_models_relationships(model)
+            for relation_data in relations:
+                relation_data = self._prepare_relation_route_data(
+                    relation_data, session
+                )
+                self._create_relation_route_and_to_url_function(relation_data)
 
     def _create_relation_route_and_to_url_function(self, relation_data: Dict):
         """
@@ -197,7 +217,7 @@ class RiceAPI(AttributeInitializerMixin):
         self.generate_route(**relation_data)
 
     def _prepare_route_data(
-            self, model: Callable, session: Any, http_method: str
+        self, model: Callable, session: Any, http_method: str
     ) -> Dict[str, Any]:
         """
         Prepares the data for a route.
@@ -219,7 +239,7 @@ class RiceAPI(AttributeInitializerMixin):
         )
 
         url_naming_function = get_config_or_model_meta(
-            "endpoint_namer", model, default=endpoint_namer
+            "API_ENDPOINT_NAMER", model, default=endpoint_namer
         )
 
         base_url = (
@@ -227,25 +247,27 @@ class RiceAPI(AttributeInitializerMixin):
         )
 
         method = "GET" if is_multiple else http_method
-        logger.debug(4, f"Collecting main model data for -{model.__name__}- with expected url |{method}|:`{base_url}`.")
+        logger.debug(
+            4,
+            f"Collecting main model data for -{model.__name__}- with expected url |{method}|:`{base_url}`.",
+        )
 
         return {
             "model": model,
-            "handler": handle_many if is_multiple else handle_one,
+            "many": is_multiple,
             "method": method,
             "url": base_url,
             "name": model.__name__.lower(),
             "output_schema": output_schema_class,
-            "authentication": get_config_or_model_meta("API_AUTHENTICATE", model=model, default=False),
             "session": session,
             "multiple": is_multiple,
-            "input_schema": input_schema_class
-            if http_method in ["POST", "PUT"]
-            else None,
+            "input_schema": (
+                input_schema_class if http_method in ["POST", "PATCH"] else None
+            ),
         }
 
     def _prepare_relation_route_data(
-            self, relation_data: Dict, session: Any
+        self, relation_data: Dict, session: Any
     ) -> Dict[str, Any]:
         """
         Prepares the data for a relation route.
@@ -270,31 +292,31 @@ class RiceAPI(AttributeInitializerMixin):
         )
 
         url_naming_function = get_config_or_model_meta(
-            "endpoint_namer", child_model, default=endpoint_namer
+            "API_ENDPOINT_NAMER", child_model, default=endpoint_namer
         )
 
-        parent_model_pk = get_primary_keys(parent_model).key
+        pk_url = get_url_pk(parent_model)
+        relation_url = f"/{url_naming_function(parent_model, pinput_schema_class, poutput_schema_class)}/{pk_url}/{url_naming_function(child_model, input_schema_class, output_schema_class)}"
 
-        relation_url = f"/{url_naming_function(parent_model, pinput_schema_class, poutput_schema_class)}/<{parent_model_pk}>/{url_naming_function(child_model, input_schema_class, output_schema_class)}"
-
-        logger.debug(4,
-                     f"Collecting parent/child model relationship for -{parent_model.__name__}- and -{child_model.__name__}- with expected url `{relation_url}`.")
+        logger.debug(
+            4,
+            f"Collecting parent/child model relationship for -{parent_model.__name__}- and -{child_model.__name__}- with expected url `{relation_url}`.",
+        )
 
         return {
             "child_model": child_model,
             "model": child_model,
             "parent_model": parent_model,
-            "handler": handle_many if is_multiple else handle_one,
+            "many": relation_data["join_type"][-4:].lower() == "many",
             "multiple": relation_data["join_type"][-4:].lower() == "many",
             "method": "GET",
             "relation_name": relation_data["relationship"],
             "url": relation_url,
             "name": child_model.__name__.lower()
-                    + "_join_to_"
-                    + parent_model.__name__.lower(),
+            + "_join_to_"
+            + parent_model.__name__.lower(),
             "join_key": relation_data["right_column"],
             "output_schema": output_schema_class,
-            "authentication": get_config_or_model_meta("API_AUTHENTICATE", model=child_model, default=False),
             "session": session,
         }
 
@@ -322,7 +344,6 @@ class RiceAPI(AttributeInitializerMixin):
             "url": kwargs["url"],
             "input_schema": kwargs.get("input_schema"),
             "output_schema": kwargs.get("output_schema"),
-            "authentication": get_config_or_model_meta("API_AUTHENTICATE", model=model, default=False),
         }
 
     def generate_route(self, **kwargs: dict):
@@ -353,12 +374,16 @@ class RiceAPI(AttributeInitializerMixin):
         http_method: str = kwargs.get("method", "GET")
 
         # Get blocked methods from Meta class, if any
-        blocked_methods = get_config_or_model_meta("block_methods", model=model, default=[], allow_join=True)
+        blocked_methods = get_config_or_model_meta(
+            "API_BLOCK_METHODS", model=model, default=[], allow_join=True
+        )
 
         # Check if flask-schema is read only, if it is, block all methods except GET
-        read_only = get_config_or_model_meta("read_only", default=False)
+        read_only = get_config_or_model_meta(
+            "API_READ_ONLY", model=model, default=False
+        )
         if read_only:
-            blocked_methods.extend(["POST", "PUT", "DELETE"])
+            blocked_methods.extend(["POST", "PATCH", "DELETE"])
 
         if http_method in [x.upper() for x in blocked_methods]:
             return
@@ -373,10 +398,13 @@ class RiceAPI(AttributeInitializerMixin):
         )
 
         # create the actual route function and add it to flask
-        if kwargs["method"] in ["GETS", "GET", "DELETE", "PUT"] and not kwargs.get(
-                "multiple", False
-        ) and not kwargs.get("relation_name"):
-            kwargs["url"] += "/<id>"
+        if (
+            kwargs["method"] in ["GETS", "GET", "DELETE", "PATCH"]
+            and not kwargs.get("multiple", False)
+            and not kwargs.get("relation_name")
+        ):
+            pk_url = get_url_pk(model)
+            kwargs["url"] += f"/{pk_url}"
 
         if kwargs["method"] == "DELETE":
             kwargs["output_schema"] = DeleteSchema
@@ -398,7 +426,10 @@ class RiceAPI(AttributeInitializerMixin):
         )
         kwargs["function"] = unique_route_function
 
-        logger.debug(4, f"Creating route function ${unique_function_name}$ for model -{model.__name__}-")
+        logger.debug(
+            4,
+            f"Creating route function ${unique_function_name}$ for model -{model.__name__}-",
+        )
 
         # Add the route to flask and wrap in the decorator.
         self._add_route_to_flask(
@@ -446,13 +477,14 @@ class RiceAPI(AttributeInitializerMixin):
         # Check for composite primary keys
         if len(primary_keys) > 1:
             logger.error(
-                f"Composite primary keys are not supported, failed to set method $to_url$ on -{model.__name__}-")
+                f"Composite primary keys are not supported, failed to set method $to_url$ on -{model.__name__}-"
+            )
             return
 
         api_prefix = get_config_or_model_meta("API_PREFIX", default="/api")
 
         url_naming_function = get_config_or_model_meta(
-            "endpoint_namer", model, default=endpoint_namer
+            "API_ENDPOINT_NAMER", model, default=endpoint_namer
         )
 
         def to_url(self):
@@ -462,7 +494,7 @@ class RiceAPI(AttributeInitializerMixin):
         setattr(model, "to_url", to_url)
 
     def _add_relation_url_function_to_model(
-            self, id_key: str, child: Callable, parent: Callable
+        self, id_key: str, child: Callable, parent: Callable
     ):
         """
         Adds a method to the model class
@@ -478,11 +510,11 @@ class RiceAPI(AttributeInitializerMixin):
         api_prefix = get_config_or_model_meta("API_PREFIX", default="/api")
 
         parent_endpoint = get_config_or_model_meta(
-            "endpoint_namer", parent, default=endpoint_namer
+            "API_ENDPOINT_NAMER", parent, default=endpoint_namer
         )(parent)
 
         child_endpoint = get_config_or_model_meta(
-            "endpoint_namer", child, default=endpoint_namer
+            "API_ENDPOINT_NAMER", child, default=endpoint_namer
         )(child)
         child_endpoint_function_name = child_endpoint.replace("-", "_")
 
@@ -491,6 +523,8 @@ class RiceAPI(AttributeInitializerMixin):
         def to_url(self):
             return f"{api_prefix}/{parent_endpoint}/{getattr(self, parent_pk)}/{child_endpoint_function_name}"
 
-        logger.log(3,
-                   f"Adding relation method ${child_endpoint_function_name}_to_url$ to parent model -{parent.__name__}- linking to -{child.__name__}-.")
+        logger.log(
+            3,
+            f"Adding relation method ${child_endpoint_function_name}_to_url$ to parent model -{parent.__name__}- linking to -{child.__name__}-.",
+        )
         setattr(parent, child_endpoint_function_name + "_to_url", to_url)

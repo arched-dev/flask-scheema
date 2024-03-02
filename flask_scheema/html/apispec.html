@@ -5,22 +5,65 @@
     <!-- needed for adaptive design -->
     <meta charset="utf-8"/>
     <meta content="width=device-width, initial-scale=1" name="viewport">
+    {% if config.get("API_DOCS_FONT") %}
+        {% set font = config.get("API_DOCS_FONT") %}
+    {% else %}
+        {% set font = "jetbrains_mono" %}
+    {% endif %}
+
+
+    {% if font == "jetbrains_mono" %}
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap"
+          rel="stylesheet">
+    {% elif font == "montserrat" %}
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital@0;1&display=swap" rel="stylesheet">
+    {% elif font == "roboto" %}
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    {% elif font == "montserrat" %}
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" rel="stylesheet">
+    {% elif font == "lato" %}
+    <link href="https://fonts.googleapis.com/css2?family=Lato&display=swap" rel="stylesheet">
+    {% endif %}
+
     <link href="https://fonts.googleapis.com/css?family=Montserrat:300,400,700" rel="stylesheet">
 
-    <!--
-    Redoc doesn't change outer page styles
-    -->
     <style>
         html {
             box-sizing: border-box;
-            font-family: "Roboto", sans-serif !important;
             font-weight: 500;
             font-style: normal;
+        }
+
+        html, div, p, a, span, h1, h2, h3, h4, h5, h6, ul, ol, li, dl, dt, dd, table, th, td, form, input, textarea, code, pre, button, label {
+
+        {% if font == "jetbrains_mono" %}
+            font-family: "JetBrains Mono", monospace !important;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        {% elif font == "sourcecode_pro" %}
+            font-family: "Source Code Pro", monospace !important;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        {% elif font == "roboto" %}
+            font-family: "Roboto", sans-serif !important;
+            font-weight: 400;
+            font-style: normal;
+        {% elif font == "montserrat" %}
+            font-family: "Montserrat", sans-serif !important;
+            font-optical-sizing: auto;
+            font-weight: 400;
+            font-style: normal;
+        {% elif font == "lato" %}
+            font-family: "Lato", sans-serif !important;
+            font-weight: 400;
+            font-style: normal;
+        {% endif %}
         }
         body {
             margin: 0;
             padding: 0;
-
         }
     </style>
 </head>
