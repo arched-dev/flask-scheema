@@ -24,11 +24,11 @@ jobs:
 
       - name: Build Sphinx Documentation
         run: |
-          cd docs  
-          build html 
+          cd docs  # Change to your documentation source directory
+          sphinx-build -b html . _build/html  # Correct command to build Sphinx documentation
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html 
+          publish_dir: ./docs/_build/html  # Specify the directory where the built HTML files are located
