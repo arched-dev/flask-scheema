@@ -43,9 +43,11 @@ def get_description(kwargs):
         "DELETE": f"Delete a single `{name}` in the database by its id",
         "PATCH": f"Patch (update) a single `{name}` in the database.",
         "POST": f"Post (create) a single `{name}` in the database.",
-        "GET": f"Get a single `{name}` in the database by its id"
-        if not kwargs.get("multiple", False)
-        else f"Get multiple `{name}` records from the database",
+        "GET": (
+            f"Get a single `{name}` in the database by its id"
+            if not kwargs.get("multiple", False)
+            else f"Get multiple `{name}` records from the database"
+        ),
     }.get(method, "")
 
 
@@ -68,8 +70,14 @@ def get_tag_group(kwargs: dict) -> str:
         return model.Meta.tag_group
 
 
-def setup_route_function(service, method, multiple=False, join_model: Optional[Callable] = None,
-                         get_field: Optional[str] = None):
+def setup_route_function(
+    service,
+    method,
+    multiple=False,
+    join_model: Optional[Callable] = None,
+    get_field: Optional[str] = None,
+    **kwargs,
+):
     """
     Sets up the route function for the API, based on the method. Returns a function that can be used as a route.
 
@@ -84,35 +92,70 @@ def setup_route_function(service, method, multiple=False, join_model: Optional[C
         function: The route function.
     """
 
-    def post_process(post_hook, output, id=id, field=get_field, join_model=join_model, **kwargs):
-        if post_hook:
-            return post_hook(model=service.model, output=output)
-        return output
+    def pre_process(pre_hook, **kwargs):
+        if pre_hook:
+            return pre_hook(
+                model=service.model,
+                **{k: v for k, v in kwargs.items() if k not in ["model"]},
+            )
 
-    def route_function_factory(action, post_hook=None, **kwargs):
+    def post_process(post_hook, output, **kwargs):
+        if post_hook:
+            return post_hook(model=service.model, output=output, **{k:v for k,v in kwargs.items() if k not in ["output", "model"]})
+        return kwargs.update({"output": output})
+
+    def route_function_factory(action, pre_hook=None, post_hook=None, **kwargs):
         def route_function(id=None, **kwargs):
 
-            action_kwargs = {'lookup_val': id} if id else {}
+            kwargs = pre_process(
+                pre_hook=pre_hook,
+                id=id,
+                field=get_field,
+                join_model=join_model,
+                **kwargs,
+            )
+
+            action_kwargs = {"lookup_val": id} if id else {}
             action_kwargs.update(kwargs)
             output = action(**action_kwargs) or abort(404)
-            return post_process(post_hook, output, id=id, field=get_field, join_model=join_model, **kwargs)
+            kwargs = post_process(
+                post_hook=post_hook,
+                output=output,
+                id=id,
+                field=get_field,
+                join_model=join_model,
+                **{
+                    k: v
+                    for k, v in kwargs.items()
+                    if k not in ["post_hook", "output", "id", "field", "join_model"]
+                },
+            )
+            return kwargs.get("output")
 
         return route_function
 
+    pre_hook = get_config_or_model_meta(
+        f"API_SETUP_CALLBACK", model=service.model, default=None, method=method
+    )
 
-    post_hook = get_config_or_model_meta(f"API_CALLBACK", model=service.model, default=None, method=method)
+    post_hook = get_config_or_model_meta(
+        f"API_RETURN_CALLBACK", model=service.model, default=None, method=method
+    )
 
     if method == "GET":
-        action = lambda **kwargs: service.get_query(request.args.to_dict(), alt_field=get_field, multiple=multiple,
-                                                    **kwargs)
+        action = lambda **kwargs: service.get_query(
+            request.args.to_dict(), alt_field=get_field, multiple=multiple, **kwargs
+        )
     elif method == "DELETE":
         action = service.delete
     elif method == "PUT" or method == "PATCH":
         action = lambda **kwargs: service.update(**kwargs)
     elif method == "POST":
         action = lambda **kwargs: service.create(**kwargs)
+    else:
+        return
 
-    return route_function_factory(action, post_hook)
+    return route_function_factory(action, pre_hook, post_hook, **kwargs)
 
 
 def table_namer(model: Optional[DeclarativeBase] = None) -> str:
@@ -124,7 +167,10 @@ def table_namer(model: Optional[DeclarativeBase] = None) -> str:
     Returns:
         str: The table name in snake_case.
     """
-    from flask_scheema.scheema.utils import convert_camel_to_snake, convert_kebab_to_snake
+    from flask_scheema.scheema.utils import (
+        convert_camel_to_snake,
+        convert_kebab_to_snake,
+    )
 
     if model is None:
         return ""
@@ -135,10 +181,11 @@ def table_namer(model: Optional[DeclarativeBase] = None) -> str:
     snake_case_name = convert_camel_to_snake(snake_case_name)
     return snake_case_name
 
+
 def endpoint_namer(
-        model: Optional[DeclarativeBase] = None,
-        input_schema: Optional[Schema] = None,
-        output_schema: Optional[Schema] = None,
+    model: Optional[DeclarativeBase] = None,
+    input_schema: Optional[Schema] = None,
+    output_schema: Optional[Schema] = None,
 ):
     """
     Gets the endpoint name for the model, based on the model name.
@@ -239,7 +286,10 @@ def get_models_relationships(model: Callable):
             "manytomany": False,
         }
 
-        if rel.direction.name in ["MANYTOMANY", "ONETOMANY", "MANYTOONE"] or rel.uselist:
+        if (
+            rel.direction.name in ["MANYTOMANY", "ONETOMANY", "MANYTOONE"]
+            or rel.uselist
+        ):
             route_info["join_type"] = rel.direction.name
             route_info["is_multiple"] = True
 
@@ -263,10 +313,12 @@ def get_models_relationships(model: Callable):
             # Special handling for MANYTOMANY to get the "other side" of the relationship
             route_info["manytomany"] = rel.direction.name == "MANYTOMANY"
             relationships.append(route_info)
-        logger.debug(4,
-                     f"Relationship found for parent +{rel.parent.class_.__name__}+ "
-                     f"and child +{rel.mapper.class_.__name__}+ "
-                     f"joined on |{rel.direction.name}|:`{route_info['join_key']}`")
+        logger.debug(
+            4,
+            f"Relationship found for parent +{rel.parent.class_.__name__}+ "
+            f"and child +{rel.mapper.class_.__name__}+ "
+            f"joined on |{rel.direction.name}|:`{route_info['join_key']}`",
+        )
     return relationships
 
 
@@ -303,7 +355,9 @@ def list_model_columns(model: "CustomBase"):
     from flask_scheema.utilities import get_config_or_model_meta
     from flask_scheema.api.utils import table_namer
 
-    table_namer_func = get_config_or_model_meta(key="api_table_namer", model=model, default=table_namer)
+    table_namer_func = get_config_or_model_meta(
+        key="api_table_namer", model=model, default=table_namer
+    )
 
     all_model_columns, _ = get_all_columns_and_hybrids(model, {})
     all_model_columns = all_model_columns.get(table_namer_func(model))

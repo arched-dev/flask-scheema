@@ -381,7 +381,7 @@ def generate_query_params_from_rule(rule, methods, schema, many) -> List[dict]:
                 "name": "limit",
                 "in": "query",
                 "required": False,
-                "schema": {"type": "integer"},
+                "schema": {"type": "integer", "example": 20},
                 "description": f"The maximum number of items to return in the response. Default `{page_default}` Maximum `{page_max}`.",
             }
         )
@@ -390,10 +390,20 @@ def generate_query_params_from_rule(rule, methods, schema, many) -> List[dict]:
                 "name": "page",
                 "in": "query",
                 "required": False,
-                "schema": {"type": "integer"},
+                "schema": {"type": "integer", "example": 1},
                 "description": "The pagination page number. Default `1`.",
             }
         )
+
+    meta = getattr(schema, "Meta", None)
+    model = None
+    if meta:
+        model = getattr(meta, "model", None)
+
+    for method in methods:
+        additional_qs = get_config_or_model_meta("ADDITIONAL_QUERY_PARAMS", model=model, method=method)
+        if additional_qs:
+            query_params.extend(additional_qs)
 
     return query_params
 

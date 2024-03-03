@@ -356,6 +356,7 @@ class CrudService:
         alt_field: Optional[str] = None,
         multiple: Optional[bool] = True,
         other_model=None,
+        **kwargs
     ) -> Dict[str, Any]:
         """
                 Retrieves a list of objects from the database, optionally paginated.

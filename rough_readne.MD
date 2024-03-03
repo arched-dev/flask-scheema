@@ -121,16 +121,17 @@ API_AUTHENTICATE:                          Optional[callable, bool] = False. # m
 API_AUTHENTICATE_METHOD:                   Optional[str] =  "api_key" | "jwt" | "basic"
 {x} - API_ALLOW_SELECT_FIELDS:                               Optional[callable] = True # Allow aggregation
 
-- API_RETURN_CALLBACK
-- API_SETUP_CALLBACK
-- API_ERROR_CALLBACK
-
+xxx {x} - API_SETUP_CALLBACK
+xxx {x} - API_RETURN_CALLBACK
+xxx {x} - API_ERROR_CALLBACK
+xxx {x} - API_ADDITIONAL_QUERY_PARAMS
 
 - API_RATE_LIMIT:                               Optional[callable] = "1 per second"
 - API_RATE_LIMIT_CALLBACK:                      Optional[callable] = None # a function that is called on rate limit
   being breached.
 
 API OUTPUT:
+
 
 xxx    {x} -  API_DUMP_DATETIME
 xxx    {x} -  API_DUMP_VERSION

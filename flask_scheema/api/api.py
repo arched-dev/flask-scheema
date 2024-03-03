@@ -1,5 +1,4 @@
 import secrets
-import secrets
 import time
 from types import FunctionType
 from typing import Optional, Callable, Union, List, Any, Dict
@@ -398,6 +397,7 @@ class RiceAPI(AttributeInitializerMixin):
             multiple=kwargs.get("multiple", False),
             join_model=kwargs.get("parent_model", None),
             get_field=kwargs.get("join_key"),
+            **{k:v for k,v in kwargs.items() if k not in ["method", "multiple", "join_model", "get_field","http_method", "service"]}
         )
 
         # create the actual route function and add it to flask

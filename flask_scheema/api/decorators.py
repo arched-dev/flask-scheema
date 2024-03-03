@@ -176,6 +176,13 @@ def handle_error(e: Any, status_code):
     Returns:
         response: an error response
     """
+    error_func = get_config_or_model_meta(
+        key="API_ERROR_CALLBACK", method=request.method
+    )
+    if error_func:
+        import traceback
+        error_func(e, traceback)
+
     return create_response(error=str(e), status=status_code)
 
 
@@ -208,16 +215,26 @@ def standardize_response(f: Callable) -> Callable:
     @wraps(f)
     def decorated_function(*args, **kwargs):
         print_exc = get_config_or_model_meta(key="API_PRINT_EXCEPTIONS", default=True)
+        error_func = get_config_or_model_meta(
+            key="API_ERROR_CALLBACK", method=request.method
+        )
 
-        def print_exc():
+        def print_exc_run_error(e):
             """
             Print the exception and the stack trace.
+
+            Args:
+                e: The exception to print.
+
             Returns:
                 None
             """
-            if print_exc:
-                import traceback
+            import traceback
 
+            if error_func:
+                error_func(e, traceback)
+
+            if print_exc:
                 print(e)
                 traceback.print_exc()
 
@@ -235,25 +252,25 @@ def standardize_response(f: Callable) -> Callable:
             )
 
         except HTTPException as e:
-            print_exc()
+            print_exc_run_error(e)
             return create_response(
                 status=e.code, errors=[{"error": e.name, "reason": e.description}]
             )
         except ProgrammingError as e:
-            print_exc()
+            print_exc_run_error(e)
             text = str(e).split(")")[1].split("\n")[0].strip().capitalize()
             return create_response(
                 status=HTTP_BAD_REQUEST,
                 errors=[{"error": "SQL Format Error", "reason": text}],
             )
         except CustomHTTPException as e:
-            print_exc()
+            print_exc_run_error(e)
             return create_response(
                 status=e.status_code,
                 errors=[{"error": e.error, "reason": str(e.reason)}],
             )
         except Exception as e:
-            print_exc()
+            print_exc_run_error(e)
             return create_response(
                 status=HTTP_INTERNAL_SERVER_ERROR,
                 errors=[{"error": "Internal Server Error", "reason": str(e)}],

@@ -133,7 +133,7 @@ def get_config_or_model_meta(
 
     def generate_method_based_keys(base_key: str) -> List[str]:
         """Generates method-based keys based on the base key."""
-        methods = ["get_one", "get_many", "post", "put", "patch", "delete"]
+        methods = ["get", "get", "post", "put", "patch", "delete"]
         return [f"{meth}_{base_key}" for meth in methods if method.lower() in meth]
 
     def search_in_sources(sources, keys):

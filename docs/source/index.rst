@@ -14,9 +14,24 @@ Flask-Scheema
    configuration
    genindex
 
+
 keema-naan == bread, flask-scheema.naan == api
 
+.. image:: https://img.shields.io/pypi/v/flask-scheema
+   :alt: PyPI - Version
+
+.. image:: https://img.shields.io/github/license/arched-dev/flask-scheema
+   :alt: GitHub License
+
+.. image:: https://img.shields.io/pypi/dm/flask-scheema
+   :alt: PyPI - Downloads
+
+.. image:: https://badgen.net/static/Repo/Github/blue?icon=github&link=https%3A%2F%2Fgithub.com%2Farched-dev%2Fflask-scheema
+   :alt: GitHub Repo
+   :target: https://github.com/arched-dev/flask-scheema
+
 --------------------------------------------
+
 
 
 **Flask-Scheema** automatically creates rapid, production ready API's directly from `SQLAlchemy`_ models with
@@ -25,13 +40,15 @@ accompanying `Redoc`_ documentation, all with little to no effort.
 By adding **flask-scheema** to your `Flask`_ application, you can be up and running in seconds, leaving you time to focus on
 what really matters.
 
+What can it do?
+
 * Automatically detect and create endpoints, with model relationships & hybrid properties.
 
 * Create detailed API outputs.
 
-* Variety of authentication methods.
+* Authentication users with a variety of methods.
 
-* Global or model based rate limiting, caching & more.
+* Global or model based configuration including callbacks, rate limiting, caching & more.
 
 * Automatically generate `Redoc`_ documentation.
 

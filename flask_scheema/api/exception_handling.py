@@ -16,6 +16,7 @@ def handle_http_exception(e: HTTPException) -> Response:
     Returns:
         Standardised response.
     """
+
     print_exc = get_config_or_model_meta(key="API_PRINT_EXCEPTIONS", default=True)
     if print_exc:
         import traceback

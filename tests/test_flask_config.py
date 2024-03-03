@@ -1,4 +1,5 @@
 import pytest
+from flask import session
 
 from demo.basic_factory.basic_factory import create_app
 from demo.model_extension.model import create_app as create_app_models
@@ -340,6 +341,27 @@ def test_cascade_delete(client_one):
     assert response.status_code == 500
 
 
+
+def setup_hook(*args, **kwargs):
+
+    session["setup_hook"] = True
+    return kwargs
+
+def return_hook(*args, **kwargs):
+
+    session["return_hook"] = True
+    return kwargs
+
+def patch_setup_hook(*args, **kwargs):
+
+    session["patch_setup_hook"] = True
+    return kwargs
+
+def get_return_hook(*args, **kwargs):
+
+    session["get_return_hook"] = True
+    return kwargs
+
 @pytest.fixture
 def app_two():
     app_two = create_app_models(
@@ -348,6 +370,35 @@ def app_two():
             "API_VERSION": "0.2.0",
             "API_IGNORE_UNDERSCORE_ATTRIBUTES": True,
             "API_ALLOW_CASCADE_DELETE": False,
+            "API_GET_RETURN_CALLBACK": get_return_hook,
+            "API_PATCH_SETUP_CALLBACK": patch_setup_hook,
+            "API_SETUP_CALLBACK": setup_hook,
+            "API_RETURN_CALLBACK": return_hook,
+            "API_ERROR_CALLBACK": return_hook,
+            "API_ADDITIONAL_QUERY_PARAMS": [{
+                "name": "log",
+                "in": "query",
+                "description": "Log call into the database", # optional
+                "required": False, # optional
+                "deprecated": False, # optional
+                "schema": {
+                    "type": "string", # see below for options available
+                    "format": "password", # see below for options available ... optional
+                    "example": 1  # optional
+                }
+            }],
+            "API_POST_ADDITIONAL_QUERY_PARAMS": [{
+                "name": "log_one",
+                "in": "query",
+                "description": "Log call into the database", # optional
+                "required": False, # optional
+                "deprecated": False, # optional
+                "schema": {
+                    "type": "string", # see below for options available
+                    "format": "password", # see below for options available ... optional
+                    "example": 1  # optional
+                }
+            }]
             # Other configurations specific to this test
         }
     )
@@ -362,3 +413,36 @@ def client_two(app_two):
 def test_hide_underscore_attributes(client_two):
     authors_response = client_two.get("/api/authors").json
     assert "_hiddenField" in authors_response["value"][0].keys()
+
+def test_callbacks(client_two):
+
+    with client_two.application.test_request_context():
+
+        book_error = client_two.get("/api/books/9999999").json
+        book_one = client_two.get("/api/books/1").json["value"]
+        book_new = client_two.post("/api/books", json=book_one).json["value"]
+        book_update = client_two.patch("/api/books/" + str(book_one["id"]), json=book_one).json["value"]
+
+        assert session.get("setup_hook")
+        assert session.get("patch_setup_hook")
+        assert session.get("get_return_hook")
+        assert session.get("return_hook")
+
+def test_global_query_param(client_two):
+    swagger = client_two.get("/swagger.json").json
+
+    params = [x["name"] for x in swagger["paths"]["/api/books"]["post"]["parameters"]]
+    assert "log" in params
+def test_post_specific_query_param(client_two):
+
+    swagger = client_two.get("/swagger.json").json
+
+    post_params = [x["name"] for x in swagger["paths"]["/api/books"]["post"]["parameters"]]
+    get_params = [x["name"] for x in swagger["paths"]["/api/books"]["get"]["parameters"]]
+
+    assert "log_one" in post_params
+    assert not "log_one" in get_params
+
+
+def test_cascade_delete(client_two):
+    assert 1 == 2

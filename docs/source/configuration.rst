@@ -136,8 +136,8 @@ should be written.
                 class Meta:
                     # config value is shown as API_RATE_LIMIT in flask config
                     rate_limit = "10 per second"
-                    # config value is shown as API_BLOCKED_METHODS in flask config
-                    blocked_methods = ["DELETE", "POST"]3
+                    # config value is shown as API_BLOCK_METHODS in flask config
+                    blocked_methods = ["DELETE", "POST"]
 
         See the :doc:`Model<config_locations/model>` page for more information.
 
@@ -182,8 +182,8 @@ Documentation Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - Controls whether the ``Redoc``_ documentation is created and served by the API. When disabled, the API will not serve
-          documentation. If true, the API will serve documentation at the url specified by `DOCUMENTATION_URL <configuration.html#DOCUMENTATION_URL>`_.
+        - Controls whether the `Redoc`_ documentation is created and served by the API. When disabled, the API will
+          not serve documentation. If true, the API will serve documentation at the url specified by `DOCUMENTATION_URL <configuration.html#DOCUMENTATION_URL>`_.
     *
         - .. data:: DOCUMENTATION_URL
 
@@ -485,7 +485,7 @@ API Configuration Values
 
 
     *
-        - .. data:: API_BASE_MODEL
+        - .. data:: BASE_MODEL
 
           :bdg:`default:` ``None``
 
@@ -496,13 +496,13 @@ API Configuration Values
         - The base class for all models in the API, and a required configuration value. Used by **flask-scheema** to
           correctly analyse models and automatically create endpoints.
 
-          This value should be a valid base model (`see here <https://docs.sqlalchemy.org/en/20/orm/quickstart.html#declare-models>`_).
+            This value should be a valid base model (`see here <https://docs.sqlalchemy.org/en/20/orm/quickstart.html#declare-models>`_).
 
           When using `Flask-SQLAlchemy`_ you must subclass your models with ``db.Model`` as normal, and also
           populate this field with ``db.Model``. You will, however, have to pass your actual base model to the
           ``SQLAlchemy.init_app(base_clas=YourBase)``
 
-          View the :doc:`Quickstart <quickstart>` docs for more information on how to use this value.
+            View the :doc:`Quickstart <quickstart>` docs for more information on how to use this value.
 
     *
         - .. data:: ALLOW_CASCADE_DELETE
@@ -524,3 +524,63 @@ API Configuration Values
           When disabled, the API will not allow cascade delete operations on models and will return a 400 response
 
           (when the model has dependent relationships).
+
+    *
+        - .. data:: SETUP_CALLBACK
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``callable``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - When a function is assigned to this value, the API will call the function prior to the model being queried.
+          This is useful for adding custom logic to the API, such as adding additional query parameters/modifying the
+          query or logging request to the database.
+
+            View an example function & its signature `here <callbacks.html#setup-function-signature>`_.
+
+    *
+        - .. data:: RETURN_CALLBACK
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``callable``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - When a function is assigned to this value, the API will call the function post database call and pre returning
+          the data to the client. This is useful for adding custom logic to the API, such as modifying the response data
+          or logging the response to the database.
+
+            View an example function & its signature `here <callbacks.html#return-function-signature>`_.
+
+    *
+        - .. data:: ERROR_CALLBACK
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``callable``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global Method`
+
+        - When a function is assigned to this value, the API will call the function when an error occurs. This is useful
+          for adding custom logic to the API, such as logging the error to the database or sending an email to the
+          developer.
+
+            View an example function & its signature `here <callbacks.html#error-function-signature>`_.
+
+    *
+        - .. data:: ADDITIONAL_QUERY_PARAMS
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``list[dict]``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - If you are hoping to extend the default query parameters of the API using callbacks, you may also want to add
+          these to the `ReDoc`_ documentation. This value allows you to add additional query parameters per model or
+          globally to the API.
+
+            View an example of its use and expected value here `Example of its use here <configuration.html#extending-query-params>`_.
