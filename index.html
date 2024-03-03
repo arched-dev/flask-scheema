@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="index.html" />
 <meta property="og:site_name" content="flask-scheema" />
-<meta property="og:description" content="keema-naan == bread, flask-scheema == api Flask-Scheema automatically creates rapid, production ready API’s directly from SQLAlchemy models with accompanying redoc documentation, with little to no ..." />
-<meta name="description" content="keema-naan == bread, flask-scheema == api Flask-Scheema automatically creates rapid, production ready API’s directly from SQLAlchemy models with accompanying redoc documentation, with little to no ..." />
+<meta property="og:description" content="keema-naan == bread, flask-scheema.naan == api Flask-Scheema automatically creates rapid, production ready API’s directly from SQLAlchemy models with accompanying Redoc documentation, all with litt..." />
+<meta name="description" content="keema-naan == bread, flask-scheema.naan == api Flask-Scheema automatically creates rapid, production ready API’s directly from SQLAlchemy models with accompanying Redoc documentation, all with litt..." />
 <link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Installation" href="installation.html" />
 
     <!-- Generated with Sphinx 6.2.1 and Furo 2024.01.29 -->
@@ -241,15 +241,21 @@
 <h1>Flask-Scheema<a class="headerlink" href="#flask-scheema" title="Permalink to this heading">#</a></h1>
 <div class="toctree-wrapper compound">
 </div>
-<p>keema-naan == bread, flask-scheema == api</p>
+<p>keema-naan == bread, flask-scheema.naan == api</p>
 <hr class="docutils" />
 <p><strong>Flask-Scheema</strong> automatically creates rapid, production ready API’s directly from <a class="reference external" href="https://docs.sqlalchemy.org/en/latest/">SQLAlchemy</a> models with
-accompanying <code class="docutils literal notranslate"><span class="pre">redoc</span></code> documentation, with little to no effort.</p>
-<p>By adding this extension to your <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> application, you can be up and running in seconds, leaving you time to focus on
+accompanying <a class="reference external" href="https://redocly.github.io/redoc/">Redoc</a> documentation, all with little to no effort.</p>
+<p>By adding <strong>flask-scheema</strong> to your <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> application, you can be up and running in seconds, leaving you time to focus on
 what really matters.</p>
-<p>Complete with; detailed API output, authentication methods, rate limiting, caching, <a class="reference external" href="https://redocly.github.io/redoc/">Redoc</a> documentation.</p>
-<p>Fully configurable through <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> config values or Meta classes in your models, meaning you have fine grained control over
-the output of your API and accompanying documentation.</p>
+<ul class="simple">
+<li><p>Automatically detect and create endpoints, with model relationships &amp; hybrid properties.</p></li>
+<li><p>Create detailed API outputs.</p></li>
+<li><p>Variety of authentication methods.</p></li>
+<li><p>Global or model based rate limiting, caching &amp; more.</p></li>
+<li><p>Automatically generate <a class="reference external" href="https://redocly.github.io/redoc/">Redoc</a> documentation.</p></li>
+</ul>
+<p>All fully configurable through <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> config values through to method based Meta classes attributes in your models, giving you
+fine grained control over the output of your API and accompanying documentation.</p>
 <p>What are you waiting for…?</p>
 <p>Turn this.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Book</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>

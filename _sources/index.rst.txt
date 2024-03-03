@@ -14,21 +14,29 @@ Flask-Scheema
    configuration
    genindex
 
-keema-naan == bread, flask-scheema == api
+keema-naan == bread, flask-scheema.naan == api
 
 --------------------------------------------
 
 
 **Flask-Scheema** automatically creates rapid, production ready API's directly from `SQLAlchemy`_ models with
-accompanying ``redoc`` documentation, with little to no effort.
+accompanying `Redoc`_ documentation, all with little to no effort.
 
-By adding this extension to your `Flask`_ application, you can be up and running in seconds, leaving you time to focus on
+By adding **flask-scheema** to your `Flask`_ application, you can be up and running in seconds, leaving you time to focus on
 what really matters.
 
-Complete with; detailed API output, authentication methods, rate limiting, caching, `Redoc`_ documentation.
+* Automatically detect and create endpoints, with model relationships & hybrid properties.
 
-Fully configurable through `Flask`_ config values or Meta classes in your models, meaning you have fine grained control over
-the output of your API and accompanying documentation.
+* Create detailed API outputs.
+
+* Variety of authentication methods.
+
+* Global or model based rate limiting, caching & more.
+
+* Automatically generate `Redoc`_ documentation.
+
+All fully configurable through `Flask`_ config values through to method based Meta classes attributes in your models, giving you
+fine grained control over the output of your API and accompanying documentation.
 
 What are you waiting for...?
 
