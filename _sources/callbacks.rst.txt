@@ -34,14 +34,23 @@ values can be applied to specific `HTTP method`_'s or `SQLAlchemy`_ models.
 Configuration Keys
 ^^^^^^^^^^^^^^^^^^^^^
 
-SETUP_CALLBACK
+
+
+
+`SETUP_CALLBACK <configuration.html#SETUP_CALLBACK>`_
     Called before the database operation is executed.
 
-RETURN_CALLBACK
+    Can be set in the `Flask`_ configuration or in `SQLAlchemy`_ models.
+
+`RETURN_CALLBACK <configuration.html#RETURN_CALLBACK>`_
     Called before the completed API response is returned.
 
-ERROR_CALLBACK
+    Can be set in the `Flask`_ configuration or in `SQLAlchemy`_ models.
+
+`ERROR_CALLBACK <configuration.html#ERROR_CALLBACK>`_
     Called when an exception is raised.
+
+    Can only be set in the `Flask`_ configuration, not in models.
 
 Configuration Placement
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -124,6 +133,218 @@ Configuration Placement
 
 
 Callback Examples
+--------------------------
+
+To demonstrate how to use callbacks, please see the demo folder of our `repo`_ or view the demo code `here <https://github.com/arched-dev/flask-scheema/tree/master/demo/callbacks>`_.
+
+
+
+Callback Signatures
+--------------------------
+
+It's probably best for your callback functions to accept `**kwargs` as the only argument. This will allow you to access
+any data you need from the request, response or error.
+
+A selection of data is passed to the callback functions (where possible), and this can differ depending on the
+`HTTP method`_ or lifecycle position. *It's also possible the structure of this data could change in later versions.*
+
+
+Setup callback signature
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To demonstrate how to use callbacks, please see the demo folder of our `repo`_ or view the demo code `here <>`_.
+The setup callback function's kwargs will accept data that could be needed to process the request.
+
+.. code:: python
+
+    {'model': "<class 'demo.model_extension.model.models.Author'>", 'id': 1, 'field': None, 'join_model': None, 'many': False, 'url': '/authors', 'name': 'author', 'output_schema': "<class 'abc.AuthorSchema'>", 'session': "<sqlalchemy.orm.scoping.scoped_session object at 0x7fbde078ae10>", 'input_schema': None, 'group_tag': 'People/Companies'}
+
+The setup function should return the `kwargs` object with any changes made to the data.
+
+.. code:: python
+
+    def my_setup_callback(**kwargs):
+        # Do some logic here
+        return kwargs
+
+
+Return callback signature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+The return callback function's kwargs will house the data that will be returned to the client. This may be the `SQLAlchemy`_
+query object or a dictionary of data depending on the query made.
+
+.. code:: python
+
+    {'model': "<class 'demo.model_extension.model.models.Book'>", 'output': {'query': "<Book 137>"}, 'id': None, 'field': None, 'join_model': None, 'deserialized_data': {'title': 'The Crimson Beacon', 'isbn': '9782227215', 'publication_date': "datetime.date(2024, 4, 19)", 'author_id': 1, 'publisher_id': 12}}
+
+The return function should return the `kwargs` object with any changes made to the data.
+
+.. code:: python
+
+    def my_return_callback(**kwargs):
+        # Do some logic here
+        return kwargs
+
+
+
+Error callback signature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+The error callback function accepts the exception and traceback as arguments. There is no need to return anything.
+
+.. code:: python
+
+    def error_callback(e, traceback):
+        # Do some logic here
+
+
+
+Custom Exceptions
+---------------------------
+
+Raising a custom exception in your callback will cause the API to return a custom error response. This can be useful
+for following the same error response structure as the rest of your API.
+
+This is simple and can be achieved with the custom exception class provided by **flask-schema**.
+
+.. code:: python
+
+    from flask_schema import CustomHTTPException
+
+    def my_error_callback(**kwargs):
+        raise CustomHTTPException(400, "My custom error message")
+
+    class MyModel(db.Model):
+        class Meta:
+            error_callback = my_error_callback
+
+
+Extending Query Params
+---------------------------
+
+If you are hoping to extend a endpoints by adding additional ``query params``, defining the function to handle its
+function is down to you.
+
+.. note::
+    If you are looking to add aditional filters...
+
+    The `return callback <configuration.html#RETURN_CALLBACK>`_ is the best place to handle this, as it will have
+    access to the `SQLAlchemy`_ ``Query`` object when in the kwargs passed to the function.
+
+    From here you can quite easily add additional filters.
+
+    .. code:: python
+
+        def my_return_callback(**kwargs):
+            query = kwargs.get("output")
+            query = query.filter_by(my_field=kwargs.get("my_query_param"))
+            kwargs["output"] = query
+            return kwargs
+
+Likely, you will want to document any changes to the available query params in `Redoc`_. This can be achieved with the
+`ADDITIONAL_QUERY_PARAMS <configuration.html#ADDITIONAL_QUERY_PARAMS>`_ configuration key.
+
+This key can be set in the `Flask`_ configuration or in `SQLAlchemy`_ models (globally or by `Http method`_).
+This means you can apply new query params to specific models, or across the API as a whole.
+
+The expected value is a ``list[dict]`` of the query params you want to add to the endpoint. Please use the below code
+examples as a guide for the expected structure.
+
+Consider the below example where we add a new query param to the `Flask`_ configuration (which is applied globally) to
+every model and endpoint in the documentation.
+
+.. code:: python
+
+    class Config:
+
+        API_ADDITIONAL_QUERY_PARAMS = [{
+            "name": "log",
+            "in": "query",
+            "description": "Log call into the database", # optional
+            "required": False, # optional
+            "deprecated": False, # optional
+            "schema": {
+                "type": "string", # see below for options available
+                "format": "password", # see below for options available ... optional
+                "example": 1  # optional
+            }
+        }]
+
+Or set to a specific `HTTP method`_ - ``GET`` on the model level.
+
+.. code:: python
+
+    class Author(db.Model):
+        class Meta:
+            get_additional_query_params = [{
+                    "name": "log",
+                    "in": "query",
+                    "description": "Log call into the database", # optional
+                    "required": False, # optional
+                    "deprecated": False, # optional
+                    "schema": {
+                        "type": "string", # see below for options available
+                        "format": "password", # see below for options available ... optional
+                        "example": 1  # optional
+                    }
+                }]
+
+
+Acceptable Types
+^^^^^^^^^^^^^^^^^^
+
+Below is a list of acceptable types for the `schema` key in the `ADDITIONAL_QUERY_PARAMS <configuration.html#ADDITIONAL_QUERY_PARAMS>`_ configuration key.
+
+
+    ``string``: For string values.
+
+    ``number``: For floating-point numbers.
+
+    ``integer``: For whole numbers.
+
+    ``boolean``: For true or false values.
+
+    ``array``: For arrays or lists of values.
+
+    ``object``: For JSON objects.
+
+Acceptable Formats
+^^^^^^^^^^^^^^^^^^^
+
+Below is a list of acceptable formats for the `schema` key in the `ADDITIONAL_QUERY_PARAMS <configuration.html#ADDITIONAL_QUERY_PARAMS>`_ configuration key.
+
+string formats
+    ``date``: Full-date according to RFC3339 (e.g., 2020-01-01).
+
+    ``date-time``: The date-time notation as defined by RFC 3339, section 5.6 (e.g., 2020-01-01T12:00:00Z).
+
+    ``password``: A hint to UIs to mask the input.
+
+    ``byte``: Base64-encoded characters, for binary data carried in JSON strings.
+
+    ``binary``: Binary data not encoded in a string, used for file uploads.
+
+    ``email``: String must be in email format.
+
+    ``uuid``: String must be a UUID.
+
+    ``uri``: String must be a URI.
+
+    ``hostname``: String must be a hostname.
+
+    ``ipv4``: String must be an IPv4.
+
+    ``ipv6``: String must be an IPv6.
+
+
+integer formats
+    ``int32``: Signed 32-bit integers.
+
+    ``int64``: Signed 64-bit integers (long).
+
+number formats
+    ``float``: Floating-point numbers.
+
+    ``double``: Double-precision floating-point numbers.

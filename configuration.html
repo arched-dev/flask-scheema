@@ -335,8 +335,8 @@ case.</p>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
         <span class="c1"># config value is shown as API_RATE_LIMIT in flask config</span>
         <span class="n">rate_limit</span> <span class="o">=</span> <span class="s2">&quot;10 per second&quot;</span>
-        <span class="c1"># config value is shown as API_BLOCKED_METHODS in flask config</span>
-        <span class="n">blocked_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="s2">&quot;POST&quot;</span><span class="p">]</span><span class="mi">3</span>
+        <span class="c1"># config value is shown as API_BLOCK_METHODS in flask config</span>
+        <span class="n">blocked_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;DELETE&quot;</span><span class="p">,</span> <span class="s2">&quot;POST&quot;</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>See the <a class="reference internal" href="config_locations/model.html"><span class="doc">Model</span></a> page for more information.</p>
@@ -376,8 +376,8 @@ case and be prefixed with the method.</p>
 <p><span class="sd-sphinx-override sd-badge">type</span> <code class="docutils literal notranslate"><span class="pre">bool</span></code></p>
 <p><span class="sd-sphinx-override sd-badge sd-bg-secondary sd-bg-text-secondary">Optional</span> <span class="sd-sphinx-override sd-badge sd-outline-dark sd-text-dark">Global</span></p>
 </td>
-<td><p>Controls whether the <a href="#id1"><span class="problematic" id="id2">``</span></a>Redoc``_ documentation is created and served by the API. When disabled, the API will not serve
-documentation. If true, the API will serve documentation at the url specified by <a class="reference external" href="configuration.html#DOCUMENTATION_URL">DOCUMENTATION_URL</a>.</p></td>
+<td><p>Controls whether the <a class="reference external" href="https://redocly.github.io/redoc/">Redoc</a> documentation is created and served by the API. When disabled, the API will
+not serve documentation. If true, the API will serve documentation at the url specified by <a class="reference external" href="configuration.html#DOCUMENTATION_URL">DOCUMENTATION_URL</a>.</p></td>
 </tr>
 <tr class="row-even"><td><dl class="py data">
 <dt class="sig sig-object py" id="DOCUMENTATION_URL">
@@ -683,8 +683,8 @@ purposes.</p></td>
 purposes.</p></td>
 </tr>
 <tr class="row-odd"><td><dl class="py data">
-<dt class="sig sig-object py" id="API_BASE_MODEL">
-<span class="sig-name descname"><span class="pre">API_BASE_MODEL</span></span><a class="headerlink" href="#API_BASE_MODEL" title="Permalink to this definition">#</a></dt>
+<dt class="sig sig-object py" id="BASE_MODEL">
+<span class="sig-name descname"><span class="pre">BASE_MODEL</span></span><a class="headerlink" href="#BASE_MODEL" title="Permalink to this definition">#</a></dt>
 <dd></dd></dl>
 
 <p><span class="sd-sphinx-override sd-badge">default:</span> <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
@@ -693,11 +693,15 @@ purposes.</p></td>
 </td>
 <td><p>The base class for all models in the API, and a required configuration value. Used by <strong>flask-scheema</strong> to
 correctly analyse models and automatically create endpoints.</p>
-<p>This value should be a valid base model (<a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/quickstart.html#declare-models">see here</a>).</p>
+<blockquote>
+<div><p>This value should be a valid base model (<a class="reference external" href="https://docs.sqlalchemy.org/en/20/orm/quickstart.html#declare-models">see here</a>).</p>
+</div></blockquote>
 <p>When using <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a> you must subclass your models with <code class="docutils literal notranslate"><span class="pre">db.Model</span></code> as normal, and also
 populate this field with <code class="docutils literal notranslate"><span class="pre">db.Model</span></code>. You will, however, have to pass your actual base model to the
 <code class="docutils literal notranslate"><span class="pre">SQLAlchemy.init_app(base_clas=YourBase)</span></code></p>
-<p>View the <a class="reference internal" href="quickstart.html"><span class="doc">Quickstart</span></a> docs for more information on how to use this value.</p>
+<blockquote>
+<div><p>View the <a class="reference internal" href="quickstart.html"><span class="doc">Quickstart</span></a> docs for more information on how to use this value.</p>
+</div></blockquote>
 </td>
 </tr>
 <tr class="row-even"><td><dl class="py data">
@@ -715,6 +719,74 @@ populate this field with <code class="docutils literal notranslate"><span class=
 <p>(when the model has dependent relationships).</p>
 <p>When disabled, the API will not allow cascade delete operations on models and will return a 400 response</p>
 <p>(when the model has dependent relationships).</p>
+</td>
+</tr>
+<tr class="row-odd"><td><dl class="py data">
+<dt class="sig sig-object py" id="SETUP_CALLBACK">
+<span class="sig-name descname"><span class="pre">SETUP_CALLBACK</span></span><a class="headerlink" href="#SETUP_CALLBACK" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p><span class="sd-sphinx-override sd-badge">default:</span> <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p><span class="sd-sphinx-override sd-badge">type</span> <code class="docutils literal notranslate"><span class="pre">callable</span></code></p>
+<p><span class="sd-sphinx-override sd-badge sd-bg-secondary sd-bg-text-secondary">Optional</span> <span class="sd-sphinx-override sd-badge sd-outline-dark sd-text-dark">Model Method</span></p>
+</td>
+<td><p>When a function is assigned to this value, the API will call the function prior to the model being queried.
+This is useful for adding custom logic to the API, such as adding additional query parameters/modifying the
+query or logging request to the database.</p>
+<blockquote>
+<div><p>View an example function &amp; its signature <a class="reference external" href="callbacks.html#setup-function-signature">here</a>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="RETURN_CALLBACK">
+<span class="sig-name descname"><span class="pre">RETURN_CALLBACK</span></span><a class="headerlink" href="#RETURN_CALLBACK" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p><span class="sd-sphinx-override sd-badge">default:</span> <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p><span class="sd-sphinx-override sd-badge">type</span> <code class="docutils literal notranslate"><span class="pre">callable</span></code></p>
+<p><span class="sd-sphinx-override sd-badge sd-bg-secondary sd-bg-text-secondary">Optional</span> <span class="sd-sphinx-override sd-badge sd-outline-dark sd-text-dark">Model Method</span></p>
+</td>
+<td><p>When a function is assigned to this value, the API will call the function post database call and pre returning
+the data to the client. This is useful for adding custom logic to the API, such as modifying the response data
+or logging the response to the database.</p>
+<blockquote>
+<div><p>View an example function &amp; its signature <a class="reference external" href="callbacks.html#return-function-signature">here</a>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-odd"><td><dl class="py data">
+<dt class="sig sig-object py" id="ERROR_CALLBACK">
+<span class="sig-name descname"><span class="pre">ERROR_CALLBACK</span></span><a class="headerlink" href="#ERROR_CALLBACK" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p><span class="sd-sphinx-override sd-badge">default:</span> <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p><span class="sd-sphinx-override sd-badge">type</span> <code class="docutils literal notranslate"><span class="pre">callable</span></code></p>
+<p><span class="sd-sphinx-override sd-badge sd-bg-secondary sd-bg-text-secondary">Optional</span> <span class="sd-sphinx-override sd-badge sd-outline-dark sd-text-dark">Global Method</span></p>
+</td>
+<td><p>When a function is assigned to this value, the API will call the function when an error occurs. This is useful
+for adding custom logic to the API, such as logging the error to the database or sending an email to the
+developer.</p>
+<blockquote>
+<div><p>View an example function &amp; its signature <a class="reference external" href="callbacks.html#error-function-signature">here</a>.</p>
+</div></blockquote>
+</td>
+</tr>
+<tr class="row-even"><td><dl class="py data">
+<dt class="sig sig-object py" id="ADDITIONAL_QUERY_PARAMS">
+<span class="sig-name descname"><span class="pre">ADDITIONAL_QUERY_PARAMS</span></span><a class="headerlink" href="#ADDITIONAL_QUERY_PARAMS" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<p><span class="sd-sphinx-override sd-badge">default:</span> <code class="docutils literal notranslate"><span class="pre">None</span></code></p>
+<p><span class="sd-sphinx-override sd-badge">type</span> <code class="docutils literal notranslate"><span class="pre">list[dict]</span></code></p>
+<p><span class="sd-sphinx-override sd-badge sd-bg-secondary sd-bg-text-secondary">Optional</span> <span class="sd-sphinx-override sd-badge sd-outline-dark sd-text-dark">Model Method</span></p>
+</td>
+<td><p>If you are hoping to extend the default query parameters of the API using callbacks, you may also want to add
+these to the <a class="reference external" href="https://redocly.github.io/redoc/">ReDoc</a> documentation. This value allows you to add additional query parameters per model or
+globally to the API.</p>
+<blockquote>
+<div><p>View an example of its use and expected value here <a class="reference external" href="configuration.html#extending-query-params">Example of its use here</a>.</p>
+</div></blockquote>
 </td>
 </tr>
 </tbody>
@@ -810,8 +882,12 @@ populate this field with <code class="docutils literal notranslate"><span class=
 <li><a class="reference internal" href="#DUMP_NULL_ERRORS"><code class="docutils literal notranslate"><span class="pre">DUMP_NULL_ERRORS</span></code></a></li>
 <li><a class="reference internal" href="#PRINT_EXCEPTIONS"><code class="docutils literal notranslate"><span class="pre">PRINT_EXCEPTIONS</span></code></a></li>
 <li><a class="reference internal" href="#CONVERT_TO_CAMEL_CASE"><code class="docutils literal notranslate"><span class="pre">CONVERT_TO_CAMEL_CASE</span></code></a></li>
-<li><a class="reference internal" href="#API_BASE_MODEL"><code class="docutils literal notranslate"><span class="pre">API_BASE_MODEL</span></code></a></li>
+<li><a class="reference internal" href="#BASE_MODEL"><code class="docutils literal notranslate"><span class="pre">BASE_MODEL</span></code></a></li>
 <li><a class="reference internal" href="#ALLOW_CASCADE_DELETE"><code class="docutils literal notranslate"><span class="pre">ALLOW_CASCADE_DELETE</span></code></a></li>
+<li><a class="reference internal" href="#SETUP_CALLBACK"><code class="docutils literal notranslate"><span class="pre">SETUP_CALLBACK</span></code></a></li>
+<li><a class="reference internal" href="#RETURN_CALLBACK"><code class="docutils literal notranslate"><span class="pre">RETURN_CALLBACK</span></code></a></li>
+<li><a class="reference internal" href="#ERROR_CALLBACK"><code class="docutils literal notranslate"><span class="pre">ERROR_CALLBACK</span></code></a></li>
+<li><a class="reference internal" href="#ADDITIONAL_QUERY_PARAMS"><code class="docutils literal notranslate"><span class="pre">ADDITIONAL_QUERY_PARAMS</span></code></a></li>
 </ul>
 </li>
 </ul>

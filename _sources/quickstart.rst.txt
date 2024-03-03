@@ -27,6 +27,10 @@ a SQLAlchemy session.
     .. tab-item:: flask-sqlalchemy
         :sync: key1
 
+        **Base Model**
+
+        First you will need a base class that returns a session with a ``get_session`` method.
+
         When using flask-sqlalchemy, you can return ``db.session`` in your base model.
 
         .. code:: python
@@ -37,6 +41,7 @@ a SQLAlchemy session.
                 def get_session(*args):
                     return db.session
 
+        **Database Models**
 
         Make sure any model you want to expose has a class attribute called ``Meta`` with the following attributes:
 
@@ -44,7 +49,7 @@ a SQLAlchemy session.
         - ``tag_group``: The tag group that the model will be placed in in the API Documentation.
 
         Don't inherit from your base model, but from ``db.Model`` as you normally would. When using `Flask-SQLAlchemy`_,
-        you set the base model when initializing the extension.
+        you set the base model when initializing the extension, we will cover that shortly...
 
         .. code:: python
 
@@ -120,22 +125,25 @@ a SQLAlchemy session.
 Extension Initialization
 -----------------------------------------
 
-To initialize the extension, it's necessary to provide it with a valid `Flask`_ application instance as with many other
-`Flask`_ extensions.
+To initialize the extension, it's necessary to provide **flask-scheema** with a valid `Flask`_ application instance
+as with many other `Flask`_ extensions.
 
-The only other requirement's are two configuration values that need to be passed to `Flask`_.
+The only other requirement's are a few configuration values that need to be passed to `Flask`_'s config.
 
-- ``API_TITLE``: The title of the API that will be displayed in the documentation.
-- ``API_VERSION``: The version of the API that will be displayed in the documentation.
-
+- `API_TITLE <configuration.html#TITLE>`_ - The title of the API that will be displayed in the documentation.
+- `API_VERSION <configuration.html#VERSION>`_ - The version of the API that will be displayed in the documentation.
+- `API_BASE_MODEL <configuration.html#BASE_MODEL>`_ - This will either be ``db.Model`` if using `Flask-SQLAlchemy`_ or the name of your base model if using vanilla `SQLAlchemy`_.
 
 .. tab-set::
 
     .. tab-item:: flask-sqlalchemy
         :sync: key1
 
-        Notice below when you initialise `Flask-SQLAlchemy`_ you pass the ``BaseModel`` as the ``model_clas`` attribute,
-        and also pass in ``db.model`` to the `Flask`_ config as :data:`API_BASE_MODEL`.
+        Notice below when you initialise `Flask-SQLAlchemy`_ you pass your ``BaseModel`` as the ``model_clas`` attribute,
+        but pass in ``db.model`` to the `Flask`_ config as :data:`API_BASE_MODEL`.
+
+        Under the hood `Flask-SQLAlchemy`_ will use the ``model_class`` to create the base model for all your models,
+        which then allows ``flask-scheema`` to view and use the same base model to create the API endpoints.
 
         .. code:: python
 
@@ -165,6 +173,8 @@ The only other requirement's are two configuration values that need to be passed
 
         .. note:: For comprehensive details on configuration, visit our :doc:`configuration </configuration>` page.
 
+        And that's all folks! Just run the code and you should now have a fully functional API with documentation.
+
     .. tab-item:: vanilla sqlalchemy
         :sync: key1
 
@@ -193,6 +203,8 @@ The only other requirement's are two configuration values that need to be passed
                 app.run(debug=True)
 
         .. note:: For comprehensive details on configuration, visit our :doc:`configuration </configuration>` page.
+
+        And that's all folks! Just run the code and you should now have a fully functional API with documentation.
 
 
 API Documentation

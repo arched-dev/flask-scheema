@@ -257,6 +257,8 @@ a SQLAlchemy session.</p>
 <input checked="checked" id="sd-tab-item-0" name="sd-tab-set-0" type="radio">
 </input><label class="sd-tab-label" data-sync-id="key1" for="sd-tab-item-0">
 flask-sqlalchemy</label><div class="sd-tab-content docutils">
+<p><strong>Base Model</strong></p>
+<p>First you will need a base class that returns a session with a <code class="docutils literal notranslate"><span class="pre">get_session</span></code> method.</p>
 <p>When using flask-sqlalchemy, you can return <code class="docutils literal notranslate"><span class="pre">db.session</span></code> in your base model.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">sqlalchemy.ext.declarative</span> <span class="kn">import</span> <span class="n">declarative_base</span>
 
@@ -265,13 +267,14 @@ flask-sqlalchemy</label><div class="sd-tab-content docutils">
         <span class="k">return</span> <span class="n">db</span><span class="o">.</span><span class="n">session</span>
 </pre></div>
 </div>
+<p><strong>Database Models</strong></p>
 <p>Make sure any model you want to expose has a class attribute called <code class="docutils literal notranslate"><span class="pre">Meta</span></code> with the following attributes:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code>: The tag that will be used to identify the model in the API and documentation.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">tag_group</span></code>: The tag group that the model will be placed in in the API Documentation.</p></li>
 </ul>
 <p>Don’t inherit from your base model, but from <code class="docutils literal notranslate"><span class="pre">db.Model</span></code> as you normally would. When using <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a>,
-you set the base model when initializing the extension.</p>
+you set the base model when initializing the extension, we will cover that shortly…</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Author</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
     <span class="n">__table__</span> <span class="o">=</span> <span class="s2">&quot;author&quot;</span>
     <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
@@ -335,19 +338,22 @@ have to set a <a class="reference external" href="https://flask.palletsprojects.
 </section>
 <section id="extension-initialization">
 <h2>Extension Initialization<a class="headerlink" href="#extension-initialization" title="Permalink to this heading">#</a></h2>
-<p>To initialize the extension, it’s necessary to provide it with a valid <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> application instance as with many other
-<a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> extensions.</p>
-<p>The only other requirement’s are two configuration values that need to be passed to <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a>.</p>
+<p>To initialize the extension, it’s necessary to provide <strong>flask-scheema</strong> with a valid <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> application instance
+as with many other <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> extensions.</p>
+<p>The only other requirement’s are a few configuration values that need to be passed to <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a>’s config.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">API_TITLE</span></code>: The title of the API that will be displayed in the documentation.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">API_VERSION</span></code>: The version of the API that will be displayed in the documentation.</p></li>
+<li><p><a class="reference external" href="configuration.html#TITLE">API_TITLE</a> - The title of the API that will be displayed in the documentation.</p></li>
+<li><p><a class="reference external" href="configuration.html#VERSION">API_VERSION</a> - The version of the API that will be displayed in the documentation.</p></li>
+<li><p><a class="reference external" href="configuration.html#BASE_MODEL">API_BASE_MODEL</a> - This will either be <code class="docutils literal notranslate"><span class="pre">db.Model</span></code> if using <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a> or the name of your base model if using vanilla <a class="reference external" href="https://docs.sqlalchemy.org/en/latest/">SQLAlchemy</a>.</p></li>
 </ul>
 <div class="sd-tab-set docutils">
 <input checked="checked" id="sd-tab-item-2" name="sd-tab-set-1" type="radio">
 </input><label class="sd-tab-label" data-sync-id="key1" for="sd-tab-item-2">
 flask-sqlalchemy</label><div class="sd-tab-content docutils">
-<p>Notice below when you initialise <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a> you pass the <code class="docutils literal notranslate"><span class="pre">BaseModel</span></code> as the <code class="docutils literal notranslate"><span class="pre">model_clas</span></code> attribute,
-and also pass in <code class="docutils literal notranslate"><span class="pre">db.model</span></code> to the <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> config as <a class="reference internal" href="configuration.html#API_BASE_MODEL" title="API_BASE_MODEL"><code class="xref py py-data docutils literal notranslate"><span class="pre">API_BASE_MODEL</span></code></a>.</p>
+<p>Notice below when you initialise <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a> you pass your <code class="docutils literal notranslate"><span class="pre">BaseModel</span></code> as the <code class="docutils literal notranslate"><span class="pre">model_clas</span></code> attribute,
+but pass in <code class="docutils literal notranslate"><span class="pre">db.model</span></code> to the <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> config as <code class="xref py py-data docutils literal notranslate"><span class="pre">API_BASE_MODEL</span></code>.</p>
+<p>Under the hood <a class="reference external" href="https://flask-sqlalchemy.palletsprojects.com/en/">Flask-SQLAlchemy</a> will use the <code class="docutils literal notranslate"><span class="pre">model_class</span></code> to create the base model for all your models,
+which then allows <code class="docutils literal notranslate"><span class="pre">flask-scheema</span></code> to view and use the same base model to create the API endpoints.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span>
 <span class="kn">from</span> <span class="nn">flask_sqlalchemy</span> <span class="kn">import</span> <span class="n">SQLAlchemy</span>
 
@@ -377,6 +383,7 @@ and also pass in <code class="docutils literal notranslate"><span class="pre">db
 <p class="admonition-title">Note</p>
 <p>For comprehensive details on configuration, visit our <a class="reference internal" href="configuration.html"><span class="doc">configuration</span></a> page.</p>
 </div>
+<p>And that’s all folks! Just run the code and you should now have a fully functional API with documentation.</p>
 </div>
 <input id="sd-tab-item-3" name="sd-tab-set-1" type="radio">
 </input><label class="sd-tab-label" data-sync-id="key1" for="sd-tab-item-3">
@@ -407,6 +414,7 @@ vanilla sqlalchemy</label><div class="sd-tab-content docutils">
 <p class="admonition-title">Note</p>
 <p>For comprehensive details on configuration, visit our <a class="reference internal" href="configuration.html"><span class="doc">configuration</span></a> page.</p>
 </div>
+<p>And that’s all folks! Just run the code and you should now have a fully functional API with documentation.</p>
 </div>
 </div>
 </section>
