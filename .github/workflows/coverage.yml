@@ -30,7 +30,7 @@ jobs:
     - name: Run Unittests and Generate Coverage Report
     
       run: |
-        pytest --cov=src tests/
+        pytest --cov=flask_scheema tests/
         coverage xml
         coverage-badge -o ./docs/source/_static/coverage.svg
     # Commit and Push Coverage Badge
