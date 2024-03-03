@@ -1,7 +1,7 @@
 import pytest
 
-from demo.model_extension_2.model import create_app
-from demo.model_extension_2.model.models import Author
+from demo.model_extension.model import create_app
+from demo.model_extension.model.models import Author
 
 
 @pytest.fixture

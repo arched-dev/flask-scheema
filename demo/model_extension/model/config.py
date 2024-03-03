@@ -1,4 +1,4 @@
-from demo.model_extension_2.model.extensions import db
+from demo.model_extension.model.extensions import db
 
 
 class Config:

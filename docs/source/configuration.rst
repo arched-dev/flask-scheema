@@ -170,7 +170,7 @@ Documentation Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - The url for accessing the redoc documentation.
+        - The url for accessing the `ReDoc`_ documentation.
     *
         - .. data:: TITLE
 
@@ -221,17 +221,106 @@ Documentation Configuration Values
           This value should be a valid CSS color value.
 
     *
-        - .. data:: API_DESCRIPTION
+        - .. data:: DESCRIPTION
 
-          :bdg:`default:` ``{library_dir}/flask_scheema/html/base_readme.MD``
+          :bdg:`default:` ``./flask_scheema/html/base_readme.MD``
 
           :bdg:`type` ``str``
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
 
-        - Paired with ``API_LOGO_URL``, this value sets the background color of the logo in the ReDoc documentation.
-          This value should be a valid CSS color value.
+        - The main description of the API in the generated ReDoc documentation. This value should be a valid markdown
+          string or a path to a markdown file. The file will be rendered with `Jinja`_ and you can access the `Flask`_
+          config with the `{{ config }}` variable.
+
+          -----------------------------------------------------------------
+
+          View the template file `here <https://github.com/arched-dev/flask-scheema/blob/master/flask_scheema/html/base_readme.MD>`_
+    *
+        - .. data:: DOCS_FONT
+
+          :bdg:`default:` ``jetbrains_mono``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Configures the font style for your ReDoc documentation, with ``jetbrains_mono`` as the default. Options
+          include ``jetbrains_mono``, ``sourcecode_pro``, ``roboto``, ``montserrat``, ``lato`` or any valid css font.
+
+          This setting allows for visual customization to match your documentation's aesthetic preferences.
+    *
+        - .. data:: CONTACT_NAME
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Specifies the contact name for inquiries and support in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+    *
+        - .. data:: CONTACT_EMAIL
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Specifies the contact email for inquiries and support in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+    *
+        - .. data:: CONTACT_URL
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Specifies the contact web address for inquiries and support in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+    *
+        - .. data:: LICENCE_NAME
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Specifies the licence type for the API in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+    *
+        - .. data:: LICENCE_URL
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - Specifies a url to the licence type for the API in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+    *
+        - .. data:: SERVER_URLS
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``list[dict]``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Specifies the server(s) used for calling the API in the `ReDoc`_ documentation. If not provided, the field name will not be displayed in the docs.
+
+          Example structure:
+
+            [{"url": "https://api.example.com", "description": "Main server"}, ...]
+
 
 
 
@@ -244,99 +333,155 @@ API Configuration Values
     *
         - .. data:: DUMP_DATETIME
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``str``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``datetime`` field in the response data. This field will contain the
+          current date and time of the response.
     *
         - .. data:: DUMP_VERSION
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``version`` field in the response data. This field will contain the
+          version number of the API.
     *
         - .. data:: DUMP_STATUS_CODE
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``str``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``statusCode`` field in the response data. This field will contain the
+          status code of the response.
+
+          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
     *
         - .. data:: DUMP_RESPONSE_TIME
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool```
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``responseTime`` field in the response data. This field will contain the
+          time taken to process the request in ms.
+
+          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
 
     *
         - .. data:: DUMP_COUNT
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``totalCount`` field in the response data. This field will contain the
+          total number of records available to be queried with pagination (not the number of records returned in the
+          response).
+
+          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
 
     *
         - .. data:: DUMP_NULL_NEXT_URL
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``nextUrl`` field in the response data if null. When disabled the
+          ``nextUrl`` field will not be included in the response data if null.
+
+          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+
 
     *
         - .. data:: DUMP_NULL_PREVIOUS_URL
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``True``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will include a ``previousUrl`` field in the response data if null. When disabled the
+          ``previousUrl`` field will not be included in the response data if null.
+
+          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
     *
-        - .. data:: DUMP_NULL_ERROR
+        - .. data:: DUMP_NULL_ERRORS
 
-          :bdg:`default:` ``None``
+          :bdg:`default:` ``False``
 
-          :bdg:`type` ``List[str]``
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - When enabled, the API will include a ``error`` field in the response data if null. When disabled the
+          ``error`` field will not be included in the response data if null.
+
+    *
+        - .. data:: PRINT_EXCEPTIONS
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - When enabled, the API will print exceptions to the console when they occur. This is useful for debugging
+          purposes.
+
+    *
+        - .. data:: CONVERT_TO_CAMEL_CASE
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - When enabled, the API will print exceptions to the console when they occur. This is useful for debugging
+          purposes.
+
+
+    *
+        - .. data:: BASE_SCHEMA
+
+          :bdg:`default:` ``db.Model``
+
+          :bdg:`type` ``DeclarativeBase``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - The base class for all models in the API. This value should be a valid `SQLAlchemy`_ model class. Default
+          to ``db.Model`` from `Flask-SQLAlchemy`_ as most users will be using this as their base class.
+
+          If you are not using `Flask-SQLAlchemy`_ you will need to set this value to your base model class to ensure
+          the API can access your models.
+
+    *
+        - .. data:: ALLOW_CASCADE_DELETE
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
 
-        - to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to
-          add to add to add to add to add to add to add to add to add to add to add to add to add to add to add to add
-          to add to add to add to add
+        - When enabled, the API will allow cascade delete operations on models. This will delete all related records
+          when a record is deleted. Cac

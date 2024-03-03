@@ -15,7 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 
-from demo.basic_1.basic.extensions import db
+from demo.basic_factory.basic_factory.extensions import db
 
 book_category_table = Table(
     "book_category",

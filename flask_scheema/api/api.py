@@ -97,21 +97,24 @@ class RiceAPI(AttributeInitializerMixin):
                         "the database session for that model."
                     )
 
-            if not current_app.config.get(
-                "FLASK_SECRET_KEY"
-            ) and not current_app.config.get("SECRET_KEY"):
-                raise ValueError(
-                    "SECRET_KEY must be set in the Flask app config. You can use this randomly generated key:\n"
-                    f"{secrets.token_urlsafe(24)}\n"
-                    f"And this SALT key\n"
-                    f"{secrets.token_urlsafe(16)}\n"
-                )
 
             user = get_config_or_model_meta("API_USER_MODEL", default=None)
             auth = get_config_or_model_meta("API_AUTHENTICATE", default=None)
             auth_method = get_config_or_model_meta(
                 "API_AUTHENTICATE_METHOD", default=None
             )
+
+            if not current_app.config.get(
+                "FLASK_SECRET_KEY"
+            ) and not current_app.config.get("SECRET_KEY") and current_app.config.get("API_AUTHENTICATE"):
+                raise ValueError(
+                    "SECRET_KEY must be set in the Flask app config. You can use this randomly generated key:\n"
+                    f"{secrets.token_urlsafe(48)}\n"
+                    f"And this SALT key\n"
+                    f"{secrets.token_urlsafe(32)}\n"
+                )
+
+
             if not user and auth and callable(auth):
                 raise ValueError(
                     "If API_AUTHENTICATE is set to a callable, API_USER_MODEL must be set to the user model."

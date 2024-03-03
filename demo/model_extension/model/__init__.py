@@ -1,8 +1,8 @@
 from flask import Flask
 
-from demo.model_extension_2.helpers import load_dummy_database
-from demo.model_extension_2.model.config import Config
-from demo.model_extension_2.model.extensions import db, scheema
+from demo.model_extension.helpers import load_dummy_database
+from demo.model_extension.model.config import Config
+from demo.model_extension.model.extensions import db, scheema
 
 
 def create_app(config: dict = None):

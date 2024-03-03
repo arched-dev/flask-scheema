@@ -1,7 +1,7 @@
 import pytest
 
-from demo.basic_1.basic import create_app
-from demo.model_extension_2.model import create_app as create_app_models
+from demo.basic_factory.basic_factory import create_app
+from demo.model_extension.model import create_app as create_app_models
 
 
 @pytest.fixture

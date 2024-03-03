@@ -36,39 +36,39 @@ xxx - API_LOGO_URL
 xxx - API_LOGO_BACKGROUND
 - API_KEYWORDS
 - 
-- API_DESCRIPTION accepts a string or a filepath string, with a default behavior that auto-generates a comprehensive
+xxx - API_DESCRIPTION accepts a string or a filepath string, with a default behavior that auto-generates a comprehensive
   documentation description. If a filepath is provided, it can point to a Jinja template that dynamically accesses the
   Flask configuration via {config.xxxx} placeholders. This flexible approach allows for a rich, context-aware
   description in your ReDoc documentation.
 - 
-- API_DOCS_FONT = configures the font style for your ReDoc documentation, with jetbrains_mono as the default. Options
+xxx - API_DOCS_FONT = configures the font style for your ReDoc documentation, with jetbrains_mono as the default. Options
   include jetbrains_mono, sourcecode_pro, roboto, montserrat, and lato. This setting allows for visual customization to
   match your documentation's aesthetic preferences.
 - 
-- API_CONTACT_NAME = None (str) Specifies the contact name for inquiries and support in the redoc documentation. If not
+xxx {X} - API_CONTACT_NAME = None (str) Specifies the contact name for inquiries and support in the redoc documentation. If not
   provided, the field name will not be displayed in the docs.
-- API_CONTACT_EMAIL = None (str) Specifies the contact email for inquiries and support in the redoc documentation. If
+xxx {X} - API_CONTACT_EMAIL = None (str) Specifies the contact email for inquiries and support in the redoc documentation. If
   not provided, the field name will not be displayed in the docs.
-- API_CONTACT_URL = None (str) Specifies the contact web address for inquiries and support in the redoc documentation.
+xxx {X}- API_CONTACT_URL = None (str) Specifies the contact web address for inquiries and support in the redoc documentation.
   If not provided, the field name will not be displayed in the docs.
-- API_LICENCE_NAME = None (str) Specifies the licence type for the API in the redoc documentation. If not provided, the
+xxx {X}- API_LICENCE_NAME = None (str) Specifies the licence type for the API in the redoc documentation. If not provided, the
   field name will not be displayed in the docs.
-- API_LICENCE_URL = None (str) Specifies a url to the licence type for the API in the redoc documentation. If not
+xxx {X}- API_LICENCE_URL = None (str) Specifies a url to the licence type for the API in the redoc documentation. If not
   provided, the field name will not be displayed in the docs.
-- API_SERVER_URLS = List[Dict[str, str]] default None,
+xxx {X}- API_SERVER_URLS = List[Dict[str, str]] default None,
   example: [{"url": "http://localhost:5000", "description": "Local server"}...]  Specifies the server(s) used for
   calling the API in the redoc documentation. If not provided, the field name will not be displayed in the docs.
 
 
-- API_PRINT_EXCEPTIONS = True Defines whether to print exceptions to console when they occur.
+xxx - API_PRINT_EXCEPTIONS = True Defines whether to print exceptions to console when they occur.
     - API_BASE_MODEL db.Model
-    - API_BASE_SCHEMA = AutoSchema
+xxx - API_BASE_SCHEMA = AutoSchema
     - AUTO_NAME_ENDPOINTS # check what this does
     - FULL_AUTO:                                 Optional[callable] = True # does the lot.
     - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
-      {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True # Convert json output to camel case
+xxx  {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True # Convert json output to camel case
     - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
-      delete
+
     -
     -
         -
@@ -128,14 +128,14 @@ API_AUTHENTICATE_METHOD:                   Optional[str] =  "api_key" | "jwt" | 
 
 API OUTPUT:
 
-    {x} -  API_DUMP_DATETIME
-    {x} -  API_DUMP_VERSION
-    {x} -  API_DUMP_STATUS_CODE
-    {x} -  API_DUMP_RESPONSE_TIME
-    {x} -  API_DUMP_COUNT
-    {x} -  API_DUMP_NULL_NEXT_URL
-    {x} -  API_DUMP_NULL_PREVIOUS_URL
-    {x} -  API_DUMP_NULL_ERROR
+xxx    {x} -  API_DUMP_DATETIME
+xxx    {x} -  API_DUMP_VERSION
+xxx    {x} -  API_DUMP_STATUS_CODE
+xxx    {x} -  API_DUMP_RESPONSE_TIME
+xxx    {x} -  API_DUMP_COUNT
+xxx    {x} -  API_DUMP_NULL_NEXT_URL
+xxx    {x} -  API_DUMP_NULL_PREVIOUS_URL
+xxx    {x} -  API_DUMP_NULL_ERROR
 
 {x}
 Model meta:

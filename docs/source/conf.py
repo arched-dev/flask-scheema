@@ -96,10 +96,13 @@ autosummary_generate = True
 
 rst_epilog = """
 .. _Flask: https://flask.palletsprojects.com/en/latest/
+.. _Flask-SQLAlchemy: https://flask-sqlalchemy.palletsprojects.com/en/
 .. _Flask-Limiter: https://flask-limiter.readthedocs.io/en/stable/
 .. _Flask-Caching: https://flask-caching.readthedocs.io/en/latest/
 .. _SQLAlchemy: https://docs.sqlalchemy.org/en/latest/
 .. _ReDoc: https://redocly.github.io/redoc/
+.. _Jinja: https://jinja.palletsprojects.com/en/3.1.x/
+.. _SQLAlchemy ORM: https://docs.sqlalchemy.org/
 .. _HTTP method: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
 """
 

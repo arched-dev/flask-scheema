@@ -114,7 +114,7 @@ def make_base_dict():
     if dump_null_previous_url:
         output.update({key_func("previous_url"): "null"})
 
-    dump_null_error = get_config_or_model_meta("API_DUMP_NULL_ERROR", default=True)
+    dump_null_error = get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=False)
     if dump_null_error:
         output.update({key_func("error"): "null"})
 

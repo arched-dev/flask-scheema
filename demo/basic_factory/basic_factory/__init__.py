@@ -1,8 +1,8 @@
 from flask import Flask
 
-from demo.basic_1.basic.config import Config
-from demo.basic_1.basic.extensions import db, scheema
-from demo.basic_1.helpers import load_dummy_database
+from demo.basic_factory.basic_factory.config import Config
+from demo.basic_factory.basic_factory.extensions import db, scheema
+from demo.basic_factory.helpers import load_dummy_database
 
 
 def create_app(config: dict = None):
@@ -22,7 +22,7 @@ def create_app(config: dict = None):
     db.init_app(app)
 
     with app.app_context():
-        from demo.basic_1.basic.models import Category, Book, Publisher, Author, Review
+        from demo.basic_factory.basic_factory.models import Category, Book, Publisher, Author, Review
         db.create_all()
         load_dummy_database(db)
         scheema.init_app(app)

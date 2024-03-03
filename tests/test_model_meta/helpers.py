@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 
 import numpy as np
 
-from demo.model_extension_2.model.models import (
+from demo.model_extension.model.models import (
     Review,
     Book,
     Category,

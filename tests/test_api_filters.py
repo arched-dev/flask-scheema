@@ -1,6 +1,6 @@
 import pytest
 
-from demo.basic_1.basic import create_app
+from demo.basic_factory.basic_factory import create_app
 
 
 @pytest.fixture

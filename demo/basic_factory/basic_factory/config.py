@@ -1,4 +1,4 @@
-from demo.basic_1.basic.extensions import db
+from demo.basic_factory.basic_factory.extensions import db
 
 
 class Config:

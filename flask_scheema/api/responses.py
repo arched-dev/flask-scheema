@@ -236,10 +236,6 @@ def create_response(
     if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
         data = {convert_snake_to_camel(k): v for k, v in data.items()}
 
-    # only include the error key if it is not None
-    if data["errors"] is None:
-        del data["errors"]
-
     response = jsonify(data)
     response.status_code = int(str(status))
 
@@ -289,7 +285,7 @@ def remove_values(data: dict) -> dict:
         data.pop("previous_url")
     if (
         "error" in data
-        and not get_config_or_model_meta("API_DUMP_NULL_ERROR", default=True)
+        and not get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=True)
         and not data.get("error")
     ):
         data.pop("error")
