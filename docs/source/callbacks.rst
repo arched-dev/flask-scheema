@@ -224,8 +224,8 @@ This is simple and can be achieved with the custom exception class provided by *
 Extending Query Params
 ---------------------------
 
-If you are hoping to extend a endpoints by adding additional ``query params``, defining the function to handle its
-function is down to you.
+If you are hoping to extend a endpoints by adding additional ``query params`` to your endpoints defining the function is
+beyond the scope of ``flask-scheema``.
 
 .. note::
     If you are looking to add aditional filters...
@@ -243,7 +243,7 @@ function is down to you.
             kwargs["output"] = query
             return kwargs
 
-Likely, you will want to document any changes to the available query params in `Redoc`_. This can be achieved with the
+However, you'll like want to document any changes to the available query params in `Redoc`_. This can be achieved with the
 `ADDITIONAL_QUERY_PARAMS <configuration.html#ADDITIONAL_QUERY_PARAMS>`_ configuration key.
 
 This key can be set in the `Flask`_ configuration or in `SQLAlchemy`_ models (globally or by `Http method`_).
@@ -271,6 +271,7 @@ every model and endpoint in the documentation.
                 "example": 1  # optional
             }
         }]
+
 
 Or set to a specific `HTTP method`_ - ``GET`` on the model level.
 

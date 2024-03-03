@@ -284,10 +284,10 @@ def remove_values(data: dict) -> dict:
     ):
         data.pop("previous_url")
     if (
-        "error" in data
-        and not get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=True)
-        and not data.get("error")
+        "errors" in data
+        and not get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=False)
+        and not data.get("errors")
     ):
-        data.pop("error")
+        data.pop("errors")
 
     return data

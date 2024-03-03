@@ -89,7 +89,7 @@ extensions = [
     "sphinxext.opengraph",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "sphinx_design"
+    "sphinx_design",
 ]
 
 extlinks = {
@@ -117,4 +117,4 @@ rst_epilog = """
 templates_path = ["_templates"]
 exclude_patterns = []
 
-html_theme = "furo"
+html_theme = "alabaster"

@@ -98,11 +98,17 @@ def setup_route_function(
                 model=service.model,
                 **{k: v for k, v in kwargs.items() if k not in ["model"]},
             )
+        return kwargs
 
     def post_process(post_hook, output, **kwargs):
         if post_hook:
-            return post_hook(model=service.model, output=output, **{k:v for k,v in kwargs.items() if k not in ["output", "model"]})
-        return kwargs.update({"output": output})
+            return post_hook(
+                model=service.model,
+                output=output,
+                **{k: v for k, v in kwargs.items() if k not in ["output", "model"]},
+            )
+        kwargs.update({"output": output})
+        return kwargs
 
     def route_function_factory(action, pre_hook=None, post_hook=None, **kwargs):
         def route_function(id=None, **kwargs):

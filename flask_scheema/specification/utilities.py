@@ -116,6 +116,6 @@ def make_base_dict():
 
     dump_null_error = get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=False)
     if dump_null_error:
-        output.update({key_func("error"): "null"})
+        output.update({key_func("errors"): "null"})
 
     return output

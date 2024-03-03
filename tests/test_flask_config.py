@@ -15,6 +15,7 @@ def app():
         }
     )
     yield app
+    del app
 
 
 @pytest.fixture
@@ -35,22 +36,35 @@ def test_basic_change_title_and_version(client):
     assert "0.2.0" in html
 
 
-# block methods from the API
-def test_block_methods():
+@pytest.fixture
+def app_meth():
+
     app_new = create_app(
         {
             "API_BLOCK_METHODS": ["POST", "PATCH", "DELETE"],
         }
     )
 
-    client_new = app_new.test_client()
-    resp = client_new.get("/api/books/1")
+    yield app_new
+    del app_new
+
+
+@pytest.fixture
+def client_meth(app_meth):
+
+    return app_meth.test_client()
+
+
+# block methods from the API
+def test_block_methods(client_meth):
+
+    resp = client_meth.get("/api/authors/1")
 
     assert len(resp.json["value"]["created"]) > 0
 
-    resp_patch = client_new.patch("/api/books", json=resp.json["value"])
-    resp_post = client_new.post("/api/books", json=resp.json["value"])
-    resp_delete = client_new.delete("/api/books/1")
+    resp_patch = client_meth.patch("/api/authors", json=resp.json["value"])
+    resp_post = client_meth.post("/api/authors", json=resp.json["value"])
+    resp_delete = client_meth.delete("/api/authors/10?cascade_delete=1")
 
     assert resp_patch.status_code == 405
     assert resp_post.status_code == 405
@@ -139,7 +153,9 @@ def test_basic_no_change_api_output(client):
     assert "totalCount" in books.keys()
     assert "nextUrl" in books.keys()
     assert "previousUrl" in books.keys()
-    assert "error" in books.keys()
+
+    books_error = client.get("/api/books/0009999").json
+    assert "errors" in books_error.keys()
 
     book = client.get("/api/books/1").json
 
@@ -147,7 +163,6 @@ def test_basic_no_change_api_output(client):
     assert "apiVersion" in book.keys()
     assert "statusCode" in book.keys()
     assert "totalCount" in book.keys()
-    assert "error" in book.keys()
 
 
 # make sure camel case is and isn't used.
@@ -341,26 +356,37 @@ def test_cascade_delete(client_one):
     assert response.status_code == 500
 
 
+hooks = {
+    "setup_hook": False,
+    "return_hook": False,
+    "patch_setup_hook": False,
+    "get_return_hook": False,
+}
+
 
 def setup_hook(*args, **kwargs):
-
-    session["setup_hook"] = True
+    global hooks
+    hooks["setup_hook"] = True
     return kwargs
+
 
 def return_hook(*args, **kwargs):
-
-    session["return_hook"] = True
+    global hooks
+    hooks["return_hook"] = True
     return kwargs
+
 
 def patch_setup_hook(*args, **kwargs):
-
-    session["patch_setup_hook"] = True
+    global hooks
+    hooks["patch_setup_hook"] = True
     return kwargs
+
 
 def get_return_hook(*args, **kwargs):
-
-    session["get_return_hook"] = True
+    global hooks
+    hooks["get_return_hook"] = True
     return kwargs
+
 
 @pytest.fixture
 def app_two():
@@ -375,30 +401,34 @@ def app_two():
             "API_SETUP_CALLBACK": setup_hook,
             "API_RETURN_CALLBACK": return_hook,
             "API_ERROR_CALLBACK": return_hook,
-            "API_ADDITIONAL_QUERY_PARAMS": [{
-                "name": "log",
-                "in": "query",
-                "description": "Log call into the database", # optional
-                "required": False, # optional
-                "deprecated": False, # optional
-                "schema": {
-                    "type": "string", # see below for options available
-                    "format": "password", # see below for options available ... optional
-                    "example": 1  # optional
+            "API_ADDITIONAL_QUERY_PARAMS": [
+                {
+                    "name": "log",
+                    "in": "query",
+                    "description": "Log call into the database",  # optional
+                    "required": False,  # optional
+                    "deprecated": False,  # optional
+                    "schema": {
+                        "type": "string",  # see below for options available
+                        "format": "password",  # see below for options available ... optional
+                        "example": 1,  # optional
+                    },
                 }
-            }],
-            "API_POST_ADDITIONAL_QUERY_PARAMS": [{
-                "name": "log_one",
-                "in": "query",
-                "description": "Log call into the database", # optional
-                "required": False, # optional
-                "deprecated": False, # optional
-                "schema": {
-                    "type": "string", # see below for options available
-                    "format": "password", # see below for options available ... optional
-                    "example": 1  # optional
+            ],
+            "API_POST_ADDITIONAL_QUERY_PARAMS": [
+                {
+                    "name": "log_one",
+                    "in": "query",
+                    "description": "Log call into the database",  # optional
+                    "required": False,  # optional
+                    "deprecated": False,  # optional
+                    "schema": {
+                        "type": "string",  # see below for options available
+                        "format": "password",  # see below for options available ... optional
+                        "example": 1,  # optional
+                    },
                 }
-            }]
+            ],
             # Other configurations specific to this test
         }
     )
@@ -412,33 +442,51 @@ def client_two(app_two):
 
 def test_hide_underscore_attributes(client_two):
     authors_response = client_two.get("/api/authors").json
+    assert "_hiddenField" not in authors_response["value"][0].keys()
+
+
+def test_show_underscore_attributes(client_two):
+
+
+    app_under = create_app_models({"API_IGNORE_UNDERSCORE_ATTRIBUTES": False})
+    client_under = app_under.test_client()
+
+    authors_response = client_under.get("/api/authors").json
     assert "_hiddenField" in authors_response["value"][0].keys()
+
 
 def test_callbacks(client_two):
 
-    with client_two.application.test_request_context():
+    book_error = client_two.get("/api/books/9999999").json
+    book_one = client_two.get("/api/books/1").json["value"]
+    book_new = client_two.post("/api/books", json=book_one).json["value"]
+    book_update = client_two.patch(
+        "/api/books/" + str(book_one["id"]), json=book_one
+    ).json["value"]
+    global hooks
+    assert hooks.get("setup_hook")
+    assert hooks.get("patch_setup_hook")
+    assert hooks.get("get_return_hook")
+    assert hooks.get("return_hook")
 
-        book_error = client_two.get("/api/books/9999999").json
-        book_one = client_two.get("/api/books/1").json["value"]
-        book_new = client_two.post("/api/books", json=book_one).json["value"]
-        book_update = client_two.patch("/api/books/" + str(book_one["id"]), json=book_one).json["value"]
-
-        assert session.get("setup_hook")
-        assert session.get("patch_setup_hook")
-        assert session.get("get_return_hook")
-        assert session.get("return_hook")
 
 def test_global_query_param(client_two):
     swagger = client_two.get("/swagger.json").json
 
-    params = [x["name"] for x in swagger["paths"]["/api/books"]["post"]["parameters"]]
+    params = [x["name"] for x in swagger["paths"]["/api/books"]["get"]["parameters"]]
     assert "log" in params
+
+
 def test_post_specific_query_param(client_two):
 
     swagger = client_two.get("/swagger.json").json
 
-    post_params = [x["name"] for x in swagger["paths"]["/api/books"]["post"]["parameters"]]
-    get_params = [x["name"] for x in swagger["paths"]["/api/books"]["get"]["parameters"]]
+    post_params = [
+        x["name"] for x in swagger["paths"]["/api/books"]["post"]["parameters"]
+    ]
+    get_params = [
+        x["name"] for x in swagger["paths"]["/api/books"]["get"]["parameters"]
+    ]
 
     assert "log_one" in post_params
     assert not "log_one" in get_params

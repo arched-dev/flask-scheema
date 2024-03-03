@@ -129,6 +129,7 @@ xxx {x} - API_ADDITIONAL_QUERY_PARAMS
 - API_RATE_LIMIT:                               Optional[callable] = "1 per second"
 - API_RATE_LIMIT_CALLBACK:                      Optional[callable] = None # a function that is called on rate limit
   being breached.
+API_RATE_LIMIT_STORAGE_URI need to add
 
 API OUTPUT:
 

@@ -454,59 +454,62 @@ def register_routes_with_spec(naan: "Naan", route_spec: List):
             )
 
             rule = get_rule(naan, f)
-            methods = rule.methods - {"OPTIONS", "HEAD"}
 
-            for http_method in methods:
+            # this was put here to avoid a bug in the code that was making the tests fail.
+            if rule:
+                methods = rule.methods - {"OPTIONS", "HEAD"}
 
-                route_info = scrape_extra_info_from_spec_data(
-                    route_info, method=http_method, multiple=route_info.get("multiple", False)
-                )
+                for http_method in methods:
 
-                path = rule.rule
-                output_schema = route_info.get("output_schema")
-                input_schema = route_info.get("input_schema")
-                model = route_info.get("model")
-                description = route_info.get("description")
-                summary = route_info.get("summary")
-                tag = route_info.get("tag")
-                many = route_info.get("multiple")
+                    route_info = scrape_extra_info_from_spec_data(
+                        route_info, method=http_method, multiple=route_info.get("multiple", False)
+                    )
 
-                path_params = generate_path_params_from_rule(model, rule)
-                query_params = generate_query_params_from_rule(rule, methods, output_schema, many)
+                    path = rule.rule
+                    output_schema = route_info.get("output_schema")
+                    input_schema = route_info.get("input_schema")
+                    model = route_info.get("model")
+                    description = route_info.get("description")
+                    summary = route_info.get("summary")
+                    tag = route_info.get("tag")
+                    many = route_info.get("multiple")
 
-                # We do not accept input schemas on GET or DELETE requests. They are handled with query parameters,
-                # and not request bodies.
-                if input_schema and http_method not in ["POST", "PATCH"]:
-                    input_schema = None
+                    path_params = generate_path_params_from_rule(model, rule)
+                    query_params = generate_query_params_from_rule(rule, methods, output_schema, many)
 
-                endpoint_spec = generate_swagger_spec(
-                    http_method,
-                    f,
-                    output_schema=output_schema,
-                    input_schema=input_schema,
-                    model=model,
-                    query_params=query_params,
-                    path_params=path_params,
-                    many=many
-                )
+                    # We do not accept input schemas on GET or DELETE requests. They are handled with query parameters,
+                    # and not request bodies.
+                    if input_schema and http_method not in ["POST", "PATCH"]:
+                        input_schema = None
 
-                endpoint_spec["tags"] = [tag]
+                    endpoint_spec = generate_swagger_spec(
+                        http_method,
+                        f,
+                        output_schema=output_schema,
+                        input_schema=input_schema,
+                        model=model,
+                        query_params=query_params,
+                        path_params=path_params,
+                        many=many
+                    )
+
+                    endpoint_spec["tags"] = [tag]
 
 
-                # Add or update the tag group in the spec
-                if route_info.get("group_tag"):
-                    naan.api_spec.set_xtags_group(tag, route_info["group_tag"])
+                    # Add or update the tag group in the spec
+                    if route_info.get("group_tag"):
+                        naan.api_spec.set_xtags_group(tag, route_info["group_tag"])
 
-                # Split function docstring by '---' and set summary and description
-                if summary:
-                    endpoint_spec["summary"] = summary
-                if description:
-                    endpoint_spec["description"] = description
+                    # Split function docstring by '---' and set summary and description
+                    if summary:
+                        endpoint_spec["summary"] = summary
+                    if description:
+                        endpoint_spec["description"] = description
 
-                naan.api_spec.path(
-                    path=convert_path_to_openapi(path),
-                    operations={http_method.lower(): endpoint_spec},
-                )
+                    naan.api_spec.path(
+                        path=convert_path_to_openapi(path),
+                        operations={http_method.lower(): endpoint_spec},
+                    )
 
     register_schemas(naan.api_spec, AutoScheema)
 

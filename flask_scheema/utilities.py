@@ -88,16 +88,6 @@ class AttributeInitializerMixin:
                 setattr(self, key, kwargs[key])
 
 
-def get_nested_attr(obj, nested_key: str, default=None) -> Any:
-    keys = nested_key.split(".")
-    for key in keys:
-        if hasattr(obj, key):
-            obj = getattr(obj, key)
-        else:
-            return default
-    return obj
-
-
 def normalize_key(key: str) -> str:
     """
     Normalize the key to handle different cases.
@@ -110,7 +100,6 @@ def normalize_key(key: str) -> str:
     """
     # Convert to uppercase
     return key.upper()
-
 
 def get_config_or_model_meta(
         key: str,
@@ -171,17 +160,17 @@ def get_config_or_model_meta(
 
     # Sources and keys setup
     sources = [model, output_schema, input_schema]
-    keys_for_sources = method_based_keys + [normalized_key, normalize_key(key.replace("api_", ""))]
+    keys_for_sources = method_based_keys + [normalized_key, normalize_key(key).replace("api_", "")]
     keys_for_config = method_based_keys + [normalized_key]
 
     # 1st & 2nd: Search in models and schemas
     result = search_in_sources(sources, keys_for_sources)
-    if result is not None:
+    if result is not None and result != []:
         return result
 
     # 3rd & 4th: Search in Flask config
     result = search_in_flask_config(keys_for_config)
-    if result is not None:
+    if result is not None and result != []:
         return result
 
     return default
@@ -410,28 +399,6 @@ def find_child_from_parent_dir(parent, child, current_dir=os.getcwd()):
                 return child_dir_path
 
     return None
-
-
-def find_root(path: str, search: str) -> str:
-    """
-    Recursively finds the path to the child directory in the parent directory.
-
-    Args:
-        path (str): The path to the parent directory.
-        search (str): The name of the child directory.
-
-    Returns:
-        The path to the child directory, or None if the child directory is not found.
-    """
-    while True:
-        paths = os.path.split(path)
-        if paths[1] == search:
-            return path
-        else:
-            path = paths[0]
-            if path == "/":
-                return None
-
 
 def check_prerequisites(service):
     """

@@ -40,7 +40,7 @@ def test_delete(client):
     assert delete_response.status_code == 200
     assert get_response.json["value"] == None
     assert delete_response_fail.status_code == 404
-    assert delete_response_fail.json["error"]["error"] == "Not Found"
+    assert delete_response_fail.json["errors"][0]["error"] == "Not Found"
 
 
 def test_delete_with_cascade(client):
