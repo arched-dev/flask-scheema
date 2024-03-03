@@ -14,11 +14,6 @@ sphinx:
   # Path to the Sphinx configuration file, relative to the root of the project
   configuration: docs/source/conf.py
 
-  # Build formats: html, pdf, epub, etc.
-  formats:
-    - pdf
-    - epub
-
 # Python environment configuration
 python:
   install:
