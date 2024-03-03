@@ -1,0 +1,460 @@
+<!doctype html>
+<html class="no-js" lang="en" data-content_root="">
+  <head><meta charset="utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1"/>
+    <meta name="color-scheme" content="light dark"><meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+<meta property="og:title" content="Callbacks" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="callbacks.html" />
+<meta property="og:site_name" content="flask-scheema" />
+<meta property="og:description" content="While accessing and updating your models via the API flask-schema has created is great. Sometimes you need to perform some additional logic before or after a model is returned, created, updated, de..." />
+<meta name="description" content="While accessing and updating your models via the API flask-schema has created is great. Sometimes you need to perform some additional logic before or after a model is returned, created, updated, de..." />
+<link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="Configuration" href="configuration.html" /><link rel="prev" title="Authentication" href="authentication.html" />
+
+    <!-- Generated with Sphinx 6.2.1 and Furo 2024.01.29 -->
+        <title>Callbacks - flask-scheema</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo.css?digest=369552022d0b975c8e74270ce6eabe0fb7978f24" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css" />
+    <link rel="stylesheet" type="text/css" href="_static/design-style.4045f2051d55cab465a707391d5b2007.min.css" />
+    <link rel="stylesheet" type="text/css" href="_static/styles/furo-extensions.css?digest=30d1aed668e5c3a91c3e3bf6a60b675221979f0e" />
+    <link rel="stylesheet" type="text/css" href="_static/colours.css" />
+    <link rel="stylesheet" type="text/css" href="_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap" />
+    
+    
+
+
+<style>
+  body {
+    --color-code-background: #fbf1c7;
+  --color-code-foreground: black;
+  --font-stack: JetBrains Mono, sans-serif;
+  --font-stack--monospace: JetBrains Mono, monospace;
+  --color-brand-primary:  #8f3f71;
+  --color-brand-content:  #076678;
+  
+  }
+  @media not print {
+    body[data-theme="dark"] {
+      --color-code-background: #282828;
+  --color-code-foreground: #dddddd;
+  --color-brand-primary:  #b16286;
+  --color-brand-content:  #458588;
+  --color-background-primary:  #3c3836;
+  --color-background-secondary:  #282828;
+  --color-foreground-primary:  #fbf1c7;
+  --color-foreground-secondary:  #ebdbb2;
+  --color-highlighted-background:  #d79921;
+  --color-highlight-on-target:  #504945;
+  
+    }
+    @media (prefers-color-scheme: dark) {
+      body:not([data-theme="light"]) {
+        --color-code-background: #282828;
+  --color-code-foreground: #dddddd;
+  --color-brand-primary:  #b16286;
+  --color-brand-content:  #458588;
+  --color-background-primary:  #3c3836;
+  --color-background-secondary:  #282828;
+  --color-foreground-primary:  #fbf1c7;
+  --color-foreground-secondary:  #ebdbb2;
+  --color-highlighted-background:  #d79921;
+  --color-highlight-on-target:  #504945;
+  
+      }
+    }
+  }
+</style></head>
+  <body>
+    
+    <script>
+      document.body.dataset.theme = localStorage.getItem("theme") || "auto";
+    </script>
+    
+
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="svg-toc" viewBox="0 0 24 24">
+    <title>Contents</title>
+    <svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 1024 1024">
+      <path d="M408 442h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8zm-8 204c0 4.4 3.6 8 8 8h480c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8H408c-4.4 0-8 3.6-8 8v56zm504-486H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zm0 632H120c-4.4 0-8 3.6-8 8v56c0 4.4 3.6 8 8 8h784c4.4 0 8-3.6 8-8v-56c0-4.4-3.6-8-8-8zM115.4 518.9L271.7 642c5.8 4.6 14.4.5 14.4-6.9V388.9c0-7.4-8.5-11.5-14.4-6.9L115.4 505.1a8.74 8.74 0 0 0 0 13.8z"/>
+    </svg>
+  </symbol>
+  <symbol id="svg-menu" viewBox="0 0 24 24">
+    <title>Menu</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-menu">
+      <line x1="3" y1="12" x2="21" y2="12"></line>
+      <line x1="3" y1="6" x2="21" y2="6"></line>
+      <line x1="3" y1="18" x2="21" y2="18"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-arrow-right" viewBox="0 0 24 24">
+    <title>Expand</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather-chevron-right">
+      <polyline points="9 18 15 12 9 6"></polyline>
+    </svg>
+  </symbol>
+  <symbol id="svg-sun" viewBox="0 0 24 24">
+    <title>Light mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="feather-sun">
+      <circle cx="12" cy="12" r="5"></circle>
+      <line x1="12" y1="1" x2="12" y2="3"></line>
+      <line x1="12" y1="21" x2="12" y2="23"></line>
+      <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+      <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+      <line x1="1" y1="12" x2="3" y2="12"></line>
+      <line x1="21" y1="12" x2="23" y2="12"></line>
+      <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+      <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+    </svg>
+  </symbol>
+  <symbol id="svg-moon" viewBox="0 0 24 24">
+    <title>Dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-moon">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+      <path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z" />
+    </svg>
+  </symbol>
+  <symbol id="svg-sun-half" viewBox="0 0 24 24">
+    <title>Auto light/dark mode</title>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+      stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon-tabler-shadow">
+      <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+      <circle cx="12" cy="12" r="9" />
+      <path d="M13 12h5" />
+      <path d="M13 15h4" />
+      <path d="M13 18h1" />
+      <path d="M13 9h4" />
+      <path d="M13 6h1" />
+    </svg>
+  </symbol>
+</svg>
+
+<input type="checkbox" class="sidebar-toggle" name="__navigation" id="__navigation">
+<input type="checkbox" class="sidebar-toggle" name="__toc" id="__toc">
+<label class="overlay sidebar-overlay" for="__navigation">
+  <div class="visually-hidden">Hide navigation sidebar</div>
+</label>
+<label class="overlay toc-overlay" for="__toc">
+  <div class="visually-hidden">Hide table of contents sidebar</div>
+</label>
+
+
+
+<div class="page">
+  <header class="mobile-header">
+    <div class="header-left">
+      <label class="nav-overlay-icon" for="__navigation">
+        <div class="visually-hidden">Toggle site navigation sidebar</div>
+        <i class="icon"><svg><use href="#svg-menu"></use></svg></i>
+      </label>
+    </div>
+    <div class="header-center">
+      <a href="index.html"><div class="brand">flask-scheema</div></a>
+    </div>
+    <div class="header-right">
+      <div class="theme-toggle-container theme-toggle-header">
+        <button class="theme-toggle">
+          <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+          <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+          <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+          <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+        </button>
+      </div>
+      <label class="toc-overlay-icon toc-header-icon" for="__toc">
+        <div class="visually-hidden">Toggle table of contents sidebar</div>
+        <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+      </label>
+    </div>
+  </header>
+  <aside class="sidebar-drawer">
+    <div class="sidebar-container">
+      
+      <div class="sidebar-sticky"><a class="sidebar-brand" href="index.html">
+  
+  <div class="sidebar-logo-container">
+    <img class="sidebar-logo" src="_static/logo.png" alt="Logo"/>
+  </div>
+  
+  <span class="sidebar-brand-text">flask-scheema</span>
+  
+</a><form class="sidebar-search-container" method="get" action="search.html" role="search">
+  <input class="sidebar-search" placeholder="Search" name="q" aria-label="Search">
+  <input type="hidden" name="check_keywords" value="yes">
+  <input type="hidden" name="area" value="default">
+</form>
+<div id="searchbox"></div><div class="sidebar-scroll"><div class="sidebar-tree">
+  <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="quickstart.html">Quick Start</a></li>
+<li class="toctree-l1"><a class="reference internal" href="models.html">SQLAlchemy Models</a></li>
+<li class="toctree-l1"><a class="reference internal" href="authentication.html">Authentication</a></li>
+<li class="toctree-l1 current current-page"><a class="current reference internal" href="#">Callbacks</a></li>
+<li class="toctree-l1 has-children"><a class="reference internal" href="configuration.html">Configuration</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" role="switch" type="checkbox"/><label for="toctree-checkbox-1"><div class="visually-hidden">Toggle navigation of Configuration</div><i class="icon"><svg><use href="#svg-arrow-right"></use></svg></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="config_locations/global_.html">Config Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_locations/global_method.html">Config by Method Globals</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_locations/model.html">Config Models</a></li>
+<li class="toctree-l2"><a class="reference internal" href="config_locations/model_method.html">Config by Method Models</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="genindex.html">Index</a></li>
+</ul>
+
+</div>
+</div>
+
+      </div>
+      
+    </div>
+  </aside>
+  <div class="main">
+    <div class="content">
+      <div class="article-container">
+        <a href="#" class="back-to-top muted-link">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+          </svg>
+          <span>Back to top</span>
+        </a>
+        <div class="content-icon-container">
+          
+<div class="theme-toggle-container theme-toggle-content">
+            <button class="theme-toggle">
+              <div class="visually-hidden">Toggle Light / Dark / Auto color theme</div>
+              <svg class="theme-icon-when-auto"><use href="#svg-sun-half"></use></svg>
+              <svg class="theme-icon-when-dark"><use href="#svg-moon"></use></svg>
+              <svg class="theme-icon-when-light"><use href="#svg-sun"></use></svg>
+            </button>
+          </div>
+          <label class="toc-overlay-icon toc-content-icon" for="__toc">
+            <div class="visually-hidden">Toggle table of contents sidebar</div>
+            <i class="icon"><svg><use href="#svg-toc"></use></svg></i>
+          </label>
+        </div>
+        <article role="main">
+          <section id="callbacks">
+<h1>Callbacks<a class="headerlink" href="#callbacks" title="Permalink to this heading">#</a></h1>
+<p>While accessing and updating your models via the API <strong>flask-schema</strong> has created is great. Sometimes you need to
+perform some additional logic before or after a model is returned, created, updated, deleted or if an error is raised.</p>
+<p>You might need to log API calls in the database, or send out an email when an error is raised. Possibly you need to
+perform some additional validation on the data before it is saved to the database.</p>
+<p><strong>flask-schema</strong> provides a way to do this by defining callbacks on your <a class="reference external" href="https://docs.sqlalchemy.org/en/latest/">SQLAlchemy</a> models or <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> configuration.</p>
+<section id="callback-lifecycle">
+<h2>Callback Lifecycle<a class="headerlink" href="#callback-lifecycle" title="Permalink to this heading">#</a></h2>
+<p>Callbacks can fire at 3 different points in the API request lifecycle.</p>
+<ol class="arabic simple">
+<li><p><strong>Setup Callback</strong> - This is called before any database operation is executed. This could be used to perform any
+additional validation or logging before the database operation is executed.</p></li>
+<li><p><strong>Return Callback</strong> - This is called before the completed API response is returned. Here you could intercept the
+response and perform any additional logic before the response is returned to the client.</p></li>
+<li><p><strong>Error Callback</strong> - This is called when an exception is raised. This could be used to log the error, send an email
+or perform any additional logic when an exception is raised.</p></li>
+</ol>
+</section>
+<section id="configuring-callbacks">
+<h2>Configuring Callbacks<a class="headerlink" href="#configuring-callbacks" title="Permalink to this heading">#</a></h2>
+<p><strong>flask-schema</strong> uses the <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> configuration to define global configuration values and these same configuration
+values can be applied to specific <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">HTTP method</a>’s or <a class="reference external" href="https://docs.sqlalchemy.org/en/latest/">SQLAlchemy</a> models.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For comprehensive details on configuration, and where they can be applied visit our <a class="reference internal" href="configuration.html"><span class="doc">configuration</span></a> page.</p>
+</div>
+<section id="configuration-keys">
+<h3>Configuration Keys<a class="headerlink" href="#configuration-keys" title="Permalink to this heading">#</a></h3>
+<dl class="simple">
+<dt>SETUP_CALLBACK</dt><dd><p>Called before the database operation is executed.</p>
+</dd>
+<dt>RETURN_CALLBACK</dt><dd><p>Called before the completed API response is returned.</p>
+</dd>
+<dt>ERROR_CALLBACK</dt><dd><p>Called when an exception is raised.</p>
+</dd>
+</dl>
+</section>
+<section id="configuration-placement">
+<h3>Configuration Placement<a class="headerlink" href="#configuration-placement" title="Permalink to this heading">#</a></h3>
+<details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+Flask Global Configuration<div class="sd-summary-down docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-down" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.72a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06L12 14.44 6.28 8.72a.75.75 0 00-1.06 0z"></path></svg></div>
+<div class="sd-summary-up docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-up" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M18.78 15.28a.75.75 0 000-1.06l-6.25-6.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 101.06 1.06L12 9.56l5.72 5.72a.75.75 0 001.06 0z"></path></svg></div>
+</summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">These configuration values can be set in your <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a> configuration and will apply to all endpoints unless a more
+specific value is set.</p>
+<blockquote>
+<div><p class="sd-card-text">Using the structure of <code class="docutils literal notranslate"><span class="pre">API_{configuration_key}</span></code></p>
+<p class="sd-card-text">i.e  API_SETUP_CALLBACK = my_setup_callback</p>
+</div></blockquote>
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#SETUP_CALLBACK">API_SETUP_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before any database operation is executed.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#RETURN_CALLBACK">API_RETURN_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before the completed API response is returned.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#ERROR_CALLBACK">API_ERROR_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed when an exception is raised.</p></li>
+</ul>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+Flask Method Based Configuration<div class="sd-summary-down docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-down" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.72a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06L12 14.44 6.28 8.72a.75.75 0 00-1.06 0z"></path></svg></div>
+<div class="sd-summary-up docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-up" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M18.78 15.28a.75.75 0 000-1.06l-6.25-6.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 101.06 1.06L12 9.56l5.72 5.72a.75.75 0 001.06 0z"></path></svg></div>
+</summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">These methods will override any global configuration values for the specific <a class="reference external" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods">HTTP method</a> and are set in your <a class="reference external" href="https://flask.palletsprojects.com/en/latest/">Flask</a>
+configuration.</p>
+<blockquote>
+<div><p class="sd-card-text">Using the structure of <code class="docutils literal notranslate"><span class="pre">API_{method}_{configuration_key}</span></code></p>
+<p class="sd-card-text">i.e  API_GET_SETUP_CALLBACK = my_get_setup_callback</p>
+</div></blockquote>
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#SETUP_CALLBACK">API_GET_SETUP_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before any <cite>GET</cite> database operation is executed.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#RETURN_CALLBACK">API_POST_RETURN_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before a completed <cite>POST</cite> API response is returned.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#ERROR_CALLBACK">API_DELETE_ERROR_CALLBACK</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed when a <cite>DELETE</cite> API call has an exception raised.</p></li>
+</ul>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+SQLAlchemy Model Configuration<div class="sd-summary-down docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-down" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.72a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06L12 14.44 6.28 8.72a.75.75 0 00-1.06 0z"></path></svg></div>
+<div class="sd-summary-up docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-up" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M18.78 15.28a.75.75 0 000-1.06l-6.25-6.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 101.06 1.06L12 9.56l5.72 5.72a.75.75 0 001.06 0z"></path></svg></div>
+</summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">These override any of the previous configuration values, only overridden by method based model configuration. These
+functions will apply to ANY endpoint for the model.</p>
+<blockquote>
+<div><p class="sd-card-text">Using the structure of <code class="docutils literal notranslate"><span class="pre">{configuration_key}</span></code> in lower case.</p>
+<p class="sd-card-text">Applied to the <code class="docutils literal notranslate"><span class="pre">Meta</span></code> class of the model.</p>
+</div></blockquote>
+<p class="sd-card-text">i.e</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">setup_callback</span> <span class="o">=</span> <span class="n">my_setup_callback</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Example Configuration Values:</p>
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#SETUP_CALLBACK">setup_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before database operation is executed on the model.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#RETURN_CALLBACK">return_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before a completed request for this model is returned by the API.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#ERROR_CALLBACK">error_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed when a API call has an exception raised for this models endpoint.</p></li>
+</ul>
+</div>
+</details><details class="sd-sphinx-override sd-dropdown sd-card sd-mb-3">
+<summary class="sd-summary-title sd-card-header">
+SQLAlchemy Model Method Based Configuration<div class="sd-summary-down docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-down" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M5.22 8.72a.75.75 0 000 1.06l6.25 6.25a.75.75 0 001.06 0l6.25-6.25a.75.75 0 00-1.06-1.06L12 14.44 6.28 8.72a.75.75 0 00-1.06 0z"></path></svg></div>
+<div class="sd-summary-up docutils">
+<svg version="1.1" width="1.5em" height="1.5em" class="sd-octicon sd-octicon-chevron-up" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M18.78 15.28a.75.75 0 000-1.06l-6.25-6.25a.75.75 0 00-1.06 0l-6.25 6.25a.75.75 0 101.06 1.06L12 9.56l5.72 5.72a.75.75 0 001.06 0z"></path></svg></div>
+</summary><div class="sd-summary-content sd-card-body docutils">
+<p class="sd-card-text">These take the highest priority and will override all other configuration values, and are set directly in the models</p>
+<blockquote>
+<div><p class="sd-card-text">Using the structure of <code class="docutils literal notranslate"><span class="pre">{method}_{configuration_key}</span></code> in lower case.</p>
+<p class="sd-card-text">Applied to the <code class="docutils literal notranslate"><span class="pre">Meta</span></code> class of the model.</p>
+</div></blockquote>
+<p class="sd-card-text">i.e</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">MyModel</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+    <span class="k">class</span> <span class="nc">Meta</span><span class="p">:</span>
+        <span class="n">get_setup_callback</span> <span class="o">=</span> <span class="n">my_get_setup_callback</span>
+        <span class="n">post_error_callback</span> <span class="o">=</span> <span class="n">my_post_error_callback</span>
+</pre></div>
+</div>
+<p class="sd-card-text">Example Configuration Values:</p>
+<ul class="simple">
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#SETUP_CALLBACK">get_setup_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before any <cite>GET</cite> database operation is executed on the model.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#RETURN_CALLBACK">post_return_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed before a completed <cite>POST</cite> request for this model is returned by the API.</p></li>
+<li><p class="sd-card-text"><a class="reference external" href="configuration.html#ERROR_CALLBACK">delete_error_callback</a> - <code class="docutils literal notranslate"><span class="pre">callable</span></code> object to be executed when a <cite>DELETE</cite> API call has an exception raised for this model’s endpoint.</p></li>
+</ul>
+</div>
+</details></section>
+<section id="callback-examples">
+<h3>Callback Examples<a class="headerlink" href="#callback-examples" title="Permalink to this heading">#</a></h3>
+<p>To demonstrate how to use callbacks, please see the demo folder of our <a class="reference external" href="https://github.com/arched-dev/flask-scheema">repo</a> or view the demo code <a href="#id1"><span class="problematic" id="id2">`here &lt;&gt;`_</span></a>.</p>
+</section>
+</section>
+</section>
+
+        </article>
+      </div>
+      <footer>
+        
+        <div class="related-pages">
+          <a class="next-page" href="configuration.html">
+              <div class="page-info">
+                <div class="context">
+                  <span>Next</span>
+                </div>
+                <div class="title">Configuration</div>
+              </div>
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+            </a>
+          <a class="prev-page" href="authentication.html">
+              <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
+              <div class="page-info">
+                <div class="context">
+                  <span>Previous</span>
+                </div>
+                
+                <div class="title">Authentication</div>
+                
+              </div>
+            </a>
+        </div>
+        <div class="bottom-of-page">
+          <div class="left-details">
+            <div class="copyright">
+                Copyright &#169; 2024, arched.dev (Lewis Morris)
+            </div>
+            Made with <a href="https://www.sphinx-doc.org/">Sphinx</a> and <a class="muted-link" href="https://pradyunsg.me">@pradyunsg</a>'s
+            
+            <a href="https://github.com/pradyunsg/furo">Furo</a>
+            
+          </div>
+          <div class="right-details">
+            
+          </div>
+        </div>
+        
+      </footer>
+    </div>
+    <aside class="toc-drawer">
+      
+      
+      <div class="toc-sticky toc-scroll">
+        <div class="toc-title-container">
+          <span class="toc-title">
+            On this page
+          </span>
+        </div>
+        <div class="toc-tree-container">
+          <div class="toc-tree">
+            <ul>
+<li><a class="reference internal" href="#">Callbacks</a><ul>
+<li><a class="reference internal" href="#callback-lifecycle">Callback Lifecycle</a></li>
+<li><a class="reference internal" href="#configuring-callbacks">Configuring Callbacks</a><ul>
+<li><a class="reference internal" href="#configuration-keys">Configuration Keys</a></li>
+<li><a class="reference internal" href="#configuration-placement">Configuration Placement</a></li>
+<li><a class="reference internal" href="#callback-examples">Callback Examples</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+          </div>
+        </div>
+      </div>
+      
+      
+    </aside>
+  </div>
+</div><script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/doctools.js"></script>
+    <script src="_static/sphinx_highlight.js"></script>
+    <script src="_static/scripts/furo.js"></script>
+    <script src="_static/clipboard.min.js"></script>
+    <script src="_static/copybutton.js"></script>
+    <script src="_static/design-tabs.js"></script>
+    </body>
+</html>
