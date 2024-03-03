@@ -89,8 +89,7 @@ extensions = [
     "sphinxext.opengraph",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
-    "sphinx_design",
-    "sphinx_prompt"
+    "sphinx_design"
 ]
 
 extlinks = {
