@@ -26,7 +26,7 @@ docs_description="This represents a user"
 
 Documentation
 
-- CREATE_API_DOCS = True
+xxx {x} - API_CREATE_DOCS = True
 xxx {x} - API_DOCUMENTATION_URL
 xxx {x} - API_TITLE is a required string that sets the title of your API in the generated ReDoc documentation. This title
   is a crucial piece of your API's identity, succinctly conveying the essence of your service to consumers. It appears
@@ -67,7 +67,7 @@ xxx - API_BASE_SCHEMA = AutoSchema
     - FULL_AUTO:                                 Optional[callable] = True # does the lot.
     - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
 xxx  {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True # Convert json output to camel case
-    - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
+xxx    - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
 
     -
     -
@@ -122,6 +122,10 @@ API_AUTHENTICATE_METHOD:                   Optional[str] =  "api_key" | "jwt" | 
 {x} - API_ALLOW_SELECT_FIELDS:                               Optional[callable] = True # Allow aggregation
 
 - API_RETURN_CALLBACK
+- API_SETUP_CALLBACK
+- API_ERROR_CALLBACK
+
+
 - API_RATE_LIMIT:                               Optional[callable] = "1 per second"
 - API_RATE_LIMIT_CALLBACK:                      Optional[callable] = None # a function that is called on rate limit
   being breached.

@@ -15,7 +15,7 @@ Install the package via pip
 Model Definition
 -----------------------------------------
 
-To enable **flask-scheema** to automatically generate API endpoints, it's necessary to provide it with a valid
+To enable **flask-scheema** to automatically generate API endpoints, it's necessary to provide a valid
 `SQLAlchemy`_ session and ensure it can interact with the models designated for API exposure.
 
 This requirement is fulfilled by establishing a base class from which all relevant models will derive.
@@ -129,27 +129,70 @@ The only other requirement's are two configuration values that need to be passed
 - ``API_VERSION``: The version of the API that will be displayed in the documentation.
 
 
-.. code:: python
+.. tab-set::
 
-    from flask import Flask
+    .. tab-item:: flask-sqlalchemy
+        :sync: key1
 
-    # Import your models
-    from models import Author
+        Notice below when you initialise `Flask-SQLAlchemy`_ you pass the ``BaseModel`` as the ``model_clas`` attribute,
+        and also pass in ``db.model`` to the `Flask`_ config as :data:`API_BASE_MODEL`.
 
-    app = Flask(__name__)
+        .. code:: python
 
-    app.config['API_TITLE'] = 'My API
-    app.config['API_VERSION'] = '1.0'
+            from flask import Flask
+            from flask_sqlalchemy import SQLAlchemy
 
-    from flask_scheema import Naan
+            # Import your models
+            from models import Author
 
-    with app.app_context():
-        db = SQLAlchemy(app=app, model_class=BaseModel)
-        scheema = Naan(app)
+            app = Flask(__name__)
 
-    if __name__ == '__main__':
+            db = SQLAlchemy(model_class=BaseModel)
+            scheema = Naan()
 
-        app.run(debug=True)
+            app.config['API_TITLE'] = 'My API
+            app.config['API_VERSION'] = '1.0'
+            app.config['API_BASE_MODEL'] = db.Model
+
+            from flask_scheema import Naan
+
+            with app.app_context():
+                db = db.init_app(app=app)
+                scheema.init_all(app)
+
+            if __name__ == '__main__':
+                app.run(debug=True)
+
+        .. note:: For comprehensive details on configuration, visit our :doc:`configuration </configuration>` page.
+
+    .. tab-item:: vanilla sqlalchemy
+        :sync: key1
+
+        When using `SQLAlchemy`_ you will have to set the `API_BASE_MODEL` in the `Flask`_ config.
+
+        .. code:: python
+
+            from flask import Flask
+
+            # Import your models
+            from models import Author, BaseModel
+
+            app = Flask(__name__)
+
+            app.config['API_TITLE'] = 'My API
+            app.config['API_VERSION'] = '1.0'
+            app.config['API_BASE_MODEL'] = BaseModel
+
+            from flask_scheema import Naan
+
+            with app.app_context():
+                scheema = Naan(app)
+
+            if __name__ == '__main__':
+
+                app.run(debug=True)
+
+        .. note:: For comprehensive details on configuration, visit our :doc:`configuration </configuration>` page.
 
 
 API Documentation
@@ -176,5 +219,11 @@ Writing API calls is simple, and can be done in the following way:
 ``DELETE`` /api/author/1 - deletes the author with the id of 1.
 
 
-While more advanced queries can be made by adding query parameters to the URL and is fully documented in the
-documentation.
+More advanced queries can be made by adding query parameters to the URL. This will be fully documented in the API
+documentation served at ``/docs``.
+
+
+Full Example
+-----------------------------------------
+
+To see a full example, please see the ``demo`` directory in our `repo`_ or view the example - `quickstart demo <https://github.com/arched-dev/flask-scheema/blob/master/demo/quickstart/load.py>`_

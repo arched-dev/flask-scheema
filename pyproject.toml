@@ -15,13 +15,8 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
-urls = {"Homepage":"https://github.com/arched-dev/flask-scheema"}
-
-[project.urls]
-"Documentation" = "https://flask-scheema.readthedocs.io/"
-"Source" = "https://github.com/arched-dev/flask-scheema"
-"Issue Tracker" = "https://github.com/arched-dev/flask-scheema/issues"
+urls = {"Homepage" = "https://github.com/arched-dev/flask-scheema"}
 
 [tool.setuptools]
-packages = find_namespace:
+packages = "find_namespace:"
 python_requires = ">=3.6"

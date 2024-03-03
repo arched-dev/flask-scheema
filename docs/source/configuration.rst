@@ -56,10 +56,13 @@ To offer flexibility and control, ``Flask-Scheema`` adheres to a hierarchy of co
     Each configuration value below is assigned a tag, which will define where the value can be used and which priority
     it takes.
 
-    1. :bdg-dark-line:`Model Method` - :doc:`View here<config_locations/model_method>`
-    2. :bdg-dark-line:`Model` - :doc:`View here<config_locations/model>`
-    3. :bdg-dark-line:`Global Method` - :doc:`View here<config_locations/global_method>`
-    4. :bdg-dark-line:`Global` - :doc:`View here<config_locations/global_>`
+    Pri 1. :bdg-dark-line:`Model Method` - :doc:`View here<config_locations/model_method>`
+
+    Pri 2. :bdg-dark-line:`Model` - :doc:`View here<config_locations/model>`
+
+    Pri 3. :bdg-dark-line:`Global Method` - :doc:`View here<config_locations/global_method>`
+
+    Pri 4. :bdg-dark-line:`Global` - :doc:`View here<config_locations/global_>`
 
 
 
@@ -75,6 +78,8 @@ should be written.
 .. tab-set::
 
     .. tab-item:: Global
+
+        :bdg-dark-line:`Global`
 
         Global configuration values are the lowest priority and apply to all requests unless overridden by a more specific
         configuration.
@@ -92,6 +97,8 @@ should be written.
         See the :doc:`Global <config_locations/global_>` page for more information.
 
     .. tab-item:: Global Method
+
+        :bdg-dark-line:`Global Method`
 
         Global configuration values can apply globally to specific `HTTP method`_, ``GET``, ``POST``, ``PUT``, ``DELETE``,
         ``PATCH``.
@@ -111,6 +118,8 @@ should be written.
         See the :doc:`Global Method<config_locations/global_method>` page for more information.
 
     .. tab-item:: Model
+
+        :bdg-dark-line:`Model`
 
         Model configuration values override any `Flask`_ configuration.
 
@@ -134,6 +143,9 @@ should be written.
 
 
     .. tab-item:: Model Method
+
+
+        :bdg-dark-line:`Model Method`
 
         Model method configuration values have the highest priority and will override any other configuration.
 
@@ -161,6 +173,17 @@ Documentation Configuration Values
 
 .. list-table::
 
+    *
+        - .. data:: CREATE_DOCS
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - Controls whether the ``Redoc``_ documentation is created and served by the API. When disabled, the API will not serve
+          documentation. If true, the API will serve documentation at the url specified by `DOCUMENTATION_URL <configuration.html#DOCUMENTATION_URL>`_.
     *
         - .. data:: DOCUMENTATION_URL
 
@@ -217,7 +240,7 @@ Documentation Configuration Values
           :bdg-secondary:`Optional` :bdg-dark-line:`Global`
 
 
-        - Paired with ``API_LOGO_URL``, this value sets the background color of the logo in the ReDoc documentation.
+        - Paired with `API_LOGO_URL <configuration.html#API_LOGO_URL>`_, this value sets the background color of the logo in the ReDoc documentation.
           This value should be a valid CSS color value.
 
     *
@@ -232,7 +255,7 @@ Documentation Configuration Values
 
         - The main description of the API in the generated ReDoc documentation. This value should be a valid markdown
           string or a path to a markdown file. The file will be rendered with `Jinja`_ and you can access the `Flask`_
-          config with the `{{ config }}` variable.
+          config with the ``{{ config }}`` variable.
 
           -----------------------------------------------------------------
 
@@ -364,7 +387,7 @@ API Configuration Values
         - When enabled, the API will include a ``statusCode`` field in the response data. This field will contain the
           status code of the response.
 
-          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+          The output key will either be camelCase or snake_case depending on the value of `CONVERT_TO_CAMEL_CASE <configuration.html#CONVERT_TO_CAMEL_CASE>`_.
     *
         - .. data:: DUMP_RESPONSE_TIME
 
@@ -377,7 +400,9 @@ API Configuration Values
         - When enabled, the API will include a ``responseTime`` field in the response data. This field will contain the
           time taken to process the request in ms.
 
-          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+          The output key will either be camelCase or snake_case depending on the value of `CONVERT_TO_CAMEL_CASE <configuration.html#CONVERT_TO_CAMEL_CASE>`_.
+
+
 
     *
         - .. data:: DUMP_COUNT
@@ -392,7 +417,7 @@ API Configuration Values
           total number of records available to be queried with pagination (not the number of records returned in the
           response).
 
-          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+          The output key will either be camelCase or snake_case depending on the value of `CONVERT_TO_CAMEL_CASE <configuration.html#CONVERT_TO_CAMEL_CASE>`_.
 
     *
         - .. data:: DUMP_NULL_NEXT_URL
@@ -406,7 +431,7 @@ API Configuration Values
         - When enabled, the API will include a ``nextUrl`` field in the response data if null. When disabled the
           ``nextUrl`` field will not be included in the response data if null.
 
-          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+          The output key will either be camelCase or snake_case depending on the value of `CONVERT_TO_CAMEL_CASE <configuration.html#CONVERT_TO_CAMEL_CASE>`_.
 
 
     *
@@ -421,7 +446,7 @@ API Configuration Values
         - When enabled, the API will include a ``previousUrl`` field in the response data if null. When disabled the
           ``previousUrl`` field will not be included in the response data if null.
 
-          The output key will either be camelCase or snake_case depending on the value of ``CONVERT_TO_CAMEL_CASE``.
+          The output key will either be camelCase or snake_case depending on the value of `CONVERT_TO_CAMEL_CASE <configuration.html#CONVERT_TO_CAMEL_CASE>`_.
     *
         - .. data:: DUMP_NULL_ERRORS
 
@@ -460,19 +485,24 @@ API Configuration Values
 
 
     *
-        - .. data:: BASE_SCHEMA
+        - .. data:: API_BASE_MODEL
 
-          :bdg:`default:` ``db.Model``
+          :bdg:`default:` ``None``
 
           :bdg:`type` ``DeclarativeBase``
 
-          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+          :bdg-danger:`Required` :bdg-dark-line:`Global`
 
-        - The base class for all models in the API. This value should be a valid `SQLAlchemy`_ model class. Default
-          to ``db.Model`` from `Flask-SQLAlchemy`_ as most users will be using this as their base class.
+        - The base class for all models in the API, and a required configuration value. Used by **flask-scheema** to
+          correctly analyse models and automatically create endpoints.
 
-          If you are not using `Flask-SQLAlchemy`_ you will need to set this value to your base model class to ensure
-          the API can access your models.
+          This value should be a valid base model (`see here <https://docs.sqlalchemy.org/en/20/orm/quickstart.html#declare-models>`_).
+
+          When using `Flask-SQLAlchemy`_ you must subclass your models with ``db.Model`` as normal, and also
+          populate this field with ``db.Model``. You will, however, have to pass your actual base model to the
+          ``SQLAlchemy.init_app(base_clas=YourBase)``
+
+          View the :doc:`Quickstart <quickstart>` docs for more information on how to use this value.
 
     *
         - .. data:: ALLOW_CASCADE_DELETE
@@ -483,5 +513,14 @@ API Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
 
-        - When enabled, the API will allow cascade delete operations on models. This will delete all related records
-          when a record is deleted. Cac
+        - When enabled, the API will allow cascade delete operations on models when the query parameter
+
+          ``?cascade_delete=1``
+
+          is added to the request. If this parameter is not added, the API will return a 400 response
+
+          (when the model has dependent relationships).
+
+          When disabled, the API will not allow cascade delete operations on models and will return a 400 response
+
+          (when the model has dependent relationships).

@@ -24,7 +24,9 @@ Example
 .. code:: python
 
     class Config():
-
+        # the rate limit for `POST` requests across all endpoints in your API
         API_POST_RATE_LIMIT = "1 per minute"
+        # the rate limit for `GET` requests across all endpoints in your API
         API_GET_RATE_LIMIT = "2 per minute"
+        # the rate limit for `PUT` requests across all endpoints in your API
         API_PUT_RATE_LIMIT = "3 per minute"

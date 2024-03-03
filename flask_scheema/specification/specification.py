@@ -35,7 +35,7 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         str
     ] = None  # The background colour of the API logo (in hex) if the logo is transparent
     api_keywords: Optional[list] = []  # The keywords for the api
-    create_api_docs: Optional[bool] = True  # Whether to create the api docs
+    CREATE_DOCS: Optional[bool] = True  # Whether to create the api docs
     documentation_url_prefix: Optional[str] = "/"  # The url prefix for the docs
     documentation_url: Optional[str] = "/docs"
 
@@ -51,7 +51,7 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         self.naan = naan
         AttributeInitializerMixin.__init__(self, app=naan.app, *args, **kwargs)
 
-        if self.create_api_docs:
+        if self.CREATE_DOCS or get_config_or_model_meta("API_CREATE_DOCS", default=True):
             # Set the naan object, the main flask_scheema object
 
             # Validate the api spec arguments

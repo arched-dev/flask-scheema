@@ -9,9 +9,9 @@ Flask-Scheema
    installation
    quickstart
    models
-   configuration
    authentication
    callbacks
+   configuration
    genindex
 
 keema-naan == bread, flask-scheema == api

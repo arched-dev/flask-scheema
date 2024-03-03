@@ -81,7 +81,7 @@ class Naan(AttributeInitializerMixin):
 
         if self.get_config("FULL_AUTO", True):
             self.init_api(app=app, **kwargs)
-        if self.get_config("CREATE_API_DOCS", True):
+        if self.get_config("API_CREATE_DOCS", True):
             self.init_apispec(app=app, **kwargs)
 
         # create the rate limiter, it needs to always created as rate limits can be per model and doesn't have to

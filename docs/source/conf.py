@@ -87,9 +87,16 @@ extensions = [
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinxext.opengraph",
+    "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx_design",
+    "sphinx_prompt"
 ]
+
+extlinks = {
+    'github': ('https://github.com/arched-dev/flask-scheema', 'GitHub '),
+    'issue': ('https://github.com/arched-dev/flask-scheema/issues', 'issue '),
+}
 
 autosummary_generate = True
 
@@ -103,6 +110,7 @@ rst_epilog = """
 .. _ReDoc: https://redocly.github.io/redoc/
 .. _Jinja: https://jinja.palletsprojects.com/en/3.1.x/
 .. _SQLAlchemy ORM: https://docs.sqlalchemy.org/
+.. _repo: https://github.com/arched-dev/flask-scheema
 .. _HTTP method: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
 """
 
