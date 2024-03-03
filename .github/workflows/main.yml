@@ -3,7 +3,7 @@ name: Build and Deploy Sphinx Documentation
 on:
   push:
     branches:
-      - master
+      - master  # Trigger the workflow on pushes to the master branch
 
 jobs:
   build-and-deploy:
@@ -24,11 +24,11 @@ jobs:
 
       - name: Build Sphinx Documentation
         run: |
-          cd docs  # Change to your documentation source directory
-          build html
+          cd docs  
+          build html 
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./docs/_build/html  # Adjust path according to your build output
+          publish_dir: ./docs/_build/html 
