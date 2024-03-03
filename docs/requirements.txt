@@ -1,4 +1,4 @@
-Sphinx
+sphinx
 sphinx-autobuild
 sphinx-basic-ng
 sphinx-copybutton
