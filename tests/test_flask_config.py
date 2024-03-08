@@ -411,8 +411,9 @@ def test_switch_off_url_params():
     resp_select = client_filters.get("/api/books?fields=title")
 
     assert resp.status_code == 200
-    assert 20 not in [x["id"] for x in resp_order.json["value"]]
-
+    assert 21 not in [x["id"] for x in resp_order.json["value"]]
+    assert resp_filter.json["value"][0]["id"] == 1
+    assert "created" in resp_select.json["value"][0].keys()
 
 
 def test_rate_limit():

@@ -273,6 +273,7 @@ class CrudService:
 
         # get the select fields
         allow_select = get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", model=self.model, default=True)
+        query = None
         if allow_select:
             select_fields: List[Callable] = get_select_fields(
                 args_dict, self.model, all_columns
@@ -280,8 +281,9 @@ class CrudService:
             # create the query
             if select_fields:
                 query: Query = self.session.query(*select_fields)
-            else:
-                query: Query = self.session.query(self.model)
+
+        if not query:
+            query: Query = self.session.query(self.model)
 
         # # join the models
         # for k, v in join_models.items():

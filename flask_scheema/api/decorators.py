@@ -314,10 +314,10 @@ def fields(model_schema: Type[AutoScheema], many: bool = False) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             """
-                        This is the wrapper function, it will be called and preforms the following:
-                        1. Gets the fields from the request args
-                        2. If fields are specified, it will return only those fields
-                        3. If no fields are specified, it will return all fields
+            This is the wrapper function, it will be called and preforms the following:
+            1. Gets the fields from the request args
+            2. If fields are specified, it will return only those fields
+            3. If no fields are specified, it will return all fields
 
 
 
@@ -329,7 +329,7 @@ def fields(model_schema: Type[AutoScheema], many: bool = False) -> Callable:
 
             """
             select_fields = request.args.get("fields")
-            if select_fields:
+            if select_fields and get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", model_schema.get_model(), default=True):
                 select_fields = select_fields.split(",")
                 kwargs["schema"] = model_schema(many=many, only=select_fields)
             else:
