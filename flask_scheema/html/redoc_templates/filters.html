@@ -1,13 +1,13 @@
 Filters can be applied to most `GET` requests as query parameters. To apply a filter, use the following format:
 
-- For columns in the default table: `{column}__{operator}={value}`
-- For columns in a specific table: `{table}.{column}__{operator}={value1}`
+- For fields in the default resource: `{field}__{operator}={value}`
+- For fields in a specific resource: `{resource}.{field}__{operator}={value1}`
 
-**Note**: Fields are mandatory, table names are conditionally required.
+**Note**: Fields are mandatory, resource names are conditionally required.
 
 ### Operators
 
-All filters require an operator, which should follow the column name, separated by a double underscore `__`. For example: `{column}__{operator}`.
+All filters require an operator, which should follow the field name, separated by a double underscore `__`. For example: `{field}__{operator}`.
 
 Here is a list of supported operators:
 

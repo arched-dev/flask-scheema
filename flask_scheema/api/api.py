@@ -170,6 +170,7 @@ class RiceAPI(AttributeInitializerMixin):
                 f"Setting up custom error handler for blueprint |{self.blueprint.name}| with http code +{code}+.",
             )
             self.blueprint.register_error_handler(code, handle_http_exception)
+        # self.blueprint.register_error_handler(Exception, handle_http_exception)
 
         @self.blueprint.before_request
         def before_request(*args, **kwargs):
@@ -234,7 +235,7 @@ class RiceAPI(AttributeInitializerMixin):
 
         """
 
-        is_multiple = http_method == "GETS"
+        is_many = http_method == "GETS"
 
         input_schema_class, output_schema_class = get_input_output_from_model_or_make(
             model
@@ -248,7 +249,7 @@ class RiceAPI(AttributeInitializerMixin):
             f"/{url_naming_function(model, input_schema_class, output_schema_class)}"
         )
 
-        method = "GET" if is_multiple else http_method
+        method = "GET" if is_many else http_method
         logger.debug(
             4,
             f"Collecting main model data for -{model.__name__}- with expected url |{method}|:`{base_url}`.",
@@ -256,13 +257,12 @@ class RiceAPI(AttributeInitializerMixin):
 
         return {
             "model": model,
-            "many": is_multiple,
+            "many": is_many,
             "method": method,
             "url": base_url,
             "name": model.__name__.lower(),
             "output_schema": output_schema_class,
             "session": session,
-            "multiple": is_multiple,
             "input_schema": (
                 input_schema_class if http_method in ["POST", "PATCH"] else None
             ),
@@ -284,7 +284,7 @@ class RiceAPI(AttributeInitializerMixin):
         """
         child_model = relation_data["model"]
         parent_model = relation_data["parent"]
-        is_multiple = relation_data["is_multiple"]
+        #is_many = relation_data["is_many"]
 
         input_schema_class, output_schema_class = get_input_output_from_model_or_make(
             child_model
@@ -309,8 +309,7 @@ class RiceAPI(AttributeInitializerMixin):
             "child_model": child_model,
             "model": child_model,
             "parent_model": parent_model,
-            "many": relation_data["join_type"][-4:].lower() == "many",
-            "multiple": relation_data["join_type"][-4:].lower() == "many",
+            "many": relation_data["join_type"][-4:].lower() == "many" or relation_data.get("is_many") or relation_data.get("is_multiple") or relation_data.get("many"),
             "method": "GET",
             "relation_name": relation_data["relationship"],
             "url": relation_url,
@@ -390,20 +389,12 @@ class RiceAPI(AttributeInitializerMixin):
         if http_method in [x.upper() for x in blocked_methods]:
             return
 
-        # Get the route function
-        route_function = setup_route_function(
-            service,
-            http_method,
-            multiple=kwargs.get("multiple", False),
-            join_model=kwargs.get("parent_model", None),
-            get_field=kwargs.get("join_key"),
-            **{k:v for k,v in kwargs.items() if k not in ["method", "multiple", "join_model", "get_field","http_method", "service"]}
-        )
+
 
         # create the actual route function and add it to flask
         if (
             kwargs["method"] in ["GETS", "GET", "DELETE", "PATCH"]
-            and not kwargs.get("multiple", False)
+            and not kwargs.get("many", False)
             and not kwargs.get("relation_name")
         ):
             pk_url = get_url_pk(model)
@@ -411,6 +402,17 @@ class RiceAPI(AttributeInitializerMixin):
 
         if kwargs["method"] == "DELETE":
             kwargs["output_schema"] = DeleteSchema
+
+
+        # Get the route function
+        route_function = setup_route_function(
+            service,
+            http_method,
+            many=kwargs.get("many", False),
+            join_model=kwargs.get("parent_model", None),
+            get_field=kwargs.get("join_key"),
+            **{k:v for k,v in kwargs.items() if k not in ["method", "many", "join_model", "get_field","http_method", "service"]}
+        )
 
         def route_function_template(*args, **kwargs):
             return route_function(*args, **kwargs)  # *args, *list(kwargs.values()),

@@ -1,4 +1,4 @@
-from demo.model_extension.model import create_app
+from demo.callbacks.model import create_app
 
 app = create_app()
 

@@ -1,3 +1,4 @@
+import re
 from typing import Optional, Callable
 
 from flask import abort, request
@@ -8,6 +9,9 @@ from sqlalchemy.orm import DeclarativeBase
 from flask_scheema.logging import logger
 from flask_scheema.services.operators import get_all_columns_and_hybrids
 from flask_scheema.utilities import get_config_or_model_meta
+import inflect
+
+p = inflect.engine()
 
 
 def get_description(kwargs):
@@ -73,7 +77,7 @@ def get_tag_group(kwargs: dict) -> str:
 def setup_route_function(
     service,
     method,
-    multiple=False,
+    many,
     join_model: Optional[Callable] = None,
     get_field: Optional[str] = None,
     **kwargs,
@@ -84,7 +88,7 @@ def setup_route_function(
     Args:
         service (CrudService): The CRUD service for the model.
         method (str): The HTTP method.
-        multiple (bool): Whether the route is for multiple records or not.
+        many (bool): Whether the route is for multiple records or not.
         join_model (Callable): The model to use in the join.
         get_field (str): The field to get the record by.
 
@@ -110,7 +114,7 @@ def setup_route_function(
         kwargs.update({"output": output})
         return kwargs
 
-    def route_function_factory(action, pre_hook=None, post_hook=None, **kwargs):
+    def route_function_factory(action, many, pre_hook=None, post_hook=None, **kwargs):
         def route_function(id=None, **kwargs):
 
             kwargs = pre_process(
@@ -123,7 +127,7 @@ def setup_route_function(
 
             action_kwargs = {"lookup_val": id} if id else {}
             action_kwargs.update(kwargs)
-            output = action(**action_kwargs) or abort(404)
+            output = action(many=many, **{k:v for k,v in action_kwargs.items() if k != "many"}) or abort(404)
             kwargs = post_process(
                 post_hook=post_hook,
                 output=output,
@@ -150,7 +154,7 @@ def setup_route_function(
 
     if method == "GET":
         action = lambda **kwargs: service.get_query(
-            request.args.to_dict(), alt_field=get_field, multiple=multiple, **kwargs
+            request.args.to_dict(), alt_field=get_field, **kwargs
         )
     elif method == "DELETE":
         action = service.delete
@@ -158,10 +162,8 @@ def setup_route_function(
         action = lambda **kwargs: service.update(**kwargs)
     elif method == "POST":
         action = lambda **kwargs: service.create(**kwargs)
-    else:
-        return
 
-    return route_function_factory(action, pre_hook, post_hook, **kwargs)
+    return route_function_factory(action, many, pre_hook, post_hook, **kwargs)
 
 
 def table_namer(model: Optional[DeclarativeBase] = None) -> str:
@@ -188,6 +190,89 @@ def table_namer(model: Optional[DeclarativeBase] = None) -> str:
     return snake_case_name
 
 
+def convert_case(s, target_case):
+    # Splitting the string into words considering various input cases
+    if "_" in s:  # Handles snake_case and SCREAMING_SNAKE_CASE directly
+        words = s.split("_")
+    else:  # Handles camelCase and PascalCase
+        words = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])", s)
+
+    # Normalize words to lowercase for conversion
+    words = [word.lower() for word in words]
+
+    if target_case == "camel":
+        return "".join(words[:1] + [word.capitalize() for word in words[1:]])
+    elif target_case == "pascal":
+        return "".join(word.capitalize() for word in words)
+    elif target_case == "snake":
+        return "_".join(words)
+    elif target_case == "screaming_snake":
+        return "_".join(word.upper() for word in words)
+    elif target_case == "kebab":
+        return "-".join(words)
+    elif target_case == "screaming_kebab":
+        return "-".join(word.upper() for word in words)
+    else:
+        # Return the original string if the target case is not recognized
+        return s
+
+
+def pluralize_last_word(converted_name):
+    """
+    Pluralize the last word of the converted name while preserving the rest of the name and its case.
+
+    Args:
+    - converted_name: The name after case conversion.
+
+    Returns:
+    - The name with the last word pluralized.
+    """
+    # Detecting the case from the converted name
+    if "_" in converted_name:  # snake_case or SCREAMING_SNAKE_CASE
+        words = converted_name.split("_")
+        target_case = "snake" if words[0].islower() else "screaming_snake"
+    elif "-" in converted_name:  # kebab-case or SCREAMING-KEBAB-CASE
+        words = converted_name.split("-")
+        target_case = "kebab" if words[0].islower() else "screaming_kebab"
+    else:  # camelCase or PascalCase
+        words = re.findall(r"[A-Z]?[a-z]+|[A-Z]+(?![a-z])", converted_name)
+        target_case = "camel" if converted_name[0].islower() else "pascal"
+
+    # Pluralizing the last word
+    last_word = words[-1]
+    if p.singular_noun(last_word):
+        # The word is plural, convert it to singular for accurate pluralization
+        last_word_singular = p.singular_noun(last_word)
+        last_word_pluralized = p.plural(last_word_singular)
+    else:
+        # The word is singular, pluralize directly
+        last_word_pluralized = p.plural(last_word)
+
+    # Replacing the last word with its plural form
+    words[-1] = last_word_pluralized
+
+    # Reconstructing the name based on the original case
+    if target_case in ["snake", "screaming_snake"]:
+        new_name = "_".join(words)
+    elif target_case in ["kebab", "screaming_kebab"]:
+        new_name = "-".join(words)
+    elif target_case == "camel":
+        new_name = "".join(words[:1] + [word.capitalize() for word in words[1:]])
+    elif target_case == "pascal":
+        new_name = "".join(word.capitalize() for word in words)
+    else:
+        # Return the original name if the target case is not recognized
+        new_name = converted_name
+
+    # Adjusting case for SCREAMING_SNAKE and SCREAMING-KEBAB
+    if target_case == "screaming_snake":
+        new_name = new_name.upper()
+    elif target_case == "screaming_kebab":
+        new_name = new_name.upper()
+
+    return new_name
+
+
 def endpoint_namer(
     model: Optional[DeclarativeBase] = None,
     input_schema: Optional[Schema] = None,
@@ -206,22 +291,12 @@ def endpoint_namer(
 
     """
 
-    def camel_to_kebab(s):
-        result = [s[0].lower()]
-        for char in s[1:]:
-            if char.isupper():
-                result.extend(["-", char.lower()])
-            else:
-                result.extend([char])
-        return "".join(result)
+    case = get_config_or_model_meta(
+        "API_ENDPOINT_CASE", default="kebab", model=model
+    )
+    converted_name = convert_case(model.__name__, case)
 
-    kebab_name = camel_to_kebab(model.__name__).replace("_", "-")
-    if kebab_name.endswith("s"):
-        return kebab_name
-    elif kebab_name.endswith("y"):
-        return kebab_name[:-1] + "ies"
-    else:
-        return kebab_name + "s"
+    return pluralize_last_word(converted_name)
 
 
 def get_url_pk(model: DeclarativeBase):
@@ -241,26 +316,7 @@ def get_url_pk(model: DeclarativeBase):
         pk_key = f"<int:{pk_key}>"
     elif parent_model_pk.type.python_type == str:
         pk_key = f"<{pk_key}>"
-    elif parent_model_pk.type.python_type == float:
-        pk_key = f"<float:{pk_key}>"
-    elif parent_model_pk.type.python_type == bool:
-        pk_key = f"<bool:{pk_key}>"
-    elif parent_model_pk.type.python_type == list:
-        pk_key = f"<list:{pk_key}>"
-    elif parent_model_pk.type.python_type == dict:
-        pk_key = f"<dict:{pk_key}>"
-    elif parent_model_pk.type.python_type == set:
-        pk_key = f"<set:{pk_key}>"
-    elif parent_model_pk.type.python_type == tuple:
-        pk_key = f"<tuple:{pk_key}>"
-    elif parent_model_pk.type.python_type == bytes:
-        pk_key = f"<bytes:{pk_key}>"
-    elif parent_model_pk.type.python_type == bytearray:
-        pk_key = f"<bytearray:{pk_key}>"
-    elif parent_model_pk.type.python_type == memoryview:
-        pk_key = f"<memoryview:{pk_key}>"
-    elif parent_model_pk.type.python_type == complex:
-        pk_key = f"<complex:{pk_key}>"
+
     return pk_key
 
 
@@ -359,16 +415,13 @@ def list_model_columns(model: "CustomBase"):
     """
 
     from flask_scheema.utilities import get_config_or_model_meta
-    from flask_scheema.api.utils import table_namer
+    from flask_scheema.api.utils import convert_case
 
-    table_namer_func = get_config_or_model_meta(
-        key="api_table_namer", model=model, default=table_namer
+    schema_case = get_config_or_model_meta(
+        key="API_SCHEMA_CASE", model=model, default="camel"
     )
 
     all_model_columns, _ = get_all_columns_and_hybrids(model, {})
-    all_model_columns = all_model_columns.get(table_namer_func(model))
+    all_model_columns = all_model_columns.get(convert_case(model.__name__, schema_case))
 
-    try:
-        return list(all_model_columns.keys())
-    except:
-        return all_model_columns
+    return list(all_model_columns.keys())

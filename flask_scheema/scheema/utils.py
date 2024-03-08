@@ -194,7 +194,7 @@ def get_openapi_meta_data(field_obj):
         )
     if field_type in [fields.Function]:
         openapi_type_info["format"] = "url"
-
+        openapi_type_info["example"] = "/url/to/resource"
     # Handle list types
     if field_type == fields.List:
         openapi_type_info["items"] = get_openapi_meta_data(field_obj.inner)

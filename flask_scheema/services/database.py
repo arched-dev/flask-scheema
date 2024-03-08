@@ -250,10 +250,6 @@ class CrudService:
             self.model, join_models
         )  # table name, column name, column
 
-        # get the select fields
-        select_fields: List[Callable] = get_select_fields(
-            args_dict, self.model, all_columns
-        )
 
         # create the conditions
         conditions: List = [
@@ -264,41 +260,47 @@ class CrudService:
             if x is not None
         ]
 
-        # create the aggregates
-        aggregates: Optional[Dict[str, Optional[str]]] = create_aggregate_conditions(
-            args_dict
-        )
+        # # create the aggregates
+        # aggregates: Optional[Dict[str, Optional[str]]] = create_aggregate_conditions(
+        #     args_dict
+        # )
 
-        # apply the aggregates
-        if aggregates:
-            aggregate_columns = self.calculate_aggregates(aggregates, all_columns)
-            # combine the select fields with the aggregate columns
-            select_fields = select_fields + aggregate_columns
+        # # apply the aggregates
+        # if aggregates:
+        #     aggregate_columns = self.calculate_aggregates(aggregates, all_columns)
+        #     # combine the select fields with the aggregate columns
+        #     select_fields = select_fields + aggregate_columns
 
-        # create the query
-        if select_fields:
-            query: Query = self.session.query(*select_fields)
-        else:
-            query: Query = self.session.query(self.model)
+        # get the select fields
+        allow_select = get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", model=self.model, default=True)
+        if allow_select:
+            select_fields: List[Callable] = get_select_fields(
+                args_dict, self.model, all_columns
+            )
+            # create the query
+            if select_fields:
+                query: Query = self.session.query(*select_fields)
+            else:
+                query: Query = self.session.query(self.model)
 
-        # join the models
-        for k, v in join_models.items():
-            query = query.join(v)
+        # # join the models
+        # for k, v in join_models.items():
+        #     query = query.join(v)
 
-        groupby_columns: List[Callable] = get_group_by_fields(
-            args_dict, all_columns, self.model
-        )
-        # apply the groupby
-        if groupby_columns:
-            query = query.group_by(*groupby_columns)
+        # groupby_columns: List[Callable] = get_group_by_fields(
+        #     args_dict, all_columns, self.model
+        # )
+        # # apply the groupby
+        # if groupby_columns:
+        #     query = query.group_by(*groupby_columns)
 
         # apply the conditions
-        if conditions:
+        if conditions and get_config_or_model_meta("API_ALLOW_FILTER", model=self.model, default=True):
             query = query.filter(and_(*conditions))
 
         # Handle Sorting
-
-        query = apply_order_by(args_dict, query, self.model)
+        if get_config_or_model_meta("API_ALLOW_ORDER_BY", model=self.model, default=True):
+            query = apply_order_by(args_dict, query, self.model)
 
         return query
 
@@ -354,7 +356,7 @@ class CrudService:
         args_dict: Dict[str, Union[str, int]],
         lookup_val: Optional[Union[int, str]] = None,
         alt_field: Optional[str] = None,
-        multiple: Optional[bool] = True,
+        many: Optional[bool] = True,
         other_model=None,
         **kwargs
     ) -> Dict[str, Any]:
@@ -367,7 +369,7 @@ class CrudService:
                 Extracts 'order_by' from args_dict for sorting. Use "-" prefix for descending order.
             lookup_val (Optional[int]): The id of the object to return.
             alt_field (Optional[str]): An alternative field to search by.
-            multiple (Optional[bool]): Whether to return many objects or not.
+            many (Optional[bool]): Whether to return many objects or not.
             other_model (db.model): The model to join with.
 
         Returns:
@@ -384,11 +386,16 @@ class CrudService:
             else:
                 query = query.filter(pk == lookup_val)
 
-            results = query.first()
+            if many:
+                results = query.all()
+            else:
+                results = query.first()
+
             if not results:
                 raise CustomHTTPException(
                     404, f"{self.model.__name__} not found with {pk.key} {lookup_val}"
                 )
+
             return {"query": results}
 
         else:
@@ -465,7 +472,7 @@ class CrudService:
         if not lookup_val:
             raise CustomHTTPException(400, "No lookup value provided for update.")
 
-        obj = self.get_query(request.args.to_dict(), lookup_val, multiple=False)[
+        obj = self.get_query(request.args.to_dict(), lookup_val, many=False)[
             "query"
         ]
         if obj:
@@ -513,7 +520,7 @@ class CrudService:
         if not lookup_val:
             raise CustomHTTPException(400, "No lookup value provided for deletion.")
 
-        obj = self.get_query(args, lookup_val, multiple=False)["query"]
+        obj = self.get_query(args, lookup_val, many=False)["query"]
         if obj:
             try:
                 if cascade_delete and allow_cascade:

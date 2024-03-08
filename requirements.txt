@@ -19,3 +19,5 @@ Jinja2==3.1.3
 marshmallow==3.20.2
 marshmallow-sqlalchemy==1.0.0
 pytz==2024.1
+inflection==0.5.1
+flask-cors==4.0.0

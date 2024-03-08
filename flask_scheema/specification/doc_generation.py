@@ -80,13 +80,13 @@ def generate_fields_description(schema: "AutoScheema") -> str:
         (k, v.metadata.get("description", ""))
         for k, v in schema().fields.items()
         if v
-           and v.dump_only in [None, False]
-           and not isinstance(v, RelatedList)
-           and not isinstance(v, Related)
+        and v.dump_only in [None, False]
+        and not isinstance(v, RelatedList)
+        and not isinstance(v, Related)
     ]
 
     if hasattr(schema, "Meta") and hasattr(schema.Meta, "model"):
-        table_name = schema.Meta.model.__name__
+        resource_name = schema.Meta.model.__name__
         example_table = (
             "OtherTable.name,OtherTable.age,OtherTable.id,OtherTable.email"
         ).split(",")
@@ -97,14 +97,14 @@ def generate_fields_description(schema: "AutoScheema") -> str:
             if x == 0:
                 current_fields = temp_fields[:3]
             elif x == 1:
-                current_fields = [table_name + "." + x for x in temp_fields[:3]]
+                current_fields = [resource_name + "." + x for x in temp_fields[:3]]
             else:
                 current_fields = []
                 for _ in range(5):
-                    table_choices = random.choice([table_name, "OtherTable"])
-                    if table_choices == table_name:
+                    table_choices = random.choice([resource_name, "OtherTable"])
+                    if table_choices == resource_name:
                         current_table_and_field = (
-                                table_name + "." + random.choice(temp_fields)
+                            resource_name + "." + random.choice(temp_fields)
                         )
                     else:
                         current_table_and_field = random.choice(example_table)
@@ -118,12 +118,18 @@ def generate_fields_description(schema: "AutoScheema") -> str:
 
         from flask_scheema.utilities import get_config_or_model_meta
         from flask_scheema.api.utils import endpoint_namer
-        schema_name = get_config_or_model_meta("API_ENDPOINT_NAMER", schema.Meta.model, default=endpoint_namer)(
-            schema.Meta.model)
+
+        schema_name = get_config_or_model_meta(
+            "API_ENDPOINT_NAMER", schema.Meta.model, default=endpoint_namer
+        )(schema.Meta.model)
         api_prefix = get_config_or_model_meta("API_PREFIX", default="/api")
 
         return manual_render_absolute_template(
-            full_path, schema_name=schema_name, api_prefix=api_prefix, fields=fields, example_fields=example_fields
+            full_path,
+            schema_name=schema_name,
+            api_prefix=api_prefix,
+            fields=fields,
+            example_fields=example_fields,
         )
 
     return "None"
@@ -272,33 +278,37 @@ def get_template_data_for_model(schema) -> Optional[dict]:
 
     from flask_scheema.utilities import extract_sqlalchemy_columns
     from flask_scheema.utilities import extract_relationships
+    from flask_scheema.api.utils import convert_case
     from flask_scheema.utilities import get_config_or_model_meta
-    from flask_scheema.api.utils import table_namer
 
-    table_namer = get_config_or_model_meta("API_TABLE_NAMER", default=table_namer)
+    schema_case = get_config_or_model_meta("API_SCHEMA_CASE", default="camel")
 
     if hasattr(schema, "Meta") and hasattr(schema.Meta, "model"):
         base_model = schema.Meta.model
-        base_table = table_namer(base_model)
-        base_columns = extract_sqlalchemy_columns(base_model)
+        base_resource = convert_case(base_model.__name__, schema_case)
+        base_fields = extract_sqlalchemy_columns(base_model)
 
         model_relationships = extract_relationships(base_model)
-        model_relationship_names = [table_namer(x) for x in model_relationships]
+        model_relationship_names = [
+            convert_case(x.__name__, schema_case) for x in model_relationships
+        ]
 
         if isinstance(model_relationships, list) and len(model_relationships) > 0:
-            relationship_columns = extract_sqlalchemy_columns(model_relationships[0])
-            relationship_table = table_namer(model_relationships[0])
+            relationship_fields = extract_sqlalchemy_columns(model_relationships[0])
+            relationship_resource = convert_case(
+                model_relationships[0].__name__, schema_case
+            )
         else:
-            relationship_columns = []
-            relationship_table = None
+            relationship_fields = []
+            relationship_resource = None
 
         aggs = ", ".join([f"`{x}`" for x in list(aggregate_funcs.keys())])
 
         template_data = {
-            "relationship_table": relationship_table,
-            "relationship_columns": relationship_columns,
-            "base_table": base_table,
-            "base_columns": base_columns,
+            "relationship_resource": relationship_resource,
+            "relationship_fields": relationship_fields,
+            "base_resource": base_resource,
+            "base_fields": base_fields,
             "aggs": aggs,
             "model_relationship_names": model_relationship_names,
         }
@@ -323,14 +333,16 @@ def generate_path_params_from_rule(model, rule) -> List[dict]:
             "name": argument,
             "in": "path",
             "required": True,
-            "description": f"Identifier for the {model.__name__} instance."
+            "description": f"Identifier for the {model.__name__} instance.",
         }
 
         # Assign type based on the converter used in the rule
         converter = rule._converters[argument]
         if isinstance(converter, IntegerConverter):
             param_info["schema"] = {"type": "integer"}
-            param_info["description"] += " This is an integer value uniquely identifying the object."
+            param_info[
+                "description"
+            ] += " This is an integer value uniquely identifying the object."
         elif isinstance(converter, UnicodeConverter):
             param_info["schema"] = {"type": "string"}
             param_info["description"] += " This is a string identifier for the object."
@@ -358,24 +370,30 @@ def generate_query_params_from_rule(rule, methods, schema, many) -> List[dict]:
         List[dict]: List of path parameters.
     """
     from flask_scheema.utilities import get_config_or_model_meta
+
     query_params = []
-    if "DELETE" in methods and get_config_or_model_meta("API_ALLOW_CASCADE_DELETE", getattr(schema.Meta, "model", None),
-                                                        default=True):
-        query_params.append({
-            "name": "cascade_delete",
-            "in": "query",
-            "schema": {"type": "integer"},
-            "description": (
-                "Controls whether related entities should be deleted when the primary entity is deleted. "
-                "Set to '1' to enable cascading delete, which will remove any associated entities in the database "
-                "that are directly related to the entity being deleted. This action ensures that no orphaned "
-                "records remain. "
-                "Set to '0' to disable cascading delete, preventing the deletion of related entities. "
-            )
-        })
+    if "DELETE" in methods and get_config_or_model_meta(
+        "API_ALLOW_CASCADE_DELETE", getattr(schema.Meta, "model", None), default=True
+    ):
+        query_params.append(
+            {
+                "name": "cascade_delete",
+                "in": "query",
+                "schema": {"type": "integer"},
+                "description": (
+                    "Controls whether related entities should be deleted when the primary entity is deleted. "
+                    "Set to `1` to enable cascading delete, which will remove any associated entities in the database "
+                    "that are directly related to the entity being deleted. This action ensures that no orphaned "
+                    "records remain. "
+                    "Set to `0` to disable cascading delete, preventing the deletion of related entities. "
+                ),
+            }
+        )
     if "GET" in methods and many:
         page_max = get_config_or_model_meta("API_PAGINATION_SIZE_MAX", default=100)
-        page_default = get_config_or_model_meta("API_PAGINATION_SIZE_DEFAULT", default=20)
+        page_default = get_config_or_model_meta(
+            "API_PAGINATION_SIZE_DEFAULT", default=20
+        )
         query_params.append(
             {
                 "name": "limit",
@@ -401,7 +419,9 @@ def generate_query_params_from_rule(rule, methods, schema, many) -> List[dict]:
         model = getattr(meta, "model", None)
 
     for method in methods:
-        additional_qs = get_config_or_model_meta("ADDITIONAL_QUERY_PARAMS", model=model, method=method)
+        additional_qs = get_config_or_model_meta(
+            "API_ADDITIONAL_QUERY_PARAMS", model=model, method=method
+        )
         if additional_qs:
             query_params.extend(additional_qs)
 
@@ -462,7 +482,9 @@ def register_routes_with_spec(naan: "Naan", route_spec: List):
                 for http_method in methods:
 
                     route_info = scrape_extra_info_from_spec_data(
-                        route_info, method=http_method, multiple=route_info.get("multiple", False)
+                        route_info,
+                        method=http_method,
+                        multiple=route_info.get("multiple", False),
                     )
 
                     path = rule.rule
@@ -475,7 +497,9 @@ def register_routes_with_spec(naan: "Naan", route_spec: List):
                     many = route_info.get("multiple")
 
                     path_params = generate_path_params_from_rule(model, rule)
-                    query_params = generate_query_params_from_rule(rule, methods, output_schema, many)
+                    query_params = generate_query_params_from_rule(
+                        rule, methods, output_schema, many
+                    )
 
                     # We do not accept input schemas on GET or DELETE requests. They are handled with query parameters,
                     # and not request bodies.
@@ -490,11 +514,10 @@ def register_routes_with_spec(naan: "Naan", route_spec: List):
                         model=model,
                         query_params=query_params,
                         path_params=path_params,
-                        many=many
+                        many=many,
                     )
 
                     endpoint_spec["tags"] = [tag]
-
 
                     # Add or update the tag group in the spec
                     if route_info.get("group_tag"):
@@ -529,10 +552,10 @@ def convert_path_to_openapi(path: str) -> str:
 
 
 def register_schemas(
-        spec: APISpec,
-        input_schema: Schema,
-        output_schema: Optional[Schema] = None,
-        force_update=False,
+    spec: APISpec,
+    input_schema: Schema,
+    output_schema: Optional[Schema] = None,
+    force_update=False,
 ):
     """
         Registers schemas with the apispec object.
@@ -544,6 +567,8 @@ def register_schemas(
             output_schema (Schema): Output schema to register.
             force_update (bool): If True, will update the schema even if it already exists.
     """
+    from flask_scheema.api.utils import convert_case
+    from flask_scheema.utilities import get_config_or_model_meta
 
     put_input_schema = None
     if input_schema:
@@ -555,7 +580,10 @@ def register_schemas(
 
     for schema in [input_schema, output_schema, put_input_schema]:
         if schema:
-            schema_name = schema.__name__
+
+            case = get_config_or_model_meta("API_SCHEMA_CASE", default="camel")
+
+            schema_name = convert_case(schema.__name__.replace("Schema", ""), case)
             existing_schema = spec.components.schemas.get(schema_name)
 
             # Check if schema already exists
@@ -589,9 +617,7 @@ def initialize_spec_template(method, many=False, rate_limit=False):
         "200": {
             "description": "Successful operation",
         },
-        "500": {
-            "description": "Internal server error"
-        }
+        "500": {"description": "Internal server error"},
     }
 
     # Adjust for non-POST methods when not returning multiple items
@@ -601,41 +627,43 @@ def initialize_spec_template(method, many=False, rate_limit=False):
     # Authentication and permission responses based on configuration
     if get_config_or_model_meta("API_AUTHENTICATE", default=False):
         responses.setdefault("401", {"description": ""})
-        responses["401"]["description"] += " You need to be authenticated to access this resource."
+        responses["401"][
+            "description"
+        ] += " You need to be authenticated to access this resource."
         responses.setdefault("403", {"description": ""})
-        responses["403"]["description"] += " You do not have the required permissions to access this resource."
+        responses["403"][
+            "description"
+        ] += " You do not have the required permissions to access this resource."
 
     # Define rate limit headers
     rate_limit_headers = {
         "X-RateLimit-Limit": {
-            "type" : "integer",
             "description": "The maximum number of requests allowed in a time window.",
-            "example": 100
+            "schema": {"type": "integer", "format": "int32", "example": 100},
         },
         "X-RateLimit-Remaining": {
-            "type": "integer",
             "description": "The number of requests remaining in the current rate limit window.",
-            "example": 99  # Default example for successful responses
+            "schema": {"type": "integer", "format": "int32", "example": 99},
         },
         "X-RateLimit-Reset": {
-            "type": "integer",
             "description": "The time at which the current rate limit window resets (in UTC epoch seconds).",
-            "example": 15830457
+            "schema": {"type": "integer", "format": "int32", "example": 15830457},
         },
         "Retry-After": {
-            "type": "integer",
             "description": "The amount of time to wait before making another request (in seconds).",
-            "example": 20
-        }
+            "schema": {"type": "integer", "format": "int32", "example": 20},
+        },
     }
 
     # If rate limiting is enabled, adjust for 429 response
     if rate_limit:
         responses["429"] = {
             "description": "Too many requests. You have exceeded the rate limit.",
-            "headers": rate_limit_headers.copy()
+            "headers": rate_limit_headers.copy(),
         }
-        responses["429"]["headers"]["X-RateLimit-Remaining"]["example"] = 0  # Adjust for 429 response
+        responses["429"]["headers"]["X-RateLimit-Remaining"][
+            "example"
+        ] = 0  # Adjust for 429 response
 
         # Apply rate limit headers to successful response
         responses["200"].setdefault("headers", {}).update(rate_limit_headers)
@@ -645,15 +673,16 @@ def initialize_spec_template(method, many=False, rate_limit=False):
         "parameters": [],
     }
 
+
 def append_parameters(
-        spec_template: Dict,
-        query_params: List[Dict],
-        path_params: List[Dict],
-        http_method: str,
-        input_schema: Schema = None,
-        output_schema: Schema = None,
-        model: DeclarativeBase = None,
-        many: bool = False,
+    spec_template: Dict,
+    query_params: List[Dict],
+    path_params: List[Dict],
+    http_method: str,
+    input_schema: Schema = None,
+    output_schema: Schema = None,
+    model: DeclarativeBase = None,
+    many: bool = False,
 ):
     """
     Enhances a spec template with parameters, request bodies, and responses for API documentation.
@@ -687,10 +716,20 @@ def append_parameters(
     # Append path and query parameters
     spec_template["parameters"].extend(path_params + query_params)
 
-    rl = get_config_or_model_meta("API_RATE_LIMIT", model=model, input_schema=input_schema, output_schema=output_schema, default=False)
+    rl = get_config_or_model_meta(
+        "API_RATE_LIMIT",
+        model=model,
+        input_schema=input_schema,
+        output_schema=output_schema,
+        default=False,
+    )
     if rl:
         description = spec_template.get("description", "")
-        description += f"\n**Rate Limited** - requests on this endpoint are limited to `{rl}`." if rl else ""
+        description += (
+            f"\n**Rate Limited** - requests on this endpoint are limited to `{rl}`."
+            if rl
+            else ""
+        )
         spec_template["description"] = description
 
     # Handle requestBody for methods expecting a payload
@@ -698,13 +737,15 @@ def append_parameters(
         # PUT and PATCH methods do not necessarily require all fields
         spec_template["requestBody"] = {
             "description": f"`{input_schema.__name__.replace('Schema', '')}` payload.",
-            "required": http_method == "POST",  # Only POST requests require the entire payload
+            "required": http_method
+            == "POST",  # Only POST requests require the entire payload
             "content": {
                 "application/json": {
                     # PATCH requests do not necessarily require all fields, so I have defined a separate schema for it
                     # which has all fields as optional
                     "schema": {
-                        "$ref": f"#/components/schemas/{'patch_' if http_method == 'PATCH' else ''}{input_schema.__name__}"}
+                        "$ref": f"#/components/schemas/{'patch_' if http_method == 'PATCH' else ''}{input_schema.__name__}"
+                    }
                 }
             },
         }
@@ -712,17 +753,21 @@ def append_parameters(
     # Add a generic 200 response based on output_schema, if available
     if output_schema:
         spec_template.setdefault("responses", {})  # Ensure 'responses' key exists
-        spec_template["responses"]["200"].update({
-            "description": "Successful response.",
-            "content": {
-                "application/json": {
-                    "schema": {"$ref": f"#/components/schemas/{output_schema.__name__}"}
-                }
-            },
-        })
+        spec_template["responses"]["200"].update(
+            {
+                "description": "Successful response.",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "$ref": f"#/components/schemas/{output_schema.__name__}"
+                        }
+                    }
+                },
+            }
+        )
 
     # Handling for GET and DELETE operations
-    if http_method in ["GET"] and model and many:
+    if http_method in ["GET"] and model and many and get_config_or_model_meta("API_ALLOW_FILTERS", model=model, default=True):
         spec_template["parameters"].extend(
             [
                 {
@@ -744,12 +789,17 @@ def append_parameters(
 
 def add_auth_to_spec(model, spec_template: Dict):
     from flask_scheema.utilities import get_config_or_model_meta
+
     auth_on = get_config_or_model_meta("API_AUTHENTICATE", model=model, default=False)
-    auth_type = get_config_or_model_meta("API_AUTHENTICATE_METHOD", model=model, default=None)
+    auth_type = get_config_or_model_meta(
+        "API_AUTHENTICATE_METHOD", model=model, default=None
+    )
     if auth_on and auth_type == "basic":
         # Ensure there's a section for security requirements
         spec_template.setdefault("security", [])
-        spec_template["security"].append({"basicAuth": []})  # This refers to the security scheme defined globally
+        spec_template["security"].append(
+            {"basicAuth": []}
+        )  # This refers to the security scheme defined globally
 
         # Ensure the global components object exists and add the Basic Auth security scheme if not already present
         spec_template.setdefault("components", {})
@@ -760,12 +810,14 @@ def add_auth_to_spec(model, spec_template: Dict):
             "description": (
                 "Basic Authentication. Credentials must be provided as a Base64-encoded string "
                 "in the format `username:password` in the `Authorization` header."
-            )
+            ),
         }
     elif auth_on and auth_type == "jwt":
         # Ensure there's a section for security requirements
         spec_template.setdefault("security", [])
-        spec_template["security"].append({"bearerAuth": []})  # This refers to the security scheme defined globally
+        spec_template["security"].append(
+            {"bearerAuth": []}
+        )  # This refers to the security scheme defined globally
 
         # Ensure the global components object exists and add the JWT Bearer Auth security scheme if not already present
         spec_template.setdefault("components", {})
@@ -774,7 +826,7 @@ def add_auth_to_spec(model, spec_template: Dict):
             "type": "http",
             "scheme": "bearer",
             "bearerFormat": "JWT",  # Indicates a JWT is expected
-            "description": "JWT Authentication. A valid JWT must be sent in the `Authorization` header as `Bearer <token>`."
+            "description": "JWT Authentication. A valid JWT must be sent in the `Authorization` header as `Bearer <token>`.",
         }
     elif auth_on and auth_type == "api_key":
         # Define where the API key should be sent; let's assume "header" for this example
@@ -782,7 +834,9 @@ def add_auth_to_spec(model, spec_template: Dict):
         api_key_name = "X-API-KEY"  # Name of the header or query parameter
 
         spec_template.setdefault("security", [])
-        spec_template["security"].append({"apiKeyAuth": []})  # This refers to the security scheme defined globally
+        spec_template["security"].append(
+            {"apiKeyAuth": []}
+        )  # This refers to the security scheme defined globally
 
         spec_template.setdefault("components", {})
         spec_template["components"].setdefault("securitySchemes", {})
@@ -790,7 +844,7 @@ def add_auth_to_spec(model, spec_template: Dict):
             "type": "apiKey",
             "in": api_key_location,  # Can be "header" or "query"
             "name": api_key_name,  # Name of the header or query parameter to be used
-            "description": f"API Key Authentication. An API key must be sent in the `{api_key_name}` {api_key_location}."
+            "description": f"API Key Authentication. An API key must be sent in the `{api_key_name}` {api_key_location}.",
         }
 
 
@@ -811,7 +865,9 @@ def make_endpoint_params_description(schema: Schema, data: dict):
 
     output = []
 
-    if get_config_or_model_meta("API_ALLOW_SELECT_FIELDS", getattr(schema.Meta, "model", None), default=True):
+    if get_config_or_model_meta(
+        "API_ALLOW_SELECT_FIELDS", getattr(schema.Meta, "model", None), default=True
+    ):
         output.append(
             {
                 "name": "fields",
@@ -821,7 +877,9 @@ def make_endpoint_params_description(schema: Schema, data: dict):
             }
         )
 
-    if get_config_or_model_meta("API_ALLOW_ORDERBY", getattr(schema.Meta, "model", None), default=True):
+    if get_config_or_model_meta(
+        "API_ALLOW_ORDER_BY", getattr(schema.Meta, "model", None), default=True
+    ):
         output.append(
             {
                 "name": "order by",
@@ -832,7 +890,9 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_JOIN", getattr(schema.Meta, "model", None), default=True):
+    if get_config_or_model_meta(
+        "API_ALLOW_JOIN", getattr(schema.Meta, "model", None), default=True
+    ):
         output.append(
             {
                 "name": "joins",
@@ -843,7 +903,9 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_GROUPBY", getattr(schema.Meta, "model", None), default=True):
+    if get_config_or_model_meta(
+        "API_ALLOW_GROUPBY", getattr(schema.Meta, "model", None), default=True
+    ):
         output.append(
             {
                 "name": "group by",
@@ -854,7 +916,9 @@ def make_endpoint_params_description(schema: Schema, data: dict):
                 ),
             }
         )
-    if get_config_or_model_meta("API_ALLOW_AGGREGATION", getattr(schema.Meta, "model", None), default=True):
+    if get_config_or_model_meta(
+        "API_ALLOW_AGGREGATION", getattr(schema.Meta, "model", None), default=True
+    ):
         output.append(
             {
                 "name": "aggregation",
@@ -894,14 +958,14 @@ def handle_authorization(f, spec_template):
 
 
 def generate_swagger_spec(
-        http_method: str,
-        f: Callable,
-        input_schema: Schema = None,
-        output_schema: Schema = None,
-        model: DeclarativeBase = None,
-        query_params: list = None,
-        path_params: list = None,
-        many: bool = False,
+    http_method: str,
+    f: Callable,
+    input_schema: Schema = None,
+    output_schema: Schema = None,
+    model: DeclarativeBase = None,
+    query_params: list = None,
+    path_params: list = None,
+    many: bool = False,
 ) -> dict:
     spec = current_app.extensions["flask_scheema"].api_spec
 
@@ -909,13 +973,27 @@ def generate_swagger_spec(
     register_schemas(spec, input_schema, output_schema)
 
     from flask_scheema.utilities import get_config_or_model_meta
-    rl = get_config_or_model_meta("API_RATE_LIMIT", model=model, output_schema=output_schema, input_schema=input_schema, default=False)
+
+    rl = get_config_or_model_meta(
+        "API_RATE_LIMIT",
+        model=model,
+        output_schema=output_schema,
+        input_schema=input_schema,
+        default=False,
+    )
     # Initialize spec template
     spec_template = initialize_spec_template(http_method, many, rl)
 
     # Append parameters to spec_template
     append_parameters(
-        spec_template, query_params, path_params, http_method, input_schema, output_schema, model, many
+        spec_template,
+        query_params,
+        path_params,
+        http_method,
+        input_schema,
+        output_schema,
+        model,
+        many,
     )
 
     # Handle Authorization in the documentation

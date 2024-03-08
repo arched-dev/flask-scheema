@@ -204,13 +204,13 @@ The only other requirement's are a few configuration values that need to be pass
 
         .. note:: For comprehensive details on configuration, visit our :doc:`configuration </configuration>` page.
 
-        And that's all folks! Just run the code and you should now have a fully functional API with documentation.
+        And that's all folks!
 
 
 API Documentation
 -----------------------------------------
 
-That's it! You should now have a fully functional API with documentation.
+You should now have a fully functional API with documentation.
 
 ``GET`` /docs
 
@@ -231,11 +231,13 @@ Writing API calls is simple, and can be done in the following way:
 ``DELETE`` /api/author/1 - deletes the author with the id of 1.
 
 
-More advanced queries can be made by adding query parameters to the URL. This will be fully documented in the API
+More advanced queries can be made by adding query parameters to the URL. This is fully documented in the API
 documentation served at ``/docs``.
 
 
 Full Example
 -----------------------------------------
 
-To see a full example, please see the ``demo`` directory in our `repo`_ or view the example - `quickstart demo <https://github.com/arched-dev/flask-scheema/blob/master/demo/quickstart/load.py>`_
+To see a full example of this code, please see the ``demo`` directory in our `repo`_ or view the example - `quickstart demo <https://github.com/arched-dev/flask-scheema/blob/master/demo/quickstart/load.py>`_
+
+For more indepth example flask application's start with the `basic factory application <https://github.com/arched-dev/flask-scheema/tree/master/demo/basic_factory>`_

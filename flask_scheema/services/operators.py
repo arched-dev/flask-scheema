@@ -93,11 +93,12 @@ def get_all_columns_and_hybrids(
     ignore_underscore = get_config_or_model_meta(
         key="API_IGNORE_UNDERSCORE_ATTRIBUTES", model=model, default=True
     )
-    namer = get_config_or_model_meta(
-        key="API_TABLE_NAMER", model=model, default=table_namer
+    schema_case = get_config_or_model_meta(
+        key="API_SCHEMA_CASE", model=model, default="camel"
     )
+    from flask_scheema.api.utils import convert_case
 
-    main_table_name = namer(model)
+    main_table_name = convert_case(model.__name__, schema_case)
     all_columns[main_table_name] = {}
     for attr, column in model.__dict__.items():
         if isinstance(column, (hybrid_property, InstrumentedAttribute)) and (
@@ -107,7 +108,7 @@ def get_all_columns_and_hybrids(
 
     # For each join model
     for join_model_name, join_model in join_models.items():
-        join_table_name = namer(join_model)
+        join_table_name = convert_case(join_model.__name__, schema_case)
         all_columns[join_table_name] = {}
         all_models.append(join_model)
         for attr, column in join_model.__dict__.items():
@@ -463,12 +464,12 @@ def get_table_and_column(value, main_model):
         table_name, column_name = value.split(".", 1)
     else:
         from flask_scheema.utilities import get_config_or_model_meta
-        from flask_scheema.api.utils import table_namer
+        from flask_scheema.api.utils import convert_case
 
-        namer = get_config_or_model_meta(
-            "API_TABLE_NAMER", model=main_model, default=table_namer
+        schema_case = get_config_or_model_meta(
+            "API_SCHEMA_CASE", model=main_model, default="camel"
         )
-        table_name = namer(main_model)
+        table_name = convert_case(main_model.__name__, schema_case)
         column_name = value
     return table_name, column_name
 
@@ -511,10 +512,12 @@ def get_check_table_columns(
     """
 
     from flask_scheema.utilities import get_config_or_model_meta
-    from flask_scheema.scheema.utils import convert_camel_to_snake
 
-    if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
-        column_name = convert_camel_to_snake(column_name)
+    from flask_scheema.api.utils import convert_case
+
+    field_case = get_config_or_model_meta("API_FIELD_CASE", default="snake_case")
+
+    column_name = convert_case(column_name, field_case)
 
     # Get column from the column dictionary
     all_models_columns = all_columns.get(table_name, {})

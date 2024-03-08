@@ -8,8 +8,12 @@ from flask import Blueprint, Flask
 from flask_scheema.specification.doc_generation import (
     register_routes_with_spec,
 )
-from flask_scheema.specification.utilities import generate_readme_html, \
-    pretty_print_dict, make_base_dict
+from flask_scheema.specification.utilities import (
+    generate_readme_html,
+    pretty_print_dict,
+    make_base_dict,
+    search_all_keys,
+)
 from flask_scheema.utilities import (
     AttributeInitializerMixin,
     get_config_or_model_meta,
@@ -31,9 +35,9 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
     api_version: Optional[str] = ""  # The version of the api
     api_description: Optional[str] = None  # The description of the api
     api_logo_url: Optional[str] = None  # The url of the API logo
-    api_logo_background: Optional[
-        str
-    ] = None  # The background colour of the API logo (in hex) if the logo is transparent
+    api_logo_background: Optional[str] = (
+        None  # The background colour of the API logo (in hex) if the logo is transparent
+    )
     api_keywords: Optional[list] = []  # The keywords for the api
     CREATE_DOCS: Optional[bool] = True  # Whether to create the api docs
     documentation_url_prefix: Optional[str] = "/"  # The url prefix for the docs
@@ -51,7 +55,9 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         self.naan = naan
         AttributeInitializerMixin.__init__(self, app=naan.app, *args, **kwargs)
 
-        if self.CREATE_DOCS or get_config_or_model_meta("API_CREATE_DOCS", default=True):
+        if self.CREATE_DOCS or get_config_or_model_meta(
+            "API_CREATE_DOCS", default=True
+        ):
             # Set the naan object, the main flask_scheema object
 
             # Validate the api spec arguments
@@ -89,8 +95,11 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         Returns:
             dict: The data for the API spec object.
         """
-        desc_path = get_config_or_model_meta("API_DESCRIPTION",
-                                             default=os.path.abspath(self.naan.base_dir + "/html/base_readme.MD"))
+
+        desc_path = get_config_or_model_meta(
+            "API_DESCRIPTION",
+            default=os.path.abspath(self.naan.base_dir + "/html/base_readme.MD"),
+        )
         api_description = self._get_api_description(desc_path)
 
         api_spec_data = {
@@ -119,9 +128,19 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         Returns:
             str: API description in HTML format.
         """
+
         if os.path.isfile(desc_path):
+            base_model = get_config_or_model_meta("API_BASE_MODEL")
+            has_rate_limiting = search_all_keys(base_model, "API_RATE_LIMIT")
+            has_auth = search_all_keys(base_model, "API_AUTHENTICATION")
+
             api_output_example = pretty_print_dict(make_base_dict())
-            return generate_readme_html(desc_path, config=self.naan.app.config, api_output_example=api_output_example)
+            return generate_readme_html(
+                desc_path,
+                config=self.naan.app.config,
+                api_output_example=api_output_example,
+                has_rate_limiting=has_rate_limiting
+            )
         else:
             return desc_path
 
@@ -145,8 +164,15 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         Returns:
             dict: A dictionary with the contact information.
         """
-        contact_info = {key: self._get_config(f"API_CONTACT_{key.upper()}", None) for key in ['name', 'email', 'url']}
-        return {"contact": {k: v for k, v in contact_info.items() if v}} if any(contact_info.values()) else {}
+        contact_info = {
+            key: self._get_config(f"API_CONTACT_{key.upper()}", None)
+            for key in ["name", "email", "url"]
+        }
+        return (
+            {"contact": {k: v for k, v in contact_info.items() if v}}
+            if any(contact_info.values())
+            else {}
+        )
 
     def _get_license_info(self) -> dict:
         """
@@ -155,8 +181,15 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
         Returns:
             dict: A dictionary with the license information.
         """
-        license_info = {key: self._get_config(f"API_LICENCE_{key.upper()}", None) for key in ['name', 'url']}
-        return {"license": {k: v for k, v in license_info.items() if v}} if any(license_info.values()) else {}
+        license_info = {
+            key: self._get_config(f"API_LICENCE_{key.upper()}", None)
+            for key in ["name", "url"]
+        }
+        return (
+            {"license": {k: v for k, v in license_info.items() if v}}
+            if any(license_info.values())
+            else {}
+        )
 
     def _get_servers_info(self) -> dict:
         """
@@ -180,8 +213,10 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
             return {
                 "x-logo": {
                     "url": logo_url,
-                    "backgroundColor": self._get_config("API_LOGO_BACKGROUND", "#ffffff"),
-                    "altText": f"{self._get_config('API_TITLE', 'My API')} logo."
+                    "backgroundColor": self._get_config(
+                        "API_LOGO_BACKGROUND", "#ffffff"
+                    ),
+                    "altText": f"{self._get_config('API_TITLE', 'My API')} logo.",
                 }
             }
         return {}
@@ -301,12 +336,16 @@ class CurrySpec(APISpec, AttributeInitializerMixin):
             Returns:
                 str: The docs page.
             """
+
+            custom_headers = get_config_or_model_meta("API_CUSTOM_HEADERS", default="")
+
             return manual_render_absolute_template(
                 os.path.join(
                     self.naan.get_templates_path(),
                     "apispec.html",
                 ),
-                config=self.app.config
+                config=self.app.config,
+                custom_headers=custom_headers,
             )
 
         self.naan.app.register_blueprint(specification)

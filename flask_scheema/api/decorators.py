@@ -1,5 +1,4 @@
 from functools import wraps
-from functools import wraps
 from typing import Optional, List
 from typing import Type, Callable, Any, Dict, Union
 
@@ -14,7 +13,7 @@ from flask_scheema.api.responses import (
     create_response,
     CustomResponse,
 )
-from flask_scheema.api.utils import list_model_columns
+from flask_scheema.api.utils import list_model_columns, convert_case
 from flask_scheema.exceptions import CustomHTTPException
 from flask_scheema.scheema.bases import AutoScheema
 from flask_scheema.utilities import get_config_or_model_meta
@@ -136,7 +135,11 @@ def handle_one(
             if input_schema:
                 data_or_error = deserialize_data(input_schema, request.json)
                 if isinstance(data_or_error, tuple):  # This means there was an error
-                    return data_or_error
+                    case = get_config_or_model_meta("API_FIELD_CASE", "snake")
+                    error = {convert_case(k, case): v for k, v in data_or_error[0].items()}
+                    raise CustomHTTPException(
+                        400, error
+                    )
                 kwargs["deserialized_data"] = data_or_error
                 kwargs["model"] = input_schema.Meta.model
 
@@ -181,6 +184,7 @@ def handle_error(e: Any, status_code):
     )
     if error_func:
         import traceback
+
         error_func(e, traceback)
 
     return create_response(error=str(e), status=status_code)
@@ -267,7 +271,14 @@ def standardize_response(f: Callable) -> Callable:
             print_exc_run_error(e)
             return create_response(
                 status=e.status_code,
-                errors=[{"error": e.error, "reason": str(e.reason)}],
+                errors=[
+                    {
+                        "error": e.error,
+                        "reason": (
+                            e.reason if isinstance(e.reason, dict) else str(e.reason)
+                        ),
+                    }
+                ],
             )
         except Exception as e:
             print_exc_run_error(e)

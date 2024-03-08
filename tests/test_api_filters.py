@@ -36,11 +36,11 @@ def test_basic_filter(client):
 def test_advanced_filter(client):
     author = client.get('/api/authors/2').json["value"]
 
-    eq = client.get('/api/authors?firstName__eq=' + author["firstName"]).json["value"]
-    assert eq[0]["firstName"] == author["firstName"]
+    eq = client.get('/api/authors?first_name__eq=' + author["first_name"]).json["value"]
+    assert eq[0]["first_name"] == author["first_name"]
 
-    ne = client.get('/api/authors?firstName__ne=' + author["firstName"]).json["value"]
-    assert ne[0]["firstName"] != author["firstName"]
+    ne = client.get('/api/authors?first_name__ne=' + author["first_name"]).json["value"]
+    assert ne[0]["first_name"] != author["first_name"]
 
     lt = client.get(f'/api/authors?id__lt={author["id"]}').json["value"]
     assert lt[0]["id"] == 1
@@ -60,11 +60,11 @@ def test_advanced_filter(client):
     nin = client.get('/api/authors?id__nin=(1,2,3)').json["value"]
     assert nin[0]["id"] not in [1, 2, 3]
 
-    like = client.get('/api/authors?fullName__like=' + author["firstName"]).json["value"]
-    assert like[0]["fullName"] == author["fullName"]
+    like = client.get('/api/authors?full_name__like=' + author["first_name"]).json["value"]
+    assert like[0]["full_name"] == author["full_name"]
 
-    ilike = client.get('/api/authors?fullName__ilike=' + author["firstName"].lower()).json["value"]
-    assert ilike[0]["fullName"] == author["fullName"]
+    ilike = client.get('/api/authors?full_name__ilike=' + author["first_name"].lower()).json["value"]
+    assert ilike[0]["full_name"] == author["full_name"]
 
 
     author_ONE = client.get('/api/authors/2').json["value"]["id"]
@@ -79,12 +79,12 @@ def test_basic_pagination(client, app):
     assert len(books["value"]) == 20
 
     books = client.get('/api/books?limit=10&page=1').json
-    assert books["nextUrl"] == f"http://localhost/api/books?limit=10&page=2"
-    assert books["previousUrl"] is None
+    assert books["next_url"] == f"http://localhost/api/books?limit=10&page=2"
+    assert books["previous_url"] is None
 
     books = client.get('/api/books?limit=5&page=2').json
-    assert books["nextUrl"] == f"http://localhost/api/books?limit=5&page=3"
-    assert books["previousUrl"] == f"http://localhost/api/books?limit=5&page=1"
+    assert books["next_url"] == f"http://localhost/api/books?limit=5&page=3"
+    assert books["previous_url"] == f"http://localhost/api/books?limit=5&page=1"
 
     app.config["API_PAGINATION_SIZE_DEFAULT"] = 5
     books = client.get('/api/books?order_by=id').json
@@ -93,7 +93,7 @@ def test_basic_pagination(client, app):
     books = client.get('/api/books?order_by=id&limit=10').json
     assert len(books["value"]) == 10
 
-    books = client.get(books["nextUrl"]).json
+    books = client.get(books["next_url"]).json
     assert len(books["value"]) == 10
     assert books["value"][0]["id"] == 11
 
@@ -108,4 +108,4 @@ def test_basic_sort(client):
     books = client.get('/api/books?order_by=id').json
     assert books["value"][0]["id"] == 1
     books = client.get('/api/books?order_by=-id').json
-    assert books["value"][0]["id"] == books["totalCount"]
+    assert books["value"][0]["id"] == books["total_count"]

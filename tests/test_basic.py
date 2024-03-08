@@ -5,11 +5,13 @@ from demo.basic_factory.basic_factory import create_app
 
 @pytest.fixture
 def app():
-    app = create_app({
-        'API_TITLE': 'Automated test',
-        'API_VERSION': '0.2.0',
-        # Other configurations specific to this test
-    })
+    app = create_app(
+        {
+            "API_TITLE": "Automated test",
+            "API_VERSION": "0.2.0",
+            # Other configurations specific to this test
+        }
+    )
     yield app
 
 
@@ -19,9 +21,9 @@ def client(app):
 
 
 def test_get(client):
-    get_resp = client.get('/api/books/1')
-    get_resp_none = client.get('/api/books/99999')
-    get_resp_child = client.get('/api/authors/1/books')
+    get_resp = client.get("/api/books/1")
+    get_resp_none = client.get("/api/books/99999")
+    get_resp_child = client.get("/api/authors/1/books")
 
     assert get_resp.status_code == 200
     assert get_resp.json["value"]["id"] == 1
@@ -33,9 +35,9 @@ def test_get(client):
 
 
 def test_delete(client):
-    delete_response = client.delete('/api/books/1')
-    delete_response_fail = client.delete('/api/books/99999999')
-    get_response = client.get('/api/books/1')
+    delete_response = client.delete("/api/books/1")
+    delete_response_fail = client.delete("/api/books/99999999")
+    get_response = client.get("/api/books/1")
 
     assert delete_response.status_code == 200
     assert get_response.json["value"] == None
@@ -62,51 +64,53 @@ def test_delete_with_cascade(client):
 
 
 def test_patch(client):
-    get_response = client.get('/api/books/1')
+    get_response = client.get("/api/books/1")
     data = get_response.json
     data["value"]["title"] = "New Title"
-    patch_response = client.patch('/api/books/1', json=data["value"])
-    new_get_response = client.get('/api/books/1')
+    patch_response = client.patch("/api/books/1", json=data["value"])
+    new_get_response = client.get("/api/books/1")
 
     assert patch_response.status_code == 200
     assert new_get_response.json["value"]["title"] == "New Title"
 
 
 def test_hybrid_and_patch(client):
-    get_response = client.get('/api/authors/1')
+    get_response = client.get("/api/authors/1")
     data = get_response.json
-    data["value"]["firstName"] = "Foo"
-    data["value"]["lastName"] = "Bar"
-    patch_response = client.patch('/api/authors/1', json=data["value"])
-    new_get_response = client.get('/api/authors/1')
+    data["value"]["first_name"] = "Foo"
+    data["value"]["last_name"] = "Bar"
+    patch_response = client.patch("/api/authors/1", json=data["value"])
+    new_get_response = client.get("/api/authors/1")
 
     assert patch_response.status_code == 200
-    assert new_get_response.json["value"]["fullName"] == "Foo Bar"
+    assert new_get_response.json["value"]["full_name"] == "Foo Bar"
 
 
 def test_post(client):
-    data = {"biography": "Foo is a Baz",
-            "dateOfBirth": "1900-01-01",
-            "firstName": "Foo",
-            "lastName": "Bar",
-            "nationality": "Bazville",
-            "website": "https://foobar.baz"}
+    data = {
+        "biography": "Foo is a Baz",
+        "date_of_birth": "1900-01-01",
+        "first_name": "Foo",
+        "last_name": "Bar",
+        "nationality": "Bazville",
+        "website": "https://foobar.baz",
+    }
 
-    post_response = client.post('/api/authors', json=data)
+    post_response = client.post("/api/authors", json=data)
 
     new_id = post_response.json["value"]["id"]
 
-    get_response = client.get(f'/api/authors/{new_id}')
+    get_response = client.get(f"/api/authors/{new_id}")
 
     assert post_response.status_code == 200
-    assert post_response.json["value"]["fullName"] == "Foo Bar"
+    assert post_response.json["value"]["full_name"] == "Foo Bar"
 
     assert get_response.status_code == 200
-    assert get_response.json["value"]["fullName"] == "Foo Bar"
+    assert get_response.json["value"]["full_name"] == "Foo Bar"
 
 
 def test_basic_get_books(client):
-    response = client.get('/api/books')
+    response = client.get("/api/books")
     assert isinstance(response.json["value"], list)
     assert "isbn" in response.json["value"][0]
     assert "title" in response.json["value"][0]
@@ -123,3 +127,15 @@ def test_patch_deleted(client):
 
     assert resp_delete.status_code == 200
     assert resp_patch_fail.status_code == 404
+
+
+def test_invalid_type(client):
+    author = client.get("/api/authors/1").json
+    assert (author["status_code"] == 200)
+
+    data = author["value"]
+    data["date_of_birth"] = 3
+    patch_resp = client.patch("/api/authors/1", json=data)
+    assert patch_resp.status_code == 400
+
+    assert patch_resp.json["errors"][0]["Reason"]["date_of_birth"] == "Not a valid date."

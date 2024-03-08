@@ -88,6 +88,7 @@ class Naan(AttributeInitializerMixin):
         # be global, so we dont know if it needs to be used in advance.
         logger.log(2, "Creating rate limiter")
         storage_uri = check_services()
+
         self.app.config["RATELIMIT_HEADERS_ENABLED"] = True
         self.app.config["RATELIMIT_SWALLOW_ERRORS"] = True
         self.app.config["RATELIMIT_IN_MEMORY_FALLBACK_ENABLED"] = True  #
@@ -207,11 +208,11 @@ class Naan(AttributeInitializerMixin):
 
                 # Deal with the authentication method
                 auth_method = get_config_or_model_meta("API_AUTHENTICATE", model=model, output_schema=output_schema, input_schema=input_schema, default=False)
-                if auth_method is "jwt":
+                if auth_method == "jwt":
                     f_decorated = None #authentication(f_decorated)
-                elif auth_method is "basic":
+                elif auth_method == "basic":
                     f_decorated = None #authentication(f_decorated)
-                elif auth_method is "api_key":
+                elif auth_method == "api_key":
                     f_decorated = None #authentication(f_decorated)
 
                 # deal with the output

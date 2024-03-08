@@ -1,5 +1,5 @@
 from flask import request
-from marshmallow import fields, Schema, missing
+from marshmallow import fields, Schema, missing, post_dump
 from marshmallow.validate import Length
 from sqlalchemy import (
     Integer,
@@ -21,7 +21,7 @@ from sqlalchemy.dialects.postgresql import JSON, JSONB
 from sqlalchemy.ext.hybrid import hybrid_property
 from sqlalchemy.orm import class_mapper, RelationshipProperty, ColumnProperty
 
-from flask_scheema.api.utils import endpoint_namer
+from flask_scheema.api.utils import endpoint_namer, convert_case
 from flask_scheema.logging import logger
 from flask_scheema.scheema.utils import (
     get_openapi_meta_data,
@@ -133,7 +133,12 @@ class AutoScheema(Schema):
         self.context = {"current_depth": 0}  # Initialize an empty context dictionary
         self.render_nested = render_nested  # Save the parameter to the instance
         if hasattr(self.Meta, "model"):
-            logger.debug(1, f"Creating to mallow object |{self.__class__.__name__}|")
+
+            schema_case = get_config_or_model_meta("API_SCHEMA_CASE", model=self.get_model(),  default="camel")
+            logger.debug(
+                1,
+                f"Creating to mallow object |{convert_case(self.__class__.__name__, schema_case)}|",
+            )
             self.model = self.Meta.model
 
             self.generate_fields()
@@ -142,6 +147,28 @@ class AutoScheema(Schema):
 
         if only_fields:
             self._apply_only(only_fields)
+
+    @classmethod
+    def get_model(self):
+        """
+        Get the SQLAlchemy model associated with the schema.
+        Returns:
+            The SQLAlchemy model associated with the schema.
+        """
+
+        # Check if model is None
+        meta = getattr(self, "Meta")
+        model = None
+
+        if meta:
+            model = getattr(meta, "model")
+        return model
+    @post_dump
+    def post_dump(self, data, **kwargs):
+        post_dump_function = get_config_or_model_meta("API_POST_DUMP_CALLBACK", model=self.get_model(), method=request.method, default=None)
+        if post_dump_function:
+            return post_dump_function(data, **kwargs)
+        return data
 
     def _apply_only(self, only_fields):
         # Your custom logic here.
@@ -157,12 +184,9 @@ class AutoScheema(Schema):
         Returns:
             None
         """
-        # Check if model is None
-        meta = getattr(self, "Meta")
-        model = None
 
-        if meta:
-            model = getattr(meta, "model")
+        model = self.get_model()
+
 
         if model is None:
             print("Warning: self.Meta.model is None. Skipping field generation.")
@@ -172,23 +196,34 @@ class AutoScheema(Schema):
         for attribute, mapper_property in mapper.all_orm_descriptors.items():
 
             original_attribute = attribute
-            if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
-                attribute = convert_snake_to_camel(attribute)
+            field_case = get_config_or_model_meta(
+                "API_FIELD_CASE", model=model, default="snake_case"
+            )
+            attribute = convert_case(attribute, field_case)
 
             ignore_underscore = get_config_or_model_meta(
                 "API_IGNORE_UNDERSCORE_ATTRIBUTES", model=model, default=True
             )
+
+            allow_hybrid = get_config_or_model_meta(
+                "API_DUMP_HYBRID_PROPERTIES", model=model, default=True
+            )
+
+            add_relations = get_config_or_model_meta(
+                "API_ADD_RELATIONS", model=model, default=True
+            )
+
             is_underscore = attribute.startswith("_")
             if (not ignore_underscore and is_underscore) or not is_underscore:
                 # relations
-                if isinstance(mapper_property, RelationshipProperty):
+                if isinstance(mapper_property, RelationshipProperty) and add_relations:
                     self.add_relationship_field(
                         attribute, original_attribute, mapper_property
                     )
                 elif (
                     hasattr(mapper_property, "property")
                     and mapper_property.property._is_relationship
-                ):
+                ) and add_relations:
                     logger.debug(
                         4,
                         f"Adding to mallow object |{self.__class__.__name__}| relationship field +{mapper_property}+",
@@ -216,7 +251,7 @@ class AutoScheema(Schema):
                         attribute, original_attribute, mapper_property.columns[0].type
                     )
                 # hybrid properties
-                elif isinstance(mapper_property, hybrid_property):
+                elif isinstance(mapper_property, hybrid_property) and allow_hybrid:
                     logger.debug(
                         4,
                         f"Adding to mallow object |{self.__class__.__name__}| hybrid property field +{mapper_property.__name__}+",
@@ -239,9 +274,10 @@ class AutoScheema(Schema):
         Returns:
             None
         """
+
         # Skip attributes that start with an underscore
         ignore_underscore = get_config_or_model_meta(
-            key="API_IGNORE_UNDERSCORE_ATTRIBUTE", default=True
+            key="API_IGNORE_UNDERSCORE_ATTRIBUTE", model=self.get_model(), default=True
         )
 
         if ignore_underscore and attribute.startswith("_"):
@@ -289,10 +325,7 @@ class AutoScheema(Schema):
         column_type = mapper.property.columns[0].type
 
         # Skip attributes that start with an underscore
-        meta = getattr(self, "Meta")
-        model = None
-        if meta:
-            model = getattr(meta, "model", None)
+        model = self.get_model()
 
         if attribute.startswith("_") and get_config_or_model_meta(
             "API_IGNORE_UNDERSCORE_ATTRIBUTES", model, default=True
@@ -358,9 +391,9 @@ class AutoScheema(Schema):
 
         """
         _, rel_type = _get_relation_use_list_and_type(relationship_property)
-
+        model = self.get_model()
         serialization_type = get_config_or_model_meta(
-            "API_SERIALIZATION_TYPE", default="hybrid"
+            "API_SERIALIZATION_TYPE", model=model, default="hybrid"
         )
         nested_schema = get_input_output_from_model_or_make(
             relationship_property.mapper.class_
@@ -407,12 +440,12 @@ class AutoScheema(Schema):
 
             def serialize_to_url(obj):
                 # Your logic here
-
+                nested_model = nested_schema.get_model()
                 namer = get_config_or_model_meta(
-                    "API_ENDPOINT_NAMER", default=endpoint_namer
+                    "API_ENDPOINT_NAMER", model=nested_model, default=endpoint_namer
                 )
-                if hasattr(obj, namer(nested_schema.Meta.model) + "_to_url"):
-                    return getattr(obj, namer(nested_schema.Meta.model) + "_to_url")()
+                if hasattr(obj, namer(nested_model) + "_to_url"):
+                    return getattr(obj, namer(nested_model) + "_to_url")()
                 elif hasattr(obj, matching[0] + "to_url"):
                     return obj.to_url()
                 return None

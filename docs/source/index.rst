@@ -12,13 +12,16 @@ Flask-Scheema
    authentication
    callbacks
    configuration
+   faq
    genindex
 
 
 keema-naan == bread, flask-scheema.naan == api
 
-.. image:: https://img.shields.io/pypi/v/flask-scheema
-   :alt: PyPI - Version
+.. image:: /_static/coverage.svg
+   :alt: Coverage Report
+   :width: 100px
+   :align: center
 
 .. image:: https://img.shields.io/github/license/arched-dev/flask-scheema
    :alt: GitHub License
@@ -29,6 +32,8 @@ keema-naan == bread, flask-scheema.naan == api
 .. image:: https://badgen.net/static/Repo/Github/blue?icon=github&link=https%3A%2F%2Fgithub.com%2Farched-dev%2Fflask-scheema
    :alt: GitHub Repo
    :target: https://github.com/arched-dev/flask-scheema
+
+
 
 --------------------------------------------
 
@@ -46,14 +51,14 @@ What can it do?
 
 * Create detailed API outputs.
 
-* Authentication users with a variety of methods.
+* Authenticate users with a variety of methods.
 
 * Global or model based configuration including callbacks, rate limiting, caching & more.
 
-* Automatically generate `Redoc`_ documentation.
+* Automatically generated `Redoc`_ documentation.
 
-All fully configurable through `Flask`_ config values through to method based Meta classes attributes in your models, giving you
-fine grained control over the output of your API and accompanying documentation.
+All fully configurable through `Flask`_ config values all the way through to http method based configuration your models,
+giving you fine grained control over the output of your API and accompanying documentation.
 
 What are you waiting for...?
 

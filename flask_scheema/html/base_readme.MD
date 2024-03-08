@@ -19,6 +19,28 @@ To maintain clarity and conciseness in this documentation, only the value field 
 Nonetheless, actual API responses will include these fields comprehensively. Depending on the endpoint requested, the
 value field may contain a single object or an array of objects.
 
+{% if has_rate_limiting %}
+# Rate Limiting
+
+To ensure the stability and reliability of our API, we have implemented rate limiting on some/all endpoints. This
+means that you can only make a certain number of requests within a given time frame. If you exceed this limit, you
+will receive a 429 Too Many Requests status code.
+
+Each endpoint documented below will specify whether it is rate limited and, if so, the maximum number of requests you
+can make within a given time frame.
+
+Request headers for endpoints with rate limiting will include the following fields:
+
+- X-RateLimit-Limit: The maximum number of requests you can make within the time frame.
+- X-RateLimit-Remaining: The number of requests you have remaining within the time frame.
+- X-RateLimit-Reset: The time at which the rate limit will reset, in UTC epoch seconds.
+- Retry-After: The number of seconds until you can make another request.
+
+{% endif %}
+{% if config.API_AUTHENTICATE %}
+
+{% endif %}
+  
 # Error Handling
 
 Error handling within the API is designed to be as informative as possible. Should an error occur, the response will
@@ -34,6 +56,9 @@ Common Error Codes:
   {% endif %}
 - 404 Not Found: The requested resource could not be found but may be available in the future.
 - 405 Method Not Allowed: A request method is not supported for the requested resource.
+{% if has_rate_limiting %}
+- 429 Too Many Requests: The user has sent too many requests in a given amount of time.
+{% endif %}
 - 500 Internal Server Error: An unexpected condition was encountered on the server.
 
 {% if config.API_AUTHENTICATE %}

@@ -1,6 +1,7 @@
 Configuration
 ==============================
 
+
 .. toctree::
    :maxdepth: 2
    :hidden:
@@ -10,6 +11,8 @@ Configuration
    config_locations/global_method
    config_locations/model
    config_locations/model_method
+
+
 
 
 Intro
@@ -24,8 +27,12 @@ classes using `Meta` classes.
 the extension's behavior at a global or model level.
 
 
+
+
 Config Hierarchy
 --------------------------------
+
+
 
 To offer flexibility and control, ``Flask-Scheema`` adheres to a hierarchy of configuration priorities.
 
@@ -51,6 +58,7 @@ To offer flexibility and control, ``Flask-Scheema`` adheres to a hierarchy of co
     - `SQLAlchemy`_ Model config values omit the ``API_`` prefix and are lower case.
     - `SQLAlchemy`_ Model method based config values omit the ``API_`` prefix, are lower case and are prefixed with the method.
 
+
 .. note::
 
     Each configuration value below is assigned a tag, which will define where the value can be used and which priority
@@ -66,6 +74,7 @@ To offer flexibility and control, ``Flask-Scheema`` adheres to a hierarchy of co
 
 
 
+
 Config Value Structure
 --------------------------------
 
@@ -74,6 +83,8 @@ These are defined by the the below badges which are listed in the configuration 
 
 Please take note of the badge for each configuration value, as this will define where the value can be used and how it
 should be written.
+
+
 
 .. tab-set::
 
@@ -344,6 +355,44 @@ Documentation Configuration Values
 
             [{"url": "https://api.example.com", "description": "Main server"}, ...]
 
+    *
+        - .. data:: CUSTOM_HEADERS
+
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Custom CSS or JS to be added to the `ReDoc`_ documentation.
+
+          Example:
+
+          .. code:: html
+
+            <style>
+                .redoc-section h1 {
+                    color: red;
+                }
+            </style>
+
+
+    *
+        - .. data:: VERBOSITY_LEVEL
+
+
+          :bdg:`default:` ``0``
+
+          :bdg:`type` ``int``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+
+        - Controls the verbosity of **flask-scheema**'s output to console, choose a value between 0 and 4.
+          0 being no output and 4 being the most verbose.
+
 
 
 
@@ -352,6 +401,18 @@ API Configuration Values
 
 
 .. list-table::
+
+    *
+        - .. data:: PRINT_EXCEPTIONS
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - When enabled, the API will print exceptions to the console when they occur. This is useful for debugging
+          purposes.
 
     *
         - .. data:: DUMP_DATETIME
@@ -459,30 +520,6 @@ API Configuration Values
         - When enabled, the API will include a ``error`` field in the response data if null. When disabled the
           ``error`` field will not be included in the response data if null.
 
-    *
-        - .. data:: PRINT_EXCEPTIONS
-
-          :bdg:`default:` ``True``
-
-          :bdg:`type` ``bool``
-
-          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
-
-        - When enabled, the API will print exceptions to the console when they occur. This is useful for debugging
-          purposes.
-
-    *
-        - .. data:: CONVERT_TO_CAMEL_CASE
-
-          :bdg:`default:` ``True``
-
-          :bdg:`type` ``bool``
-
-          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
-
-        - When enabled, the API will print exceptions to the console when they occur. This is useful for debugging
-          purposes.
-
 
     *
         - .. data:: BASE_MODEL
@@ -534,11 +571,24 @@ API Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
 
-        - When a function is assigned to this value, the API will call the function prior to the model being queried.
+        - When assigned, the API will call the function prior to the model being queried.
           This is useful for adding custom logic to the API, such as adding additional query parameters/modifying the
           query or logging request to the database.
 
             View an example function & its signature `here <callbacks.html#setup-function-signature>`_.
+    *
+        - .. data:: POST_DUMP_CALLBACK
+
+          :bdg:`default:` ``None``
+
+          :bdg:`type` ``callable``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - When assigned, the API will call the function after the model has been dumped to a dictionary by Marshmallow.
+          Its possible to add extra validation here or modify the response data.
+
+          View an example function & its signature `here <callbacks.html#post-dump-function-signature>`_.
 
     *
         - .. data:: RETURN_CALLBACK
@@ -549,7 +599,7 @@ API Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
 
-        - When a function is assigned to this value, the API will call the function post database call and pre returning
+        - When assigned, the API will call the function post database call and pre returning
           the data to the client. This is useful for adding custom logic to the API, such as modifying the response data
           or logging the response to the database.
 
@@ -564,9 +614,8 @@ API Configuration Values
 
           :bdg-secondary:`Optional` :bdg-dark-line:`Global Method`
 
-        - When a function is assigned to this value, the API will call the function when an error occurs. This is useful
-          for adding custom logic to the API, such as logging the error to the database or sending an email to the
-          developer.
+        - When assigned, the API will call the function when an error occurs. This is useful
+          for adding custom logic to the API, such as logging the error to the database, sending an emails etc.
 
             View an example function & its signature `here <callbacks.html#error-function-signature>`_.
 
@@ -584,3 +633,128 @@ API Configuration Values
           globally to the API.
 
             View an example of its use and expected value here `Example of its use here <configuration.html#extending-query-params>`_.
+
+    *
+        - .. data:: DUMP_HYBRID_PROPERTIES
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - When enabled, the API will include hybrid properties in resources response data & in the `ReDoc`_
+          documentation.
+
+
+    *
+        - .. data:: ADD_RELATIONS
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model`
+
+        - When enabled, the API will automatically add relationships to the model's schema. This is useful for
+          automatically including related resources in the response data.
+
+    *
+        - .. data:: IGNORE_UNDERSCORE_ATTRIBUTES
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - When enabled, the API will ignore all attributes that start with an underscore in the model. This is useful
+          for hiding private attributes from the API.
+
+    *
+        - .. data:: PAGINATION_SIZE_DEFAULT
+
+          :bdg:`default:` ``20``
+
+          :bdg:`type` ``int``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - The default number of records to return in a single response. This value can be overridden by the client
+          by adding the query parameter ``?limit=`` to the request. The maximum value for this parameter is defined by
+          `PAGINATION_SIZE_MAX <configuration.html#PAGINATION_SIZE_MAX>`_.
+
+    *
+        - .. data:: PAGINATION_SIZE_MAX
+
+          :bdg:`default:` ``True``
+
+          :bdg:`type` ``bool``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Model Method`
+
+        - The maximum number of records to return in a single response. The default (no query parameter) is defined by
+          `PAGINATION_SIZE_DEFAULT <configuration.html#PAGINATION_SIZE_DEFAULT>`_. Adding the query parameter
+          ``?limit=`` to the request allows the user in increase this default but it is limited to this value as the
+          maximum allowed to be returned. Increase this value to allow more records to be returned in a single response.
+
+
+Schema Configuration Values
+------------------------------------------
+
+.. list-table::
+
+    *
+        - .. data:: BASE_SCHEMA
+
+          :bdg:`default:` ``AutoSchema``
+
+          :bdg:`type` ``Schema``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - At the heart of **flask-scheema** is the ``AutoSchema`` which creates and translates your `SQLAlchemy`_ models
+          into `Marshmallow`_ schema's. This value should be a valid schema class (`see here <https://marshmallow.readthedocs.io/en/stable/quickstart.html>`_).
+
+            It is advisable to leave this value as the default, unless you have a specific use case or know what you
+            are doing.
+
+
+
+    *
+        - .. data:: ENDPOINT_CASE
+
+          :bdg:`default:` ``kebab``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - One of the following options: ``camel``, ``pascal``, ``snake``, ``screaming_snake``, ``kebab`` or ``screaming_kebab``.
+
+          Defines which case to use to convert the model names into endpoint URLs. To keep inline with restful API
+          conventions, the endpoint URL will also be pluralized.
+
+    *
+        - .. data:: FIELD_CASE
+
+          :bdg:`default:` ``snake``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - One of the following options: ``camel``, ``pascal``, ``snake``, ``screaming_snake``, ``kebab``,
+          ``screaming_kebab``. This value will be used to convert the model attributes into field names.
+
+    *
+        - .. data:: SCHEMA_CASE
+
+          :bdg:`default:` ``camel``
+
+          :bdg:`type` ``str``
+
+          :bdg-secondary:`Optional` :bdg-dark-line:`Global`
+
+        - When enabled, the API will include a ``datetime`` field in the response data. This field will contain the
+          current date and time of the response.

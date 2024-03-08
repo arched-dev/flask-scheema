@@ -440,6 +440,9 @@ def check_services():
         'Redis': 6379,
         'MongoDB': 27017,
     }
+    uri = get_config_or_model_meta("API_RATE_LIMIT_STORAGE_URI", default=None)
+    if uri:
+        return uri
 
     for service, port in services.items():
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

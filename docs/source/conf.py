@@ -111,10 +111,11 @@ rst_epilog = """
 .. _SQLAlchemy ORM: https://docs.sqlalchemy.org/
 .. _repo: https://github.com/arched-dev/flask-scheema
 .. _HTTP method: https://developer.mozilla.org/en-US/docs/Web/HTTP/Methods
+.. _Marshmallow: https://marshmallow.readthedocs.io/en/stable/
 """
 
 
 templates_path = ["_templates"]
 exclude_patterns = []
 
-html_theme = "alabaster"
+html_theme = "furo"

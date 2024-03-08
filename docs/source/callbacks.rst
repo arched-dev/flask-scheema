@@ -188,6 +188,33 @@ The return function should return the `kwargs` object with any changes made to t
 
 
 
+Post dump callback signature
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+
+The post dump callback function accepts two arguments, the data (the serialized model in ``dict`` form) and ``**kwargs``
+passed to the schemas dump method.
+
+You must return the data after any changes have been made or the api will return ``None``.
+
+
+.. code:: python
+
+    def my_dump_function_callback(data, **kwargs):
+        if data.get("name") == "John":
+            data["name"] = "Johnathon"
+        return data
+
+
+.. code:: python
+
+    def my_dump_function_callback(data, **kwargs):
+        if not validate.email(data.get("email")):
+            raise CustomHTTPException(400, "Invalid email")
+        return data
+
+
+
 Error callback signature
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

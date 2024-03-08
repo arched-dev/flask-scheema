@@ -66,8 +66,8 @@ xxx - API_BASE_SCHEMA = AutoSchema
     - AUTO_NAME_ENDPOINTS # check what this does
     - FULL_AUTO:                                 Optional[callable] = True # does the lot.
     - AUTO_NAME_ENDPOINTS:                       Optional[callable] = True
-xxx  {x} - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = True # Convert json output to camel case
-xxx    - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
+xxx  {x}   - API_CONVERT_TO_CAMEL_CASE:             Optional[callable] = False # Convert json output to camel case
+xxx  {x}   - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True # When True, will not cascade delete on
 
     -
     -
@@ -78,7 +78,7 @@ xxx    - API_ALLOW_CASCADE_DELETE:                   Optional[callable] = True #
               db_service
 
 
-- API_IGNORE_UNDERSCORE_ATTRIBUTE:          Optional[boolean] = When enabled model or schema fields that start with an
+xxx  {x}  - API_IGNORE_UNDERSCORE_ATTRIBUTE:          Optional[boolean] = When enabled model or schema fields that start with an
   underscore will be ignored from all documentation and api outputs.
 
 {x} - API_SERIALIZATION_TYPE Optional[str] = "json"  | "url" | "hybrid" | False # json -> serialise all, url -> to_only
@@ -91,6 +91,7 @@ url, hybrid -> serialise single items, url lists. None -> No serialisation of ne
   {x} - API_PAGINATION_SIZE_MAX Optional[int] = 100 Sets the maximum allowed number of items returned in a single page
   of API results  (specified with the url param ?limit=100)
 -
+API_DUMP_HYBRID_PROPERTIES     True
 
 API_ADD_RELATIONS
 -
@@ -104,11 +105,13 @@ API_ADD_RELATIONS
     - API_RATE_LIMIT_STORAGE_URI                Optional[str] = "memory"  or   "memcached://127.0.0.1:{port}" | "redis://127.0.0.1:{port}" | "mongodb://127.0.0.1:{port}"  # attempts to gather the suitable backend for you.
 
 - API_ENDPOINT_NAMER:                            Optional[callable] = endpoint_namer
+- API_ENDPOINT_CASE:                            Optional[callable] = camelCase,PascalCase,snake_case,SCREAMING_SNAKE_CASE, kebab-case,SCREAMING-KEBAB-CASE  |   endpoint_namer
+
 
 Dual only:
 
 - API_READ_ONLY = False When set to true, the API will not allow POST, PUT, PATCH, DELETE requests.
-- API_ALLOW_ORDERBY:                              Optional[callable] = True # Allow aggregation
+- API_ALLOW_ORDER_BY:                              Optional[callable] = True # Allow aggregation
 - API_ALLOW_JOIN:                                 Optional[callable] = True # Allow aggregation
 - API_ALLOW_GROUPBY:                              Optional[callable] = True # Allow aggregation
 - API_ALLOW_AGGREGATION:                          Optional[callable] = TRUE #Allow aggregation
@@ -126,7 +129,7 @@ xxx {x} - API_RETURN_CALLBACK
 xxx {x} - API_ERROR_CALLBACK
 xxx {x} - API_ADDITIONAL_QUERY_PARAMS
 
-- API_RATE_LIMIT:                               Optional[callable] = "1 per second"
+{x} \- API_RATE_LIMIT:                               Optional[callable] = "1 per second"
 - API_RATE_LIMIT_CALLBACK:                      Optional[callable] = None # a function that is called on rate limit
   being breached.
 API_RATE_LIMIT_STORAGE_URI need to add
@@ -142,6 +145,11 @@ xxx    {x} -  API_DUMP_COUNT
 xxx    {x} -  API_DUMP_NULL_NEXT_URL
 xxx    {x} -  API_DUMP_NULL_PREVIOUS_URL
 xxx    {x} -  API_DUMP_NULL_ERROR
+
+IGNORE_FIELDS = ["password", "email"] # fields to ignore in the API output
+IGNORE_OUTPUT_FIELDS = ["password", "email"] # fields to ignore in the API output
+IGNORE_INPUT_FIELDS = ["password", "email"] # fields to ignore in the API output
+
 
 {x}
 Model meta:

@@ -8,6 +8,7 @@ from flask import Response, current_app, jsonify, g
 from marshmallow import Schema, ValidationError
 from sqlalchemy.orm import DeclarativeBase
 
+from flask_scheema.api.utils import convert_case
 from flask_scheema.scheema.utils import convert_snake_to_camel
 from flask_scheema.utilities import get_config_or_model_meta
 
@@ -233,8 +234,8 @@ def create_response(
 
     data = remove_values(data)
 
-    if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
-        data = {convert_snake_to_camel(k): v for k, v in data.items()}
+    field_case = get_config_or_model_meta("API_FIELD_CASE", default="snake_case")
+    data = {convert_case(k, field_case): v for k, v in data.items()}
 
     response = jsonify(data)
     response.status_code = int(str(status))

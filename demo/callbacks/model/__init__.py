@@ -1,8 +1,8 @@
 from flask import Flask
 
-from demo.model_extension.helpers import load_dummy_database
-from demo.model_extension.model.config import Config
-from demo.model_extension.model.extensions import db, scheema
+from demo.callbacks.helpers import load_dummy_database
+from demo.callbacks.model.config import Config
+from demo.callbacks.model.extensions import db, scheema
 
 
 def create_app(config: dict = None):

@@ -3,8 +3,18 @@ import pprint
 
 from jinja2 import Environment, FileSystemLoader
 
+from flask_scheema.api.utils import convert_case
 from flask_scheema.scheema.utils import convert_snake_to_camel
 from flask_scheema.utilities import get_config_or_model_meta
+
+
+def search_all_keys(model, key):
+
+    for model in model.__subclasses__():
+        for method in ["GET", "POST", "PATCH", "DELETE"]:
+            config = get_config_or_model_meta(key, model=model, method=method)
+            if config:
+                return True
 
 
 def generate_readme_html(file_path: str, *args, **kwargs):
@@ -69,20 +79,19 @@ def pretty_print_dict(d):
 def make_base_dict():
     output = {"value": "..."}
 
-    if get_config_or_model_meta("API_CONVERT_TO_CAMEL_CASE", default=True):
-        key_func = convert_snake_to_camel
-    else:
-        key_func = case_no_change
+    field_case = get_config_or_model_meta("API_FIELD_CASE", default="snake_case")
 
     dump_datetime = get_config_or_model_meta("API_DUMP_DATETIME", default=True)
     if dump_datetime:
-        output.update({key_func("datetime"): "2024-01-01T00:00:00.0000+00:00"})
+        output.update(
+            {convert_case("datetime", field_case): "2024-01-01T00:00:00.0000+00:00"}
+        )
 
     dump_version = get_config_or_model_meta("API_DUMP_VERSION", default=True)
     if dump_version:
         output.update(
             {
-                key_func("api_version"): get_config_or_model_meta(
+                convert_case("api_version", field_case): get_config_or_model_meta(
                     "API_VERSION", default=True
                 )
             }
@@ -90,32 +99,32 @@ def make_base_dict():
 
     dump_status_code = get_config_or_model_meta("API_DUMP_STATUS_CODE", default=True)
     if dump_status_code:
-        output.update({key_func("status_code"): 200})
+        output.update({convert_case("status_code", field_case): 200})
 
     dump_response_time = get_config_or_model_meta(
         "API_DUMP_RESPONSE_TIME", default=True
     )
     if dump_response_time:
-        output.update({key_func("response_ms"): 15})
+        output.update({convert_case("response_ms", field_case): 15})
 
     dump_count = get_config_or_model_meta("API_DUMP_COUNT", default=True)
     if dump_count:
-        output.update({key_func("total_count"): 10})
+        output.update({convert_case("total_count", field_case): 10})
 
     dump_null_next_url = get_config_or_model_meta(
         "API_DUMP_NULL_NEXT_URL", default=True
     )
     if dump_null_next_url:
-        output.update({key_func("next_url"): "/api/example/url"})
+        output.update({convert_case("next_url", field_case): "/api/example/url"})
 
     dump_null_previous_url = get_config_or_model_meta(
         "API_DUMP_NULL_PREVIOUS_URL", default=True
     )
     if dump_null_previous_url:
-        output.update({key_func("previous_url"): "null"})
+        output.update({convert_case("previous_url", field_case): "null"})
 
     dump_null_error = get_config_or_model_meta("API_DUMP_NULL_ERRORS", default=False)
     if dump_null_error:
-        output.update({key_func("errors"): "null"})
+        output.update({convert_case("errors", field_case): "null"})
 
     return output
